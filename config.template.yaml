@@ -27,7 +27,11 @@ ops:
     port: "10000"
     write_timeout: 60
 data_dir: ./data
+server:
+  addr: :8080
 telegram:
   bot_token: ""
-groq:
-  api_key: ""
+mcp:
+  groq:
+    model: meta-llama/llama-4-scout-17b-16e-instruct
+    api_key: ""

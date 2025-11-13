@@ -6,7 +6,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sxwebdev/donejournal/internal/api"
 	"github.com/sxwebdev/donejournal/internal/config"
+	"github.com/sxwebdev/donejournal/internal/mcp"
+	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
@@ -81,10 +84,16 @@ func startCMD() *cli.Command {
 				return fmt.Errorf("failed to initialize store: %w", err)
 			}
 
+			// Initialize MCP provider and service
+			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
+			mcpService := mcp.New(l, provider)
+			apiService := api.New(l, conf, mcpService)
+
 			// register services
 			ln.ServicesRunner().Register(
 				service.New(service.WithService(pingpong.New(l))),
 				service.New(service.WithService(sqliteDB)),
+				service.New(service.WithService(apiService)),
 				// service.New(service.WithService(appCache)),
 				// service.New(service.WithService(botService)),
 			)
