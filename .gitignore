@@ -27,6 +27,17 @@ go.work.sum
 # env file
 .env
 
+.vite
+.DS_Store
+
 # Editor/IDE
 # .idea/
 # .vscode/
+
+data
+data-agent
+build
+config.yaml
+config-agent.yaml
+dist
+.tmp
