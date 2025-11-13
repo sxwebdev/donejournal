@@ -7,7 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/sxwebdev/donejournal/internal/config"
+	"github.com/sxwebdev/donejournal/internal/store"
+	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
+	"github.com/sxwebdev/donejournal/sql"
 	"github.com/tkcrm/mx/launcher"
 	"github.com/tkcrm/mx/logger"
 	"github.com/tkcrm/mx/service"
@@ -68,17 +71,20 @@ func startCMD() *cli.Command {
 			l.Infof("SQLite version: %s", sqliteVersion)
 
 			// check and run all migrations
-			// m := migrator.New(l, sql.MigrationsFS, sql.MigrationsPath, datamigrations.Migrations)
-			// if err := m.MigrateUpAll(ctx, sqliteDbPath); err != nil {
-			// 	return fmt.Errorf("failed to run migrations: %w", err)
-			// }
+			m := migrator.New(l, sql.MigrationsFS, sql.MigrationsPath, migrator.DataMigrations{})
+			if err := m.MigrateUpAll(ctx, sqliteDbPath); err != nil {
+				return fmt.Errorf("failed to run migrations: %w", err)
+			}
 
-			// initialize cache
-			// appCache := cache.New()
+			_, err = store.New(sqliteDB.DB)
+			if err != nil {
+				return fmt.Errorf("failed to initialize store: %w", err)
+			}
 
 			// register services
 			ln.ServicesRunner().Register(
 				service.New(service.WithService(pingpong.New(l))),
+				service.New(service.WithService(sqliteDB)),
 				// service.New(service.WithService(appCache)),
 				// service.New(service.WithService(botService)),
 			)

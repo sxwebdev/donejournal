@@ -13,9 +13,9 @@ import (
 
 const updateStatus = `-- name: UpdateStatus :exec
 UPDATE todos
-SET status = ?, updated_at = CURRENT_TIMESTAMP
-WHERE id = ?
-RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
+  SET status = ?, updated_at = CURRENT_TIMESTAMP
+  WHERE id = ?
+  RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
 `
 
 func (q *Queries) UpdateStatus(ctx context.Context, status models.TodoStatusType, iD int64) error {
