@@ -11,14 +11,57 @@ import (
 	"github.com/sxwebdev/donejournal/internal/models"
 )
 
-const updateStatus = `-- name: UpdateStatus :exec
-UPDATE todos
-  SET status = ?, updated_at = CURRENT_TIMESTAMP
-  WHERE id = ?
-  RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
+const getPendingRequests = `-- name: GetPendingRequests :many
+SELECT id, data, status, error_message, user_id, created_at, updated_at
+  FROM requests
+  WHERE "status" = 'pending'
+  ORDER BY created_at ASC LIMIT 3
 `
 
-func (q *Queries) UpdateStatus(ctx context.Context, status models.TodoStatusType, iD int64) error {
-	_, err := q.db.ExecContext(ctx, updateStatus, status, iD)
+func (q *Queries) GetPendingRequests(ctx context.Context) ([]*models.Request, error) {
+	rows, err := q.db.QueryContext(ctx, getPendingRequests)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*models.Request{}
+	for rows.Next() {
+		var i models.Request
+		if err := rows.Scan(
+			&i.ID,
+			&i.Data,
+			&i.Status,
+			&i.ErrorMessage,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateStatus = `-- name: UpdateStatus :exec
+UPDATE requests
+  SET "status" = ?, error_message = ?, updated_at = CURRENT_TIMESTAMP
+  WHERE id = ?
+`
+
+type UpdateStatusParams struct {
+	Status       models.RequestStatusType `db:"status" json:"status" validate:"required,oneof=pending completed failed"`
+	ErrorMessage *string                  `db:"error_message" json:"error_message"`
+	ID           string                   `db:"id" json:"id" validate:"required"`
+}
+
+func (q *Queries) UpdateStatus(ctx context.Context, arg UpdateStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateStatus, arg.Status, arg.ErrorMessage, arg.ID)
 	return err
 }

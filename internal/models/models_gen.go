@@ -9,7 +9,7 @@ import (
 )
 
 type Request struct {
-	ID           int64             `db:"id" json:"id" validate:"required"`
+	ID           string            `db:"id" json:"id" validate:"required"`
 	Data         string            `db:"data" json:"data" validate:"required"`
 	Status       RequestStatusType `db:"status" json:"status" validate:"required,oneof=pending completed failed"`
 	ErrorMessage *string           `db:"error_message" json:"error_message"`
@@ -19,14 +19,14 @@ type Request struct {
 }
 
 type Todo struct {
-	ID          int64          `db:"id" json:"id" validate:"required"`
+	ID          string         `db:"id" json:"id" validate:"required"`
 	UserID      string         `db:"user_id" json:"user_id" validate:"required"`
 	Title       string         `db:"title" json:"title" validate:"required"`
 	Description string         `db:"description" json:"description"`
 	Status      TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time      `db:"planned_date" json:"planned_date"`
 	CompletedAt *time.Time     `db:"completed_at" json:"completed_at"`
-	RequestID   *int64         `db:"request_id" json:"request_id"`
+	RequestID   *string        `db:"request_id" json:"request_id"`
 	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
 }

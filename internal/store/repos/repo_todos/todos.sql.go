@@ -18,7 +18,7 @@ UPDATE todos
   RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
 `
 
-func (q *Queries) UpdateStatus(ctx context.Context, status models.TodoStatusType, iD int64) error {
+func (q *Queries) UpdateStatus(ctx context.Context, status models.TodoStatusType, iD string) error {
 	_, err := q.db.ExecContext(ctx, updateStatus, status, iD)
 	return err
 }

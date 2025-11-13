@@ -18,7 +18,7 @@ INSERT INTO requests (id, data, status, error_message, user_id)
 `
 
 type CreateParams struct {
-	ID           int64                    `db:"id" json:"id" validate:"required"`
+	ID           string                   `db:"id" json:"id" validate:"required"`
 	Data         string                   `db:"data" json:"data" validate:"required"`
 	Status       models.RequestStatusType `db:"status" json:"status" validate:"required,oneof=pending completed failed"`
 	ErrorMessage *string                  `db:"error_message" json:"error_message"`
@@ -50,7 +50,7 @@ const delete = `-- name: Delete :exec
 DELETE FROM requests WHERE id=?
 `
 
-func (q *Queries) Delete(ctx context.Context, id int64) error {
+func (q *Queries) Delete(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, delete, id)
 	return err
 }
@@ -59,7 +59,7 @@ const getByID = `-- name: GetByID :one
 SELECT id, data, status, error_message, user_id, created_at, updated_at FROM requests WHERE id=? LIMIT 1
 `
 
-func (q *Queries) GetByID(ctx context.Context, id int64) (*models.Request, error) {
+func (q *Queries) GetByID(ctx context.Context, id string) (*models.Request, error) {
 	row := q.db.QueryRowContext(ctx, getByID, id)
 	var i models.Request
 	err := row.Scan(

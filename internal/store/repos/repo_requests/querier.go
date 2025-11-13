@@ -12,9 +12,10 @@ import (
 
 type Querier interface {
 	Create(ctx context.Context, arg CreateParams) (*models.Request, error)
-	Delete(ctx context.Context, id int64) error
-	GetByID(ctx context.Context, id int64) (*models.Request, error)
-	UpdateStatus(ctx context.Context, status models.TodoStatusType, iD int64) error
+	Delete(ctx context.Context, id string) error
+	GetByID(ctx context.Context, id string) (*models.Request, error)
+	GetPendingRequests(ctx context.Context) ([]*models.Request, error)
+	UpdateStatus(ctx context.Context, arg UpdateStatusParams) error
 }
 
 var _ Querier = (*Queries)(nil)

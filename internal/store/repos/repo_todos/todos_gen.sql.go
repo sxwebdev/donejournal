@@ -13,20 +13,19 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, request_id)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, request_id)
+	VALUES (?, ?, ?, ?, ?, ?, ?)
 	RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
 `
 
 type CreateParams struct {
-	ID          int64                 `db:"id" json:"id" validate:"required"`
+	ID          string                `db:"id" json:"id" validate:"required"`
 	UserID      string                `db:"user_id" json:"user_id" validate:"required"`
 	Title       string                `db:"title" json:"title" validate:"required"`
 	Description string                `db:"description" json:"description"`
 	Status      models.TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time             `db:"planned_date" json:"planned_date"`
-	CompletedAt *time.Time            `db:"completed_at" json:"completed_at"`
-	RequestID   *int64                `db:"request_id" json:"request_id"`
+	RequestID   *string               `db:"request_id" json:"request_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {
@@ -37,7 +36,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		arg.Description,
 		arg.Status,
 		arg.PlannedDate,
-		arg.CompletedAt,
 		arg.RequestID,
 	)
 	var i models.Todo
@@ -60,7 +58,7 @@ const delete = `-- name: Delete :exec
 DELETE FROM todos WHERE id=?
 `
 
-func (q *Queries) Delete(ctx context.Context, id int64) error {
+func (q *Queries) Delete(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, delete, id)
 	return err
 }
@@ -69,7 +67,7 @@ const getByID = `-- name: GetByID :one
 SELECT id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at FROM todos WHERE id=? LIMIT 1
 `
 
-func (q *Queries) GetByID(ctx context.Context, id int64) (*models.Todo, error) {
+func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) {
 	row := q.db.QueryRowContext(ctx, getByID, id)
 	var i models.Todo
 	err := row.Scan(

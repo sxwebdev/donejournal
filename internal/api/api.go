@@ -2,13 +2,13 @@ package api
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sxwebdev/donejournal/internal/config"
-	"github.com/sxwebdev/donejournal/internal/mcp"
+	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/tkcrm/mx/logger"
 )
 
@@ -23,14 +23,14 @@ type API struct {
 
 	app *fiber.App
 
-	mcpService *mcp.MCP
+	baseService *baseservices.BaseServices
 }
 
-func New(log logger.Logger, conf *config.Config, mcpService *mcp.MCP) *API {
+func New(log logger.Logger, conf *config.Config, baseService *baseservices.BaseServices) *API {
 	s := &API{
-		logger:     log,
-		config:     conf,
-		mcpService: mcpService,
+		logger:      log,
+		config:      conf,
+		baseService: baseService,
 		app: fiber.New(fiber.Config{
 			DisableStartupMessage: true,
 		}),
@@ -80,15 +80,11 @@ func (s *API) setupRoutes() {
 	s.app.Post("/ingest", func(c *fiber.Ctx) error {
 		var req IngestRequest
 		if err := c.BodyParser(&req); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "invalid json body",
-			})
+			return errorMessage(c, fiber.StatusBadRequest, err)
 		}
 
 		if req.Text == "" {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "text is required",
-			})
+			return errorMessage(c, fiber.StatusBadRequest, errors.New("text is required"))
 		}
 
 		if req.UserID == "" {
@@ -97,35 +93,10 @@ func (s *API) setupRoutes() {
 
 		s.logger.Debugf("received: user_id=%s, text=%s", req.UserID, req.Text)
 
-		go func(userID, text string) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Minute*3)
-			defer cancel()
+		if _, err := s.baseService.Requests().Create(c.Context(), req.Text, req.UserID); err != nil {
+			return errorMessage(c, fiber.StatusInternalServerError, fmt.Errorf("failed to create request: %w", err))
+		}
 
-			now := time.Now()
-			resp, err := s.mcpService.ParseMessage(ctx, userID, text)
-			if err != nil {
-				s.logger.Errorf("mcp processing failed: %v", err)
-				return
-			}
-
-			s.logger.Infof("processed response in %s", time.Since(now).String())
-
-			if len(resp.Entries) == 0 {
-				return
-			}
-
-			jsonData, err := json.MarshalIndent(resp.Entries, "", "  ")
-			if err != nil {
-				s.logger.Errorf("failed to marshal MCP response: %v", err)
-				return
-			}
-
-			s.logger.Debugf("MCP parsed response for user %s: \n%s\n", userID, string(jsonData))
-		}(req.UserID, req.Text)
-
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"status":  "ok",
-			"message": "accepted",
-		})
+		return successMessage(c, "ok")
 	})
 }

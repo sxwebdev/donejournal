@@ -10,6 +10,8 @@ import (
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
+	"github.com/sxwebdev/donejournal/internal/processor"
+	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
@@ -79,21 +81,29 @@ func startCMD() *cli.Command {
 				return fmt.Errorf("failed to run migrations: %w", err)
 			}
 
-			_, err = store.New(sqliteDB.DB)
+			st, err := store.New(sqliteDB.DB)
 			if err != nil {
 				return fmt.Errorf("failed to initialize store: %w", err)
 			}
 
+			baseService := baseservices.New(l, st)
+
 			// Initialize MCP provider and service
 			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
 			mcpService := mcp.New(l, provider)
-			apiService := api.New(l, conf, mcpService)
+
+			// Initialize API service
+			apiService := api.New(l, conf, baseService)
+
+			// init processor service
+			processorService := processor.New(l, baseService, mcpService)
 
 			// register services
 			ln.ServicesRunner().Register(
 				service.New(service.WithService(pingpong.New(l))),
 				service.New(service.WithService(sqliteDB)),
 				service.New(service.WithService(apiService)),
+				service.New(service.WithService(processorService)),
 				// service.New(service.WithService(appCache)),
 				// service.New(service.WithService(botService)),
 			)

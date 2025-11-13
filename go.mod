@@ -3,6 +3,7 @@ module github.com/sxwebdev/donejournal
 go 1.25.4
 
 require (
+	github.com/dromara/carbon/v2 v2.6.14
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/gobeam/stringy v0.0.7
 	github.com/goccy/go-yaml v1.18.0

@@ -1,6 +1,6 @@
 -- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, request_id)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, request_id)
+	VALUES (?, ?, ?, ?, ?, ?, ?)
 	RETURNING *;
 
 -- name: Delete :exec

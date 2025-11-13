@@ -10,14 +10,21 @@ import (
 	"github.com/tkcrm/mx/logger"
 )
 
+type EntryKind string
+
+const (
+	EntryKindTodo EntryKind = "todo"
+	EntryKindDone EntryKind = "done"
+)
+
 // ParsedEntry represents a single parsed task entry from the LLM
 type ParsedEntry struct {
-	Kind        string  `json:"kind"`        // "todo" or "done"
-	Title       string  `json:"title"`       // short title
-	Date        string  `json:"date"`        // YYYY-MM-DD
-	Description string  `json:"description"` // cleaned text
-	Language    string  `json:"language"`    // "ru" | "en" | "unknown"
-	Confidence  float64 `json:"confidence"`  // 0..1
+	Kind        EntryKind `json:"kind"`        // "todo" or "done"
+	Title       string    `json:"title"`       // short title
+	Date        string    `json:"date"`        // YYYY-MM-DD
+	Description string    `json:"description"` // cleaned text
+	Language    string    `json:"language"`    // "ru" | "en" | "unknown"
+	Confidence  float64   `json:"confidence"`  // 0..1
 }
 
 // ParsedResponse contains all parsed entries from the LLM
@@ -55,6 +62,12 @@ func addDaysToDate(dateStr string, days int) string {
 
 // ParseMessage processes user message through LLM provider and returns parsed entries
 func (m *MCP) ParseMessage(ctx context.Context, userID, text string) (*ParsedResponse, error) {
+	m.log.Debugw(
+		"mcp parse message",
+		"userID", userID,
+		"text", text,
+	)
+
 	now := time.Now()
 	today := now.Format("2006-01-02")
 
@@ -103,8 +116,6 @@ Format: {"entries":[...]} where each entry is a separate task`,
 		// Actual user input
 		{Role: "user", Content: text},
 	}
-
-	m.log.Debugf("Processing message for user %s with %d messages", userID, len(messages))
 
 	// Send request to LLM provider
 	responseContent, err := m.provider.SendChatCompletion(ctx, messages)
