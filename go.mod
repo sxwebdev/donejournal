@@ -4,7 +4,9 @@ go 1.25.4
 
 require (
 	github.com/go-playground/validator/v10 v10.28.0
+	github.com/gobeam/stringy v0.0.7
 	github.com/goccy/go-yaml v1.18.0
+	github.com/oklog/ulid/v2 v2.1.1
 	github.com/sxwebdev/xconfig v0.2.0
 	github.com/sxwebdev/xconfig/decoders/xconfigyaml v0.0.0-20251102203511-831aa4924448
 	github.com/tkcrm/mx v0.2.34
