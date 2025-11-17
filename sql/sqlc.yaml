@@ -5,23 +5,19 @@ overrides:
       - db_type: jsonb
         go_type:
           type: JSONField
-          import: github.com/sxwebdev/sentinel/internal/store/storecmn
+          import: github.com/sxwebdev/donejournal/internal/store/storecmn
 
       - db_type: JSONB
         go_type:
           type: JSONField
-          import: github.com/sxwebdev/sentinel/internal/store/storecmn
+          import: github.com/sxwebdev/donejournal/internal/store/storecmn
 
-      # requests
-      - column: requests.id
+      # inbox
+      - column: inbox.id
         go_struct_tag: validate:"required"
-      - column: requests.data
+      - column: inbox.data
         go_struct_tag: validate:"required"
-      - column: requests.status
-        go_struct_tag: validate:"required,oneof=pending completed failed"
-        go_type:
-          type: RequestStatusType
-      - column: requests.user_id
+      - column: inbox.user_id
         go_struct_tag: validate:"required"
 
       # todos
@@ -37,13 +33,13 @@ overrides:
         go_struct_tag: validate:"required"
 
 sql:
-  # requests
+  # inbox
   - schema: migrations
-    queries: queries/requests
+    queries: queries/inbox
     engine: sqlite
     gen:
       go:
-        out: ../internal/store/repos/repo_requests
+        out: ../internal/store/repos/repo_inbox
         emit_prepared_queries: false
         emit_json_tags: true
         emit_exported_queries: false

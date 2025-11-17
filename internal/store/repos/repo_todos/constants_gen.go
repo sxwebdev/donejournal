@@ -46,7 +46,6 @@ const (
 	ColumnNameTodosStatus      ColumnName = "status"
 	ColumnNameTodosPlannedDate ColumnName = "planned_date"
 	ColumnNameTodosCompletedAt ColumnName = "completed_at"
-	ColumnNameTodosRequestId   ColumnName = "request_id"
 	ColumnNameTodosCreatedAt   ColumnName = "created_at"
 	ColumnNameTodosUpdatedAt   ColumnName = "updated_at"
 )
@@ -60,7 +59,6 @@ func TodosColumnNames() ColumnNames {
 		ColumnNameTodosStatus,
 		ColumnNameTodosPlannedDate,
 		ColumnNameTodosCompletedAt,
-		ColumnNameTodosRequestId,
 		ColumnNameTodosCreatedAt,
 		ColumnNameTodosUpdatedAt,
 	}

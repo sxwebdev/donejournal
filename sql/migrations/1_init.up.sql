@@ -1,17 +1,15 @@
 -- SQL in section 'Up' is executed when this migration is applied.
 
--- Create requests table
-CREATE TABLE IF NOT EXISTS requests (
+-- Create inbox table
+CREATE TABLE IF NOT EXISTS inbox (
   id TEXT PRIMARY KEY,
   "data" TEXT NOT NULL,
-  "status" TEXT NOT NULL,
-  error_message TEXT,
+  additional_data JSONB NOT NULL,
   user_id TEXT NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_requests_user_id ON requests(user_id);
-CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status);
+CREATE INDEX IF NOT EXISTS idx_inbox_user_id ON inbox(user_id);
 
 -- Create todos table
 CREATE TABLE IF NOT EXISTS todos (
@@ -22,7 +20,6 @@ CREATE TABLE IF NOT EXISTS todos (
   status TEXT NOT NULL,
   planned_date DATETIME NOT NULL,
   completed_at DATETIME,
-  request_id TEXT REFERENCES requests(id) ON DELETE SET NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

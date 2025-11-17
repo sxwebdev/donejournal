@@ -10,16 +10,14 @@ sqlc:
         package_path: github.com/sxwebdev/donejournal/internal/models
         imports:
           - path: github.com/sxwebdev/donejournal/internal/models
-            go_type: RequestStatusType
-          - path: github.com/sxwebdev/donejournal/internal/models
             go_type: TodoStatusType
     crud:
       auto_remove_generated_files: true
       exclude_table_name_from_methods: true
       tables:
-        # requests
-        requests:
-          output_dir: queries/requests
+        # inbox
+        inbox:
+          output_dir: queries/inbox
           primary_column: id
           methods:
             create:
@@ -48,8 +46,8 @@ sqlc:
 
     constants:
       tables:
-        requests:
-          output_dir: ../internal/store/repos/repo_requests
+        inbox:
+          output_dir: ../internal/store/repos/repo_inbox
           include_column_names: true
         todos:
           output_dir: ../internal/store/repos/repo_todos

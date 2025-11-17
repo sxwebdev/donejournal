@@ -13,9 +13,9 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, request_id)
-	VALUES (?, ?, ?, ?, ?, ?, ?)
-	RETURNING id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at
+INSERT INTO todos (id, user_id, title, description, status, planned_date)
+	VALUES (?, ?, ?, ?, ?, ?)
+	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at
 `
 
 type CreateParams struct {
@@ -25,7 +25,6 @@ type CreateParams struct {
 	Description string                `db:"description" json:"description"`
 	Status      models.TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time             `db:"planned_date" json:"planned_date"`
-	RequestID   *string               `db:"request_id" json:"request_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {
@@ -36,7 +35,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		arg.Description,
 		arg.Status,
 		arg.PlannedDate,
-		arg.RequestID,
 	)
 	var i models.Todo
 	err := row.Scan(
@@ -47,7 +45,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		&i.Status,
 		&i.PlannedDate,
 		&i.CompletedAt,
-		&i.RequestID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -64,7 +61,7 @@ func (q *Queries) Delete(ctx context.Context, id string) error {
 }
 
 const getByID = `-- name: GetByID :one
-SELECT id, user_id, title, description, status, planned_date, completed_at, request_id, created_at, updated_at FROM todos WHERE id=? LIMIT 1
+SELECT id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at FROM todos WHERE id=? LIMIT 1
 `
 
 func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) {
@@ -78,7 +75,6 @@ func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) 
 		&i.Status,
 		&i.PlannedDate,
 		&i.CompletedAt,
-		&i.RequestID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

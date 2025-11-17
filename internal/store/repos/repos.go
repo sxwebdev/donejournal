@@ -3,31 +3,31 @@ package repos
 import (
 	"database/sql"
 
-	"github.com/sxwebdev/donejournal/internal/store/repos/repo_requests"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_inbox"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 )
 
 type Repos struct {
-	requests *repo_requests.Queries
-	todos    *repo_todos.Queries
+	inbox *repo_inbox.Queries
+	todos *repo_todos.Queries
 }
 
 func New(sqlite *sql.DB) *Repos {
 	return &Repos{
-		requests: repo_requests.New(sqlite),
-		todos:    repo_todos.New(sqlite),
+		inbox: repo_inbox.New(sqlite),
+		todos: repo_todos.New(sqlite),
 	}
 }
 
-// Requests returns repo for requests
-func (s *Repos) Requests(opts ...Option) repo_requests.Querier {
+// Inbox returns repo for requests
+func (s *Repos) Inbox(opts ...Option) repo_inbox.Querier {
 	options := parseOptions(opts...)
 
 	if options.Tx != nil {
-		return s.requests.WithTx(options.Tx)
+		return s.inbox.WithTx(options.Tx)
 	}
 
-	return s.requests
+	return s.inbox
 }
 
 // Todos returns repo for todos

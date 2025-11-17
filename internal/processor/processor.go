@@ -2,7 +2,6 @@ package processor
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/sxwebdev/donejournal/internal/mcp"
@@ -67,29 +66,29 @@ func (s *Processor) initProcessor(ctx context.Context) {
 
 // do processes pending requests
 func (s *Processor) do(ctx context.Context) error {
-	items, err := s.baseService.Requests().GetPendingRequests(ctx)
-	if err != nil {
-		return fmt.Errorf("get pending requests: %w", err)
-	}
+	// items, err := s.baseService.Requests().GetPendingRequests(ctx)
+	// if err != nil {
+	// 	return fmt.Errorf("get pending requests: %w", err)
+	// }
 
-	if len(items) == 0 {
-		return nil
-	}
+	// if len(items) == 0 {
+	// 	return nil
+	// }
 
-	s.logger.Infof("found %d pending requests", len(items))
+	// s.logger.Infof("found %d pending requests", len(items))
 
-	for _, item := range items {
-		if err := s.processItem(ctx, item); err != nil {
-			s.logger.Errorf("process item %s: %v", item.ID, err)
-			continue
-		}
-	}
+	// for _, item := range items {
+	// 	if err := s.processItem(ctx, item); err != nil {
+	// 		s.logger.Errorf("process item %s: %v", item.ID, err)
+	// 		continue
+	// 	}
+	// }
 
 	return nil
 }
 
 // processItem processes a single request item
-func (s *Processor) processItem(ctx context.Context, item *models.Request) error {
+func (s *Processor) processItem(ctx context.Context, item *models.Inbox) error {
 	// resp, err := s.mcpService.ParseMessage(ctx, item.UserID, item.Data)
 	// if err != nil {
 	// 	return fmt.Errorf("failed to parse message: %w", err)

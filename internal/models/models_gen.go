@@ -6,16 +6,17 @@ package models
 
 import (
 	"time"
+
+	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 )
 
-type Request struct {
-	ID           string            `db:"id" json:"id" validate:"required"`
-	Data         string            `db:"data" json:"data" validate:"required"`
-	Status       RequestStatusType `db:"status" json:"status" validate:"required,oneof=pending completed failed"`
-	ErrorMessage *string           `db:"error_message" json:"error_message"`
-	UserID       string            `db:"user_id" json:"user_id" validate:"required"`
-	CreatedAt    time.Time         `db:"created_at" json:"created_at"`
-	UpdatedAt    time.Time         `db:"updated_at" json:"updated_at"`
+type Inbox struct {
+	ID             string             `db:"id" json:"id" validate:"required"`
+	Data           string             `db:"data" json:"data" validate:"required"`
+	AdditionalData storecmn.JSONField `db:"additional_data" json:"additional_data"`
+	UserID         string             `db:"user_id" json:"user_id" validate:"required"`
+	CreatedAt      time.Time          `db:"created_at" json:"created_at"`
+	UpdatedAt      time.Time          `db:"updated_at" json:"updated_at"`
 }
 
 type Todo struct {
@@ -26,7 +27,6 @@ type Todo struct {
 	Status      TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time      `db:"planned_date" json:"planned_date"`
 	CompletedAt *time.Time     `db:"completed_at" json:"completed_at"`
-	RequestID   *string        `db:"request_id" json:"request_id"`
 	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
 }

@@ -1,33 +1,33 @@
 package baseservices
 
 import (
-	"github.com/sxwebdev/donejournal/internal/services/requests"
+	"github.com/sxwebdev/donejournal/internal/services/inbox"
 	"github.com/sxwebdev/donejournal/internal/services/todos"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/tkcrm/mx/logger"
 )
 
 type BaseServices struct {
-	requestsService *requests.Service
-	todosService    *todos.Service
+	inboxService *inbox.Service
+	todosService *todos.Service
 }
 
 func New(
 	l logger.Logger,
 	st *store.Store,
 ) *BaseServices {
-	requestsService := requests.New(st)
+	inboxService := inbox.New(st)
 	todosService := todos.New(st)
 
 	return &BaseServices{
-		requestsService: requestsService,
-		todosService:    todosService,
+		inboxService: inboxService,
+		todosService: todosService,
 	}
 }
 
-// Requests returns requests service
-func (b *BaseServices) Requests() *requests.Service {
-	return b.requestsService
+// Inbox returns inbox service
+func (b *BaseServices) Inbox() *inbox.Service {
+	return b.inboxService
 }
 
 // Todos returns todos service

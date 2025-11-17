@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package repo_requests
+package repo_inbox
 
 import (
 	"context"
