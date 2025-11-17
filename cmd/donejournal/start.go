@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/riverqueue/river/riverdriver/riversqlite"
+	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/api"
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
-	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store"
+	"github.com/sxwebdev/donejournal/internal/tmanager"
 	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
 	"github.com/sxwebdev/donejournal/sql"
@@ -81,6 +84,22 @@ func startCMD() *cli.Command {
 				return fmt.Errorf("failed to run migrations: %w", err)
 			}
 
+			sqliteRiverDbPath := filepath.Join(conf.DataDir, "sqlite", "river.sqlite")
+			riverSqliteDB, err := sqlite.New(ctx, sqliteRiverDbPath, sqlite.WithName("river-sqlite"))
+			if err != nil {
+				return fmt.Errorf("failed to initialize sqlite: %w", err)
+			}
+
+			migrator, err := rivermigrate.New(riversqlite.New(riverSqliteDB.DB), nil)
+			if err != nil {
+				return fmt.Errorf("failed to create river sqlite migrator: %w", err)
+			}
+
+			_, err = migrator.Migrate(ctx, rivermigrate.DirectionUp, &rivermigrate.MigrateOpts{})
+			if err != nil {
+				return fmt.Errorf("failed to migrate river sqlite database: %w", err)
+			}
+
 			st, err := store.New(sqliteDB.DB)
 			if err != nil {
 				return fmt.Errorf("failed to initialize store: %w", err)
@@ -92,18 +111,32 @@ func startCMD() *cli.Command {
 			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
 			mcpService := mcp.New(l, provider)
 
+			// init task manager
+			taskManager, err := tmanager.New(riverSqliteDB, baseService, mcpService)
+			if err != nil {
+				return fmt.Errorf("failed to initialize task manager: %w", err)
+			}
+
 			// Initialize API service
-			apiService := api.New(l, conf, baseService)
+			apiService := api.New(l, conf, taskManager)
 
 			// init processor service
-			processorService := processor.New(l, baseService, mcpService)
+			// processorService := processor.New(l, baseService, mcpService)
 
 			// register services
 			ln.ServicesRunner().Register(
 				service.New(service.WithService(pingpong.New(l))),
 				service.New(service.WithService(sqliteDB)),
+				service.New(service.WithService(riverSqliteDB)),
+				service.New(
+					service.WithService(taskManager),
+					service.WithShutdownTimeout(time.Minute),
+				),
 				service.New(service.WithService(apiService)),
-				service.New(service.WithService(processorService)),
+				// service.New(
+				// 	service.WithService(processorService),
+				// 	service.WithShutdownTimeout(time.Minute),
+				// ),
 				// service.New(service.WithService(appCache)),
 				// service.New(service.WithService(botService)),
 			)

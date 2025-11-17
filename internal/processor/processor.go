@@ -33,7 +33,7 @@ func New(
 	s.looper = loop.New(
 		s.initProcessor,
 		loop.WithLeading(),
-		loop.WithPeriod(time.Second*5),
+		loop.WithPeriod(time.Second*2),
 		loop.WithContextTimeout(time.Second*30),
 	)
 
@@ -90,15 +90,15 @@ func (s *Processor) do(ctx context.Context) error {
 
 // processItem processes a single request item
 func (s *Processor) processItem(ctx context.Context, item *models.Request) error {
-	resp, err := s.mcpService.ParseMessage(ctx, item.UserID, item.Data)
-	if err != nil {
-		return fmt.Errorf("failed to parse message: %w", err)
-	}
+	// resp, err := s.mcpService.ParseMessage(ctx, item.UserID, item.Data)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to parse message: %w", err)
+	// }
 
-	err = s.baseService.Todos().BatchCreate(ctx, item, resp)
-	if err != nil {
-		return fmt.Errorf("failed to batch create todos: %w", err)
-	}
+	// err = s.baseService.Todos().BatchCreate(ctx, item, resp)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to batch create todos: %w", err)
+	// }
 
 	return nil
 }

@@ -12,10 +12,11 @@ import (
 )
 
 type SQLite struct {
-	DB *sql.DB
+	DB   *sql.DB
+	name string
 }
 
-func New(ctx context.Context, dbPath string) (*SQLite, error) {
+func New(ctx context.Context, dbPath string, opts ...Option) (*SQLite, error) {
 	if dbPath == "" {
 		return nil, fmt.Errorf("database path is empty")
 	}
@@ -43,7 +44,12 @@ func New(ctx context.Context, dbPath string) (*SQLite, error) {
 	}
 
 	instance := &SQLite{
-		DB: db,
+		DB:   db,
+		name: "sqlite",
+	}
+
+	for _, opt := range opts {
+		opt(instance)
 	}
 
 	return instance, nil

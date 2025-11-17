@@ -2,7 +2,7 @@ package sqlite
 
 import "context"
 
-func (s *SQLite) Name() string { return "sqlite" }
+func (s *SQLite) Name() string { return s.name }
 
 func (s *SQLite) Start(_ context.Context) error { return nil }
 

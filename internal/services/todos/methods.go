@@ -9,20 +9,19 @@ import (
 	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/store/repos"
-	"github.com/sxwebdev/donejournal/internal/store/repos/repo_requests"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 	"github.com/sxwebdev/donejournal/pkg/utils"
 )
 
 // Create a new todo
-func (s *Service) Create(ctx context.Context, tx *sql.Tx, request *models.Request, entry mcp.ParsedEntry) (*models.Todo, error) {
+func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID string, entry mcp.ParsedEntry) (*models.Todo, error) {
 	req := repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
-		UserID:      request.UserID,
+		UserID:      userID,
 		Title:       entry.Title,
 		Description: entry.Description,
-		RequestID:   &request.ID,
+		// RequestID:   &request.ID,
 	}
 
 	date := carbon.Parse(entry.Date).StdTime()
@@ -43,13 +42,13 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, request *models.Reques
 	}
 
 	// update reequest status
-	err := s.store.Requests(repos.WithTx(tx)).UpdateStatus(ctx, repo_requests.UpdateStatusParams{
-		ID:     request.ID,
-		Status: models.RequestStatusCompleted,
-	})
-	if err != nil {
-		return nil, err
-	}
+	// err := s.store.Requests(repos.WithTx(tx)).UpdateStatus(ctx, repo_requests.UpdateStatusParams{
+	// 	ID:     request.ID,
+	// 	Status: models.RequestStatusCompleted,
+	// })
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// create the todo
 	todo, err := s.store.Todos(repos.WithTx(tx)).Create(ctx, req)
@@ -61,14 +60,14 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, request *models.Reques
 }
 
 // BatchCreate creates todos in batch
-func (s *Service) BatchCreate(ctx context.Context, request *models.Request, parsedResponse *mcp.ParsedResponse) error {
+func (s *Service) BatchCreate(ctx context.Context, userID string, parsedResponse *mcp.ParsedResponse) error {
 	if len(parsedResponse.Entries) == 0 {
 		return nil
 	}
 
 	err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		for _, entry := range parsedResponse.Entries {
-			if _, err := s.Create(ctx, tx, request, entry); err != nil {
+			if _, err := s.Create(ctx, tx, userID, entry); err != nil {
 				return fmt.Errorf("create todo for entry '%s': %w", entry.Title, err)
 			}
 		}

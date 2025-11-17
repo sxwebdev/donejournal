@@ -8,7 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sxwebdev/donejournal/internal/config"
-	"github.com/sxwebdev/donejournal/internal/services/baseservices"
+	"github.com/sxwebdev/donejournal/internal/tmanager"
 	"github.com/tkcrm/mx/logger"
 )
 
@@ -23,14 +23,14 @@ type API struct {
 
 	app *fiber.App
 
-	baseService *baseservices.BaseServices
+	taskManager *tmanager.Manager
 }
 
-func New(log logger.Logger, conf *config.Config, baseService *baseservices.BaseServices) *API {
+func New(log logger.Logger, conf *config.Config, taskManager *tmanager.Manager) *API {
 	s := &API{
 		logger:      log,
 		config:      conf,
-		baseService: baseService,
+		taskManager: taskManager,
 		app: fiber.New(fiber.Config{
 			DisableStartupMessage: true,
 		}),
@@ -93,8 +93,11 @@ func (s *API) setupRoutes() {
 
 		s.logger.Debugf("received: user_id=%s, text=%s", req.UserID, req.Text)
 
-		if _, err := s.baseService.Requests().Create(c.Context(), req.Text, req.UserID); err != nil {
-			return errorMessage(c, fiber.StatusInternalServerError, fmt.Errorf("failed to create request: %w", err))
+		if err := s.taskManager.AddProcessorTask(c.Context(), tmanager.ProcessorWorkerArgs{
+			Data:   req.Text,
+			UserID: req.UserID,
+		}); err != nil {
+			return errorMessage(c, fiber.StatusInternalServerError, fmt.Errorf("failed to add processor task: %w", err))
 		}
 
 		return successMessage(c, "ok")
