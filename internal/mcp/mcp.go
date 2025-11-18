@@ -129,7 +129,10 @@ Format: {"entries":[...]} where each entry is a separate task`,
 	}
 
 	if len(parsed.Entries) > 0 {
-		m.log.Infof("Successfully parsed %d entries from LLM response", len(parsed.Entries))
+		m.log.Infow(
+			"Successfully parsed entries from LLM response",
+			"count", len(parsed.Entries),
+			"time", time.Since(now).String())
 	}
 
 	return &parsed, nil
