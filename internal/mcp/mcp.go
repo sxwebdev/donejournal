@@ -61,10 +61,9 @@ func addDaysToDate(dateStr string, days int) string {
 }
 
 // ParseMessage processes user message through LLM provider and returns parsed entries
-func (m *MCP) ParseMessage(ctx context.Context, userID, text string) (*ParsedResponse, error) {
+func (m *MCP) ParseMessage(ctx context.Context, text string) (*ParsedResponse, error) {
 	m.log.Debugw(
 		"mcp parse message",
-		"userID", userID,
 		"text", text,
 	)
 

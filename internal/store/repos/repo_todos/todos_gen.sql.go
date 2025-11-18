@@ -20,7 +20,7 @@ INSERT INTO todos (id, user_id, title, description, status, planned_date)
 
 type CreateParams struct {
 	ID          string                `db:"id" json:"id" validate:"required"`
-	UserID      string                `db:"user_id" json:"user_id" validate:"required"`
+	UserID      int64                 `db:"user_id" json:"user_id" validate:"required"`
 	Title       string                `db:"title" json:"title" validate:"required"`
 	Description string                `db:"description" json:"description"`
 	Status      models.TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`

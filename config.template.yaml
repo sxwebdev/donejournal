@@ -28,6 +28,7 @@ ops:
     write_timeout: 60
 data_dir: ./data
 server:
+  is_enabled: false
   addr: :8080
 telegram:
   bot_token: ""

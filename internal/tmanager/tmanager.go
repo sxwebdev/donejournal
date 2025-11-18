@@ -8,26 +8,39 @@ import (
 
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riversqlite"
-	"github.com/sxwebdev/donejournal/internal/mcp"
-	"github.com/sxwebdev/donejournal/internal/services/baseservices"
+	"github.com/sxwebdev/donejournal/internal/bot"
+	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
+	"github.com/tkcrm/mx/logger"
 )
 
 type Manager struct {
+	logger      logger.Logger
 	riverClient *river.Client[*sql.Tx]
+	botService  *bot.Bot
 }
 
 func New(
+	l logger.Logger,
 	sqliteDB *sqlite.SQLite,
-	baseService *baseservices.BaseServices,
-	mcpService *mcp.MCP,
+	processorService *processor.Processor,
+	botService *bot.Bot,
 ) (*Manager, error) {
 	workers := river.NewWorkers()
-	river.AddWorker(workers, &processorWorker{
-		baseServices: baseService,
-		mcpService:   mcpService,
+
+	// Add send message worker
+	river.AddWorker(workers, &sendMessageWorker{
+		botService: botService,
 	})
 
+	// Add processor worker
+	pWorker := &processorWorker{
+		processorService: processorService,
+	}
+
+	river.AddWorker(workers, pWorker)
+
+	// Create river client
 	riverClient, err := river.NewClient(riversqlite.New(sqliteDB.DB), &river.Config{
 		Queues: map[string]river.QueueConfig{
 			river.QueueDefault: {MaxWorkers: 100},
@@ -38,8 +51,12 @@ func New(
 		return nil, err
 	}
 
+	pWorker.riverClient = riverClient
+
 	return &Manager{
+		logger:      l,
 		riverClient: riverClient,
+		botService:  botService,
 	}, nil
 }
 
@@ -50,7 +67,25 @@ func (m *Manager) Name() string {
 
 // Start starts the task manager
 func (m *Manager) Start(ctx context.Context) error {
-	return m.riverClient.Start(ctx)
+	if err := m.riverClient.Start(ctx); err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case update := <-m.botService.OnUpdate():
+				err := m.AddProcessorTask(ctx, update.Message.From.ID, update.Message.Text)
+				if err != nil {
+					m.logger.Errorf("failed to enqueue processor task: %v", err)
+				}
+			}
+		}
+	}()
+
+	return nil
 }
 
 // Stop stops the task manager
@@ -59,7 +94,12 @@ func (m *Manager) Stop(ctx context.Context) error {
 }
 
 // AddProcessorTask adds a new processor task to the task manager
-func (m *Manager) AddProcessorTask(ctx context.Context, params ProcessorWorkerArgs) error {
+func (m *Manager) AddProcessorTask(ctx context.Context, userID int64, data string) error {
+	params := processorWorkerArgs{
+		UserID: userID,
+		Data:   data,
+	}
+
 	if err := params.Validate(); err != nil {
 		return err
 	}

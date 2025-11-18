@@ -15,7 +15,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Addr string `yaml:"addr" validate:"required" default:":8080"`
+	IsEnabled bool   `yaml:"is_enabled" default:"false"`
+	Addr      string `yaml:"addr" validate:"required" default:":8080"`
 }
 
 type TelegramConfig struct {

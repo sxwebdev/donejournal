@@ -2,52 +2,58 @@ package tmanager
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/riverqueue/river"
-	"github.com/sxwebdev/donejournal/internal/mcp"
-	"github.com/sxwebdev/donejournal/internal/services/baseservices"
+	"github.com/sxwebdev/donejournal/internal/processor"
 )
 
-type ProcessorWorkerArgs struct {
+type processorWorkerArgs struct {
 	Data   string
-	UserID string
+	UserID int64
 }
 
-func (ProcessorWorkerArgs) Kind() string { return "processor" }
+func (processorWorkerArgs) Kind() string { return "processor" }
 
 // Validate validates the worker arguments
-func (args *ProcessorWorkerArgs) Validate() error {
+func (args *processorWorkerArgs) Validate() error {
 	if args.Data == "" {
 		return fmt.Errorf("data is required")
 	}
-	if args.UserID == "" {
+	if args.UserID == 0 {
 		return fmt.Errorf("userID is required")
 	}
 	return nil
 }
 
 type processorWorker struct {
-	river.WorkerDefaults[ProcessorWorkerArgs]
+	river.WorkerDefaults[processorWorkerArgs]
 
-	baseServices *baseservices.BaseServices
-	mcpService   *mcp.MCP
+	riverClient      *river.Client[*sql.Tx]
+	processorService *processor.Processor
 }
 
-func (w *processorWorker) Timeout(*river.Job[ProcessorWorkerArgs]) time.Duration {
+func (w *processorWorker) Timeout(*river.Job[processorWorkerArgs]) time.Duration {
 	return time.Second * 30
 }
 
-func (w *processorWorker) Work(ctx context.Context, job *river.Job[ProcessorWorkerArgs]) error {
-	resp, err := w.mcpService.ParseMessage(ctx, job.Args.UserID, job.Args.Data)
+func (w *processorWorker) Work(ctx context.Context, job *river.Job[processorWorkerArgs]) error {
+	responseText, err := w.processorService.ProcessNewRequest(ctx, job.Args.UserID, job.Args.Data)
 	if err != nil {
-		return fmt.Errorf("failed to parse message: %w", err)
+		return fmt.Errorf("failed to process new request: %w", err)
 	}
 
-	err = w.baseServices.Todos().BatchCreate(ctx, job.Args.UserID, resp)
-	if err != nil {
-		return fmt.Errorf("failed to batch create todos: %w", err)
+	if len(responseText) > 0 {
+		_, err = w.riverClient.Insert(ctx, sendMessageWorkerArgs{
+			UserID: job.Args.UserID,
+			Data:   responseText,
+		}, nil)
+		if err != nil {
+			return fmt.Errorf("failed to enqueue send message task: %w", err)
+		}
 	}
+
 	return nil
 }

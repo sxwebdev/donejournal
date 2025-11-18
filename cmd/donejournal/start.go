@@ -10,9 +10,11 @@ import (
 	"github.com/riverqueue/river/riverdriver/riversqlite"
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/api"
+	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
+	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/sxwebdev/donejournal/internal/tmanager"
@@ -111,17 +113,26 @@ func startCMD() *cli.Command {
 			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
 			mcpService := mcp.New(l, provider)
 
+			// init bot service
+			botService, err := bot.New(l, conf.Telegram.BotToken)
+			if err != nil {
+				return fmt.Errorf("failed to initialize bot service: %w", err)
+			}
+
+			// init processor service
+			processorService := processor.New(l, baseService, mcpService, botService)
+
 			// init task manager
-			taskManager, err := tmanager.New(riverSqliteDB, baseService, mcpService)
+			taskManager, err := tmanager.New(l, riverSqliteDB, processorService, botService)
 			if err != nil {
 				return fmt.Errorf("failed to initialize task manager: %w", err)
 			}
 
 			// Initialize API service
-			apiService := api.New(l, conf, taskManager)
-
-			// init processor service
-			// processorService := processor.New(l, baseService, mcpService)
+			var apiService *api.API
+			if conf.Server.IsEnabled {
+				apiService = api.New(l, conf, taskManager)
+			}
 
 			// register services
 			ln.ServicesRunner().Register(
@@ -132,14 +143,14 @@ func startCMD() *cli.Command {
 					service.WithService(taskManager),
 					service.WithShutdownTimeout(time.Minute),
 				),
-				service.New(service.WithService(apiService)),
-				// service.New(
-				// 	service.WithService(processorService),
-				// 	service.WithShutdownTimeout(time.Minute),
-				// ),
-				// service.New(service.WithService(appCache)),
-				// service.New(service.WithService(botService)),
+				service.New(service.WithService(botService)),
 			)
+
+			if conf.Server.IsEnabled {
+				ln.ServicesRunner().Register(
+					service.New(service.WithService(apiService)),
+				)
+			}
 
 			return ln.Run()
 		},

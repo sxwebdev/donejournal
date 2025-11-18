@@ -15,13 +15,12 @@ import (
 )
 
 // Create a new todo
-func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID string, entry mcp.ParsedEntry) (*models.Todo, error) {
+func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mcp.ParsedEntry) (*models.Todo, error) {
 	req := repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
 		Title:       entry.Title,
 		Description: entry.Description,
-		// RequestID:   &request.ID,
 	}
 
 	date := carbon.Parse(entry.Date).StdTime()
@@ -41,15 +40,6 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID string, entry m
 		return nil, fmt.Errorf("invalid entry kind: %s", entry.Kind)
 	}
 
-	// update reequest status
-	// err := s.store.Requests(repos.WithTx(tx)).UpdateStatus(ctx, repo_requests.UpdateStatusParams{
-	// 	ID:     request.ID,
-	// 	Status: models.RequestStatusCompleted,
-	// })
-	// if err != nil {
-	// 	return nil, err
-	// }
-
 	// create the todo
 	todo, err := s.store.Todos(repos.WithTx(tx)).Create(ctx, req)
 	if err != nil {
@@ -60,7 +50,7 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID string, entry m
 }
 
 // BatchCreate creates todos in batch
-func (s *Service) BatchCreate(ctx context.Context, userID string, parsedResponse *mcp.ParsedResponse) error {
+func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse *mcp.ParsedResponse) error {
 	if len(parsedResponse.Entries) == 0 {
 		return nil
 	}

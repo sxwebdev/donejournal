@@ -12,11 +12,6 @@ import (
 	"github.com/tkcrm/mx/logger"
 )
 
-type IngestRequest struct {
-	UserID string `json:"user_id"`
-	Text   string `json:"text"`
-}
-
 type API struct {
 	logger logger.Logger
 	config *config.Config
@@ -78,7 +73,10 @@ func (s *API) Stop(ctx context.Context) error {
 // setupRoutes sets up the API routes
 func (s *API) setupRoutes() {
 	s.app.Post("/ingest", func(c *fiber.Ctx) error {
-		var req IngestRequest
+		var req struct {
+			UserID int64  `json:"user_id"`
+			Text   string `json:"text"`
+		}
 		if err := c.BodyParser(&req); err != nil {
 			return errorMessage(c, fiber.StatusBadRequest, err)
 		}
@@ -87,16 +85,12 @@ func (s *API) setupRoutes() {
 			return errorMessage(c, fiber.StatusBadRequest, errors.New("text is required"))
 		}
 
-		if req.UserID == "" {
-			req.UserID = "anonymous"
+		if req.UserID == 0 {
+			req.UserID = -1 // or any other sentinel value for anonymous
 		}
 
-		s.logger.Debugf("received: user_id=%s, text=%s", req.UserID, req.Text)
-
-		if err := s.taskManager.AddProcessorTask(c.Context(), tmanager.ProcessorWorkerArgs{
-			Data:   req.Text,
-			UserID: req.UserID,
-		}); err != nil {
+		s.logger.Debugf("received: user_id=%d, text=%s", req.UserID, req.Text)
+		if err := s.taskManager.AddProcessorTask(c.Context(), req.UserID, req.Text); err != nil {
 			return errorMessage(c, fiber.StatusInternalServerError, fmt.Errorf("failed to add processor task: %w", err))
 		}
 

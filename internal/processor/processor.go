@@ -2,12 +2,12 @@ package processor
 
 import (
 	"context"
-	"time"
+	"fmt"
+	"strings"
 
+	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/mcp"
-	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
-	"github.com/sxwebdev/donejournal/pkg/loop"
 	"github.com/tkcrm/mx/logger"
 )
 
@@ -15,89 +15,51 @@ type Processor struct {
 	logger      logger.Logger
 	baseService *baseservices.BaseServices
 	mcpService  *mcp.MCP
-	looper      *loop.Loop
+	botService  *bot.Bot
 }
 
 func New(
 	l logger.Logger,
 	baseService *baseservices.BaseServices,
 	mcpService *mcp.MCP,
+	botService *bot.Bot,
 ) *Processor {
 	s := &Processor{
 		logger:      l,
 		baseService: baseService,
 		mcpService:  mcpService,
+		botService:  botService,
 	}
-
-	s.looper = loop.New(
-		s.initProcessor,
-		loop.WithLeading(),
-		loop.WithPeriod(time.Second*2),
-		loop.WithContextTimeout(time.Second*30),
-	)
 
 	return s
 }
 
-// Name returns processor name
-func (s *Processor) Name() string {
-	return "processor"
-}
-
-// Start starts the processor
-func (s *Processor) Start(ctx context.Context) error {
-	s.looper.Start(ctx)
-	return nil
-}
-
-// Stop stops the processor
-func (s *Processor) Stop(ctx context.Context) error {
-	s.looper.Stop()
-	s.looper.Wait()
-	return nil
-}
-
-// initProcessor initializes the processor loop
-func (s *Processor) initProcessor(ctx context.Context) {
-	if err := s.do(ctx); err != nil {
-		s.logger.Errorf("failed to process notification history: %v", err)
+func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data string) (string, error) {
+	resp, err := s.mcpService.ParseMessage(ctx, data)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse message: %w", err)
 	}
-}
 
-// do processes pending requests
-func (s *Processor) do(ctx context.Context) error {
-	// items, err := s.baseService.Requests().GetPendingRequests(ctx)
-	// if err != nil {
-	// 	return fmt.Errorf("get pending requests: %w", err)
-	// }
+	if err := s.baseService.Todos().BatchCreate(ctx, userID, resp); err != nil {
+		return "", fmt.Errorf("failed to batch create todos: %w", err)
+	}
 
-	// if len(items) == 0 {
-	// 	return nil
-	// }
+	responseText := new(strings.Builder)
+	if len(resp.Entries) > 1 {
+		if _, err := fmt.Fprintf(responseText, "%d items have been created.\n", len(resp.Entries)); err != nil {
+			return "", fmt.Errorf("failed to write result text: %w", err)
+		}
 
-	// s.logger.Infof("found %d pending requests", len(items))
+		for i, entry := range resp.Entries {
+			formatPreffix := "\n✅"
+			if entry.Kind == mcp.EntryKindTodo {
+				formatPreffix = "\n📝"
+			}
+			if _, err := fmt.Fprintf(responseText, formatPreffix+" %d. %s", i+1, entry.Title); err != nil {
+				return "", fmt.Errorf("failed to write result text: %w", err)
+			}
+		}
+	}
 
-	// for _, item := range items {
-	// 	if err := s.processItem(ctx, item); err != nil {
-	// 		s.logger.Errorf("process item %s: %v", item.ID, err)
-	// 		continue
-	// 	}
-	// }
-
-	return nil
-}
-
-// processItem processes a single request item
-func (s *Processor) processItem(ctx context.Context, item *models.Inbox) error {
-	// resp, err := s.mcpService.ParseMessage(ctx, item.UserID, item.Data)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to parse message: %w", err)
-	// }
-
-	// err = s.baseService.Todos().BatchCreate(ctx, item, resp)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to batch create todos: %w", err)
-	// }
-
-	return nil
+	return responseText.String(), nil
 }

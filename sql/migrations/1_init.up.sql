@@ -14,7 +14,7 @@ CREATE INDEX IF NOT EXISTS idx_inbox_user_id ON inbox(user_id);
 -- Create todos table
 CREATE TABLE IF NOT EXISTS todos (
   id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
+  user_id BIGINT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   status TEXT NOT NULL,
