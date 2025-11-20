@@ -13,8 +13,8 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date)
-	VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at)
+	VALUES (?, ?, ?, ?, ?, ?, ?)
 	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at
 `
 
@@ -25,6 +25,7 @@ type CreateParams struct {
 	Description string                `db:"description" json:"description"`
 	Status      models.TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time             `db:"planned_date" json:"planned_date"`
+	CompletedAt *time.Time            `db:"completed_at" json:"completed_at"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {
@@ -35,6 +36,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		arg.Description,
 		arg.Status,
 		arg.PlannedDate,
+		arg.CompletedAt,
 	)
 	var i models.Todo
 	err := row.Scan(

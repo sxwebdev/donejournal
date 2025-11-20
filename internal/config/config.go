@@ -12,6 +12,7 @@ type Config struct {
 	Server   ServerConfig
 	Telegram TelegramConfig
 	MCP      MCPConfig
+	Timezone string `yaml:"timezone" validate:"required" default:"UTC"`
 }
 
 type ServerConfig struct {

@@ -6,6 +6,7 @@ import (
 
 	_ "modernc.org/sqlite"
 
+	"github.com/mymmrac/telego"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riversqlite"
 	"github.com/sxwebdev/donejournal/internal/bot"
@@ -15,9 +16,10 @@ import (
 )
 
 type Manager struct {
-	logger      logger.Logger
-	riverClient *river.Client[*sql.Tx]
-	botService  *bot.Bot
+	logger           logger.Logger
+	riverClient      *river.Client[*sql.Tx]
+	botService       *bot.Bot
+	processorService *processor.Processor
 }
 
 func New(
@@ -54,9 +56,10 @@ func New(
 	pWorker.riverClient = riverClient
 
 	return &Manager{
-		logger:      l,
-		riverClient: riverClient,
-		botService:  botService,
+		logger:           l,
+		riverClient:      riverClient,
+		botService:       botService,
+		processorService: processorService,
 	}, nil
 }
 
@@ -77,10 +80,7 @@ func (m *Manager) Start(ctx context.Context) error {
 			case <-ctx.Done():
 				return
 			case update := <-m.botService.OnUpdate():
-				err := m.AddProcessorTask(ctx, update.Message.From.ID, update.Message.Text)
-				if err != nil {
-					m.logger.Errorf("failed to enqueue processor task: %v", err)
-				}
+				m.handleUpdate(ctx, update)
 			}
 		}
 	}()
@@ -106,4 +106,32 @@ func (m *Manager) AddProcessorTask(ctx context.Context, userID int64, data strin
 
 	_, err := m.riverClient.Insert(ctx, &params, nil)
 	return err
+}
+
+// handleUpdate handles incoming updates from the bot.
+func (m *Manager) handleUpdate(ctx context.Context, update telego.Update) {
+	// Handle callback queries
+	if update.CallbackQuery != nil {
+		if err := m.processorService.HandleCallbackQuery(ctx, update.CallbackQuery); err != nil {
+			m.logger.Errorf("failed to handle callback query: %v", err)
+		}
+		return
+	}
+
+	// Handle messages
+	if update.Message != nil {
+		// Handle commands (messages starting with /)
+		if len(update.Message.Text) > 0 && update.Message.Text[0] == '/' {
+			if err := m.processorService.HandleCommand(ctx, update.Message.Chat.ID, update.Message.Text); err != nil {
+				m.logger.Errorf("failed to handle command: %v", err)
+			}
+			return
+		}
+
+		// Handle regular messages - add to processor task
+		err := m.AddProcessorTask(ctx, update.Message.From.ID, update.Message.Text)
+		if err != nil {
+			m.logger.Errorf("failed to enqueue processor task: %v", err)
+		}
+	}
 }

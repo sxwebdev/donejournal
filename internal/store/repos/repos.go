@@ -9,13 +9,13 @@ import (
 
 type Repos struct {
 	inbox *repo_inbox.Queries
-	todos *repo_todos.Queries
+	todos *repo_todos.CustomQueries
 }
 
 func New(sqlite *sql.DB) *Repos {
 	return &Repos{
 		inbox: repo_inbox.New(sqlite),
-		todos: repo_todos.New(sqlite),
+		todos: repo_todos.NewCustom(sqlite),
 	}
 }
 
@@ -31,7 +31,7 @@ func (s *Repos) Inbox(opts ...Option) repo_inbox.Querier {
 }
 
 // Todos returns repo for todos
-func (s *Repos) Todos(opts ...Option) repo_todos.Querier {
+func (s *Repos) Todos(opts ...Option) repo_todos.ICustomQuerier {
 	options := parseOptions(opts...)
 
 	if options.Tx != nil {

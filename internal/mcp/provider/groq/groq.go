@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"time"
 
@@ -70,8 +71,17 @@ func (c *Client) SendChatCompletion(ctx context.Context, messages []mcptypes.Cha
 	}
 	defer resp.Body.Close()
 
+	respBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("read groq response body: %w", err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("groq API error: status %d, body: %s", resp.StatusCode, string(respBytes))
+	}
+
 	var groqResp groqResponse
-	if err := json.NewDecoder(resp.Body).Decode(&groqResp); err != nil {
+	if err := json.Unmarshal(respBytes, &groqResp); err != nil {
 		return "", fmt.Errorf("decode groq response: %w", err)
 	}
 

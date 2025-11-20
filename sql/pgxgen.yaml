@@ -36,7 +36,6 @@ sqlc:
           methods:
             create:
               skip_columns:
-                - completed_at
                 - created_at
                 - updated_at
               returning: "*"

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/riverqueue/river/riverdriver/riversqlite"
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/api"
@@ -56,6 +57,15 @@ func startCMD() *cli.Command {
 				launcher.WithOpsConfig(conf.Ops),
 				launcher.WithAppStartStopLog(true),
 			)
+
+			// set default timezone
+			var err error
+			time.Local, err = time.LoadLocation(conf.Timezone)
+			if err != nil {
+				return fmt.Errorf("failed to set timezone: %w", err)
+			}
+
+			carbon.SetTimezone(conf.Timezone)
 
 			// check if exists data dir, if not create it
 			if _, err := os.Stat(conf.DataDir); os.IsNotExist(err) {

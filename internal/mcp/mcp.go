@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/sxwebdev/donejournal/internal/mcp/mcptypes"
 	"github.com/tkcrm/mx/logger"
 )
@@ -51,13 +52,9 @@ func New(log logger.Logger, provider mcptypes.MCPProvider) *MCP {
 	}
 }
 
-// addDaysToDate adds a number of days to a date string in YYYY-MM-DD format
-func addDaysToDate(dateStr string, days int) string {
-	t, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return dateStr
-	}
-	return t.AddDate(0, 0, days).Format("2006-01-02")
+// addDaysToDate adds a number of days to current time and returns in YYYY-MM-DD HH:mm:ss format
+func addDaysToDate(days int) string {
+	return carbon.Now().AddDays(days).ToDateTimeString()
 }
 
 // ParseMessage processes user message through LLM provider and returns parsed entries
@@ -68,7 +65,7 @@ func (m *MCP) ParseMessage(ctx context.Context, text string) (*ParsedResponse, e
 	)
 
 	now := time.Now()
-	today := now.Format("2006-01-02")
+	today := carbon.Now().ToDateTimeString()
 
 	systemPrompt := fmt.Sprintf(`Parse tasks from user messages. Today: %s
 
@@ -92,26 +89,24 @@ IMPORTANT: Keep original language in title and description
 
 Format: {"entries":[...]} where each entry is a separate task`,
 		today,
-		addDaysToDate(today, 1),
-		addDaysToDate(today, 2),
-		addDaysToDate(today, -1),
-		addDaysToDate(today, -2),
+		addDaysToDate(1),
+		addDaysToDate(2),
+		addDaysToDate(-1),
+		addDaysToDate(-2),
 		today)
-
-	yesterday := addDaysToDate(today, -1)
 
 	// Few-shot examples - showing EXACTLY how to split multiple tasks
 	messages := []mcptypes.ChatMessage{
 		{Role: "system", Content: systemPrompt},
 		// Example 1: Multiple tasks with date at the start - ALL get the same date
 		{Role: "user", Content: "вчера\n - таску A\n - таску B\n - таску C"},
-		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"done","title":"таску A","date":"%s","description":"таску A","language":"ru","confidence":0.95},{"kind":"done","title":"таску B","date":"%s","description":"таску B","language":"ru","confidence":0.95},{"kind":"done","title":"таску C","date":"%s","description":"таску C","language":"ru","confidence":0.95}]}`, yesterday, yesterday, yesterday)},
+		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"done","title":"таску A","date":"%s","description":"таску A","language":"ru","confidence":0.95},{"kind":"done","title":"таску B","date":"%s","description":"таску B","language":"ru","confidence":0.95},{"kind":"done","title":"таску C","date":"%s","description":"таску C","language":"ru","confidence":0.95}]}`, addDaysToDate(-1), addDaysToDate(-1), addDaysToDate(-1))},
 		// Example 2: Multiple tasks without date - all get today
 		{Role: "user", Content: "сделал X, Y и Z"},
 		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"done","title":"X","date":"%s","description":"X","language":"ru","confidence":0.95},{"kind":"done","title":"Y","date":"%s","description":"Y","language":"ru","confidence":0.95},{"kind":"done","title":"Z","date":"%s","description":"Z","language":"ru","confidence":0.95}]}`, today, today, today)},
 		// Example 3: Single task with date
 		{Role: "user", Content: "добавь задачу на завтра - обновить домен"},
-		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"todo","title":"обновить домен","date":"%s","description":"обновить домен","language":"ru","confidence":0.97}]}`, addDaysToDate(today, 1))},
+		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"todo","title":"обновить домен","date":"%s","description":"обновить домен","language":"ru","confidence":0.97}]}`, addDaysToDate(1))},
 		// Actual user input
 		{Role: "user", Content: text},
 	}

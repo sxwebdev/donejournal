@@ -52,12 +52,22 @@ func (b *Bot) Start(ctx context.Context) error {
 	// Loop through all updates when they came
 	go func() {
 		for update := range updates {
-			b.logger.Debugw(
-				"received message",
-				"from_id", update.Message.From.ID,
-				"from_username", update.Message.From.Username,
-				"text", update.Message.Text,
-			)
+			// Log different types of updates
+			if update.Message != nil {
+				b.logger.Debugw(
+					"received message",
+					"from_id", update.Message.From.ID,
+					"from_username", update.Message.From.Username,
+					"text", update.Message.Text,
+				)
+			} else if update.CallbackQuery != nil {
+				b.logger.Debugw(
+					"received callback query",
+					"from_id", update.CallbackQuery.From.ID,
+					"from_username", update.CallbackQuery.From.Username,
+					"data", update.CallbackQuery.Data,
+				)
+			}
 
 			b.updates <- update
 		}

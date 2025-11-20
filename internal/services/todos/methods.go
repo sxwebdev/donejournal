@@ -36,6 +36,7 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mc
 		req.Status = models.TodoStatusPending
 	case mcp.EntryKindDone:
 		req.Status = models.TodoStatusCompleted
+		req.CompletedAt = &req.PlannedDate
 	default:
 		return nil, fmt.Errorf("invalid entry kind: %s", entry.Kind)
 	}
@@ -66,4 +67,9 @@ func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse 
 	})
 
 	return err
+}
+
+// Find todos by params
+func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*storecmn.FindResponseWithCount[*models.Todo], error) {
+	return s.store.Todos().Find(ctx, params)
 }
