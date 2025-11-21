@@ -4,10 +4,12 @@ go 1.25.4
 
 require (
 	github.com/dromara/carbon/v2 v2.6.15
+	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/gobeam/stringy v0.0.7
 	github.com/goccy/go-yaml v1.18.0
 	github.com/gofiber/fiber/v2 v2.52.9
+	github.com/huandu/go-sqlbuilder v1.38.1
 	github.com/mymmrac/telego v1.3.1
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/riverqueue/river v0.27.0
@@ -33,7 +35,6 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.11 // indirect
-	github.com/georgysavva/scany/v2 v2.1.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -41,7 +42,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grbit/go-json v0.11.0 // indirect
 	github.com/huandu/go-clone v1.7.3 // indirect
-	github.com/huandu/go-sqlbuilder v1.38.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
