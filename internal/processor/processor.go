@@ -38,7 +38,15 @@ func New(
 func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data string) (string, error) {
 	resp, err := s.mcpService.ParseMessage(ctx, data)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse message: %w", err)
+		s.logger.Errorf("failed to parse message via MCP, saving to inbox: %v", err)
+		runes := []rune(data)
+		if len(runes) > 200 {
+			runes = runes[:200]
+		}
+		if _, inboxErr := s.baseService.Inbox().Create(ctx, string(runes), strconv.FormatInt(userID, 10)); inboxErr != nil {
+			return "", fmt.Errorf("mcp error: %w; inbox fallback also failed: %v", err, inboxErr)
+		}
+		return "Saved to inbox 📥", nil
 	}
 
 	if err := s.baseService.Todos().BatchCreate(ctx, userID, resp); err != nil {
