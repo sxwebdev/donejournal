@@ -3,10 +3,48 @@ package bot
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
 )
+
+// DownloadFile downloads a file from Telegram by file ID and returns its bytes.
+func (b *Bot) DownloadFile(ctx context.Context, fileID string) ([]byte, error) {
+	if fileID == "" {
+		return nil, fmt.Errorf("fileID is required")
+	}
+
+	file, err := b.bot.GetFile(ctx, &telego.GetFileParams{FileID: fileID})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get file info: %w", err)
+	}
+
+	fileURL := b.bot.FileDownloadURL(file.FilePath)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fileURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create download request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download file: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status code when downloading file: %d", resp.StatusCode)
+	}
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read file body: %w", err)
+	}
+
+	return data, nil
+}
 
 // SendMessage sends a message to a chat.
 func (b *Bot) SendMessage(ctx context.Context, chatID int64, text string) error {

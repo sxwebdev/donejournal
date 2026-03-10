@@ -18,6 +18,7 @@ import (
 	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
+	"github.com/sxwebdev/donejournal/internal/stt"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/sxwebdev/donejournal/internal/store/badgerdb"
 	"github.com/sxwebdev/donejournal/internal/tmanager"
@@ -200,8 +201,17 @@ func startCMD() *cli.Command {
 			// init processor service
 			processorService := processor.New(l, baseService, mcpService, botService)
 
+			// init STT service (optional, only if enabled)
+			var sttService *stt.Service
+			if conf.STT.Enabled {
+				sttService, err = stt.New(ctx, l, conf.DataDir, conf.STT.ModelPath)
+				if err != nil {
+					return fmt.Errorf("failed to initialize STT service: %w", err)
+				}
+			}
+
 			// init task manager
-			taskManager, err := tmanager.New(l, riverSqliteDB, processorService, botService)
+			taskManager, err := tmanager.New(l, riverSqliteDB, processorService, botService, sttService, conf.STT.MaxDuration)
 			if err != nil {
 				return fmt.Errorf("failed to initialize task manager: %w", err)
 			}

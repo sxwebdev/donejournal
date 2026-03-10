@@ -36,7 +36,7 @@ func New(
 }
 
 // inboxPrefixes are lowercased phrases that indicate the user wants to save directly to inbox.
-var inboxPrefixes = []string{"в инбокс", "inbox", "инбокс"}
+var inboxPrefixes = []string{"в инбокс", "inbox", "инбокс", "in", "box"}
 
 // parseInboxMessage returns (true, content) if the message starts with an inbox keyword.
 // content is the text after the keyword, trimmed of leading spaces, colons, and newlines.

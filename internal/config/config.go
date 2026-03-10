@@ -12,7 +12,8 @@ type Config struct {
 	Server   ServerConfig
 	Telegram TelegramConfig
 	MCP      MCPConfig
-	Timezone string `yaml:"timezone" validate:"required" default:"UTC"`
+	STT      STTConfig `yaml:"stt"`
+	Timezone string    `yaml:"timezone" validate:"required" default:"UTC"`
 }
 
 type AuthConfig struct {
@@ -33,6 +34,12 @@ type TelegramConfig struct {
 
 type MCPConfig struct {
 	Groq GroqConfig
+}
+
+type STTConfig struct {
+	Enabled     bool   `yaml:"enabled" default:"false"`
+	ModelPath   string `yaml:"model_path"`
+	MaxDuration int    `yaml:"max_duration" default:"30"`
 }
 
 type GroqConfig struct {
