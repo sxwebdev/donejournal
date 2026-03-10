@@ -11,6 +11,10 @@ RUN pnpm install --frozen-lockfile
 COPY frontend/ .
 RUN pnpm run build
 
+# Whisper.cpp — use official pre-built image (linux/amd64, linux/arm64)
+# Includes whisper-cli, ffmpeg, and curl; no compilation needed
+FROM ghcr.io/ggml-org/whisper.cpp:main AS whisper-source
+
 # Backend build stage
 FROM golang:1.26.1-alpine AS backend-builder
 
@@ -32,34 +36,32 @@ COPY --from=admin-frontend-builder /app/frontend/dist ./frontend/dist
 # Copy source code
 COPY . .
 
-# Build the application
-RUN go build -trimpath -ldflags="-w -s -X 'main.version=${VERSION}' -X 'main.commitHash=${COMMIT_HASH}' -X 'main.buildDate=${BUILD_DATE}'" -o bin/donejournal ./cmd/donejournal
+# Build the application (CGO_ENABLED=0 for a fully static binary)
+RUN CGO_ENABLED=0 go build -trimpath -ldflags="-w -s -X 'main.version=${VERSION}' -X 'main.commitHash=${COMMIT_HASH}' -X 'main.buildDate=${BUILD_DATE}'" -o bin/donejournal ./cmd/donejournal
 
-# Final stage — debian:slim for glibc compatibility with pre-built whisper binary
+# Final stage — debian-slim for glibc compatibility with whisper-cli
 FROM debian:bookworm-slim
 
-# Install runtime dependencies
+# Install runtime dependencies: tzdata, ffmpeg for OGG→WAV conversion,
+# libstdc++ and libgomp for whisper-cli shared library dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
     ffmpeg \
-    ca-certificates \
-    wget \
-    unzip \
+    libstdc++6 \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
-
-# Download pre-built whisper-cli binary for Linux x64 (glibc, no GPU)
-# Uses official release from github.com/ggerganov/whisper.cpp
-ARG WHISPER_VERSION=v1.8.3
-RUN wget -q -O /tmp/whisper.zip \
-    "https://github.com/ggerganov/whisper.cpp/releases/download/${WHISPER_VERSION}/whisper-bin-x64.zip" && \
-    unzip -q /tmp/whisper.zip -d /tmp/whisper-bin && \
-    install -m 755 /tmp/whisper-bin/whisper-cli /usr/local/bin/whisper-cli && \
-    rm -rf /tmp/whisper.zip /tmp/whisper-bin
 
 WORKDIR /app
 
-# Copy binary from backend builder stage
+# Copy whisper-cli and its whisper/ggml shared libraries from official image
+COPY --from=whisper-source /app/build/bin/whisper-cli /usr/local/bin/whisper-cli
+COPY --from=whisper-source /app/build/src/libwhisper.so.1 /usr/local/lib/libwhisper.so.1
+COPY --from=whisper-source /app/build/ggml/src/libggml.so.0 /usr/local/lib/libggml.so.0
+COPY --from=whisper-source /app/build/ggml/src/libggml-base.so.0 /usr/local/lib/libggml-base.so.0
+COPY --from=whisper-source /app/build/ggml/src/libggml-cpu.so.0 /usr/local/lib/libggml-cpu.so.0
+RUN ldconfig
+
+# Copy Go binary
 COPY --from=backend-builder /app/bin/donejournal .
 
-# Run the binary
 ENTRYPOINT ["./donejournal"]
