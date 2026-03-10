@@ -66,18 +66,9 @@ func (h *TodosHandler) ListTodos(ctx context.Context, req *connect.Request[todos
 	}
 
 	// Map status filter
-	if len(req.Msg.GetStatuses()) > 0 {
-		// If filtering by specific statuses, set IsCompleted based on them
-		for _, s := range req.Msg.GetStatuses() {
-			if s == todosv1.TodoStatus_TODO_STATUS_COMPLETED {
-				isCompleted := true
-				params.IsCompleted = &isCompleted
-				break
-			}
-		}
-		if params.IsCompleted == nil {
-			isCompleted := false
-			params.IsCompleted = &isCompleted
+	for _, s := range req.Msg.GetStatuses() {
+		if s != todosv1.TodoStatus_TODO_STATUS_UNSPECIFIED {
+			params.Statuses = append(params.Statuses, todoStatusFromProto(s))
 		}
 	}
 

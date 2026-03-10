@@ -8,15 +8,20 @@ export const Route = createFileRoute("/_authenticated/calendar")({
 })
 
 function CalendarPage() {
-  const [currentMonth, setCurrentMonth] = useState(() => startOfMonth(new Date()))
+  const [currentMonth, setCurrentMonth] = useState(() =>
+    startOfMonth(new Date())
+  )
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Calendar</h1>
-        <p className="text-sm text-muted-foreground">View todos by date</p>
+        <p className="mt-1 text-sm text-muted-foreground">View todos by date</p>
       </div>
-      <CalendarView currentMonth={currentMonth} onMonthChange={setCurrentMonth} />
+      <CalendarView
+        currentMonth={currentMonth}
+        onMonthChange={setCurrentMonth}
+      />
     </div>
   )
 }

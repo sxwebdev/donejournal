@@ -41,7 +41,7 @@ function LoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">DoneJournal</h1>
-          <p className="text-muted-foreground">Your Telegram task journal</p>
+          <p className="text-muted-foreground">Your task journal</p>
         </div>
 
         <div className="rounded-xl border bg-card p-6 shadow-sm">
@@ -51,9 +51,7 @@ function LoginPage() {
           <div className="flex justify-center">
             <TelegramLoginButton onAuth={handleAuth} />
           </div>
-          {error && (
-            <p className="mt-3 text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
         </div>
       </div>
     </div>

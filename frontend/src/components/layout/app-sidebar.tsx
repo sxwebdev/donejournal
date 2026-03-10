@@ -9,6 +9,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -25,11 +27,11 @@ function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+      className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       title="Toggle theme"
     >
-      <Sun className="h-4 w-4 hidden dark:block" />
-      <Moon className="h-4 w-4 block dark:hidden" />
+      <Sun className="hidden h-4 w-4 dark:block" />
+      <Moon className="block h-4 w-4 dark:hidden" />
       <span className="text-muted-foreground capitalize">{theme}</span>
     </button>
   )
@@ -43,6 +45,7 @@ const navItems = [
 
 export function AppSidebar() {
   const { user, logout } = useAuth()
+  const { setOpenMobile } = useSidebar()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   const initials = user
@@ -50,7 +53,7 @@ export function AppSidebar() {
     : "?"
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="px-4 py-4">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
@@ -63,7 +66,10 @@ export function AppSidebar() {
           <SidebarMenu>
             {navItems.map(({ to, label, icon: Icon }) => (
               <SidebarMenuItem key={to}>
-                <SidebarMenuButton render={<Link to={to} />} isActive={pathname.startsWith(to)}>
+                <SidebarMenuButton
+                  render={<Link to={to} onClick={() => setOpenMobile(false)} />}
+                  isActive={pathname.startsWith(to)}
+                >
                   <Icon className="h-4 w-4" />
                   <span>{label}</span>
                 </SidebarMenuButton>
@@ -76,28 +82,38 @@ export function AppSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <ThemeToggle />
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-left bg-transparent border-0">
-              <Avatar className="h-7 w-7">
-                {user?.photoUrl && <AvatarImage src={user.photoUrl} alt={user.firstName} />}
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="truncate font-medium leading-none">
-                  {user ? `${user.firstName} ${user.lastName}`.trim() : "Loading..."}
+          <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg border-0 bg-transparent px-2 py-2 text-left text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+            <Avatar className="h-8 w-8">
+              {user?.photoUrl && (
+                <AvatarImage src={user.photoUrl} alt={user.firstName} />
+              )}
+              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1 text-left">
+              <p className="truncate leading-none font-medium">
+                {user
+                  ? `${user.firstName} ${user.lastName}`.trim()
+                  : "Loading..."}
+              </p>
+              {user?.username && (
+                <p className="mt-1.5 truncate text-xs text-muted-foreground">
+                  @{user.username}
                 </p>
-                {user?.username && (
-                  <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
-                )}
-              </div>
+              )}
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-48">
-            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={logout}
+              className="text-destructive focus:text-destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

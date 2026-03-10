@@ -8,10 +8,12 @@ export const Route = createFileRoute("/_authenticated/inbox")({
 
 function InboxPage() {
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Inbox</h1>
-        <p className="text-sm text-muted-foreground">Capture quick thoughts and ideas</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Capture quick thoughts and ideas
+        </p>
       </div>
       <InboxQuickAdd />
       <InboxList />

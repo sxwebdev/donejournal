@@ -16,6 +16,8 @@ import {
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { fromDate, toDate } from "@/lib/dates"
+import { ConnectError } from "@connectrpc/connect"
+import { toast } from "sonner"
 
 type CreateProps = {
   mode: "create"
@@ -49,20 +51,25 @@ export function TodoDialog(props: Props) {
   })
 
   const handleSubmit = async (values: TodoFormValues) => {
-    if (props.mode === "create") {
-      await createMutation.mutateAsync({
-        title: values.title,
-        description: values.description ?? "",
-        plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
-      })
-    } else {
-      await updateMutation.mutateAsync({
-        id: props.todo.id,
-        title: values.title,
-        description: values.description,
-        plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
-        status: values.status !== undefined ? values.status : undefined,
-      })
+    try {
+      if (props.mode === "create") {
+        await createMutation.mutateAsync({
+          title: values.title,
+          description: values.description ?? "",
+          plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
+        })
+      } else {
+        await updateMutation.mutateAsync({
+          id: props.todo.id,
+          title: values.title,
+          description: values.description,
+          plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
+          status: values.status !== undefined ? values.status : undefined,
+        })
+      }
+    } catch (err) {
+      const message = err instanceof ConnectError ? err.rawMessage : "Something went wrong"
+      toast.error(message)
     }
   }
 

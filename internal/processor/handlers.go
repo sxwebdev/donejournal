@@ -151,13 +151,12 @@ func (s *Processor) showTodosForDay(ctx context.Context, chatID int64, messageID
 	dateFrom := date.StartOfDay().StdTime()
 	dateTo := date.EndOfDay().StdTime()
 
-	isCompleted := false
 	params := repo_todos.FindParams{
-		UserID:      userID,
-		IsCompleted: &isCompleted,
-		DateFrom:    &dateFrom,
-		DateTo:      &dateTo,
-		OrderBy:     "created_at",
+		UserID:   userID,
+		Statuses: []models.TodoStatusType{models.TodoStatusPending, models.TodoStatusInProgress},
+		DateFrom: &dateFrom,
+		DateTo:   &dateTo,
+		OrderBy:  "created_at",
 	}
 
 	result, err := s.baseService.Todos().Find(ctx, params)
@@ -219,13 +218,12 @@ func (s *Processor) showDoneForDay(ctx context.Context, chatID int64, messageID 
 	dateFrom := date.StartOfDay().StdTime()
 	dateTo := date.EndOfDay().StdTime()
 
-	isCompleted := true
 	params := repo_todos.FindParams{
-		UserID:      userID,
-		IsCompleted: &isCompleted,
-		DateFrom:    &dateFrom,
-		DateTo:      &dateTo,
-		OrderBy:     "completed_at",
+		UserID:   userID,
+		Statuses: []models.TodoStatusType{models.TodoStatusCompleted},
+		DateFrom: &dateFrom,
+		DateTo:   &dateTo,
+		OrderBy:  "completed_at",
 	}
 
 	result, err := s.baseService.Todos().Find(ctx, params)

@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { z } from "zod"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import { format, startOfDay } from "date-fns"
 import { TodoList } from "@/components/todos/todo-list"
 import { TodoFilters } from "@/components/todos/todo-filters"
 import { TodoDialog } from "@/components/todos/todo-dialog"
@@ -22,13 +23,27 @@ export const Route = createFileRoute("/_authenticated/todos")({
 function TodosPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const search = Route.useSearch()
+  const navigate = useNavigate({ from: "/todos" })
+  const initialFromRef = useRef(search.from)
+
+  useEffect(() => {
+    if (!initialFromRef.current) {
+      navigate({
+        search: (prev) => ({
+          ...prev,
+          from: format(startOfDay(new Date()), "yyyy-MM-dd"),
+        }),
+        replace: true,
+      })
+    }
+  }, [navigate])
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Todos</h1>
-          <p className="text-sm text-muted-foreground">Track your tasks</p>
+          <p className="mt-1 text-sm text-muted-foreground">Track your tasks</p>
         </div>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -38,11 +53,7 @@ function TodosPage() {
 
       <TodoFilters />
 
-      <TodoList
-        statuses={search.statuses}
-        from={search.from}
-        to={search.to}
-      />
+      <TodoList statuses={search.statuses} from={search.from} to={search.to} />
 
       <TodoDialog
         mode="create"

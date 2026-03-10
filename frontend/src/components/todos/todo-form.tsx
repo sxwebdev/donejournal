@@ -22,7 +22,7 @@ import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
-  plannedDate: z.date().optional(),
+  plannedDate: z.date({ required_error: "Planned date is required" }),
   status: z.nativeEnum(TodoStatus).optional(),
 })
 
@@ -97,10 +97,13 @@ export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPend
             <Calendar
               mode="single"
               selected={plannedDate}
-              onSelect={(d) => setValue("plannedDate", d)}
+              onSelect={(d) => setValue("plannedDate", d, { shouldValidate: true })}
             />
           </PopoverContent>
         </Popover>
+        {errors.plannedDate && (
+          <p className="text-xs text-destructive">{errors.plannedDate.message}</p>
+        )}
       </div>
 
       {showStatus && (

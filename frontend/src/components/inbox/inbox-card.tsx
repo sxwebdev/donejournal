@@ -3,6 +3,16 @@ import { formatDistanceToNow } from "date-fns"
 import { ArrowRight, Pencil, Trash2, Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ConvertToTodoDialog } from "./convert-to-todo-dialog"
 import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
 import { useQueryClient } from "@tanstack/react-query"
@@ -20,24 +30,40 @@ type Props = {
 
 export function InboxCard({ item }: Props) {
   const [convertOpen, setConvertOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editValue, setEditValue] = useState(item.data)
   const qc = useQueryClient()
 
   const updateMutation = useMutation(updateInboxItem, {
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listInboxItems, cardinality: "finite" }) })
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listInboxItems,
+          cardinality: "finite",
+        }),
+      })
       setEditing(false)
     },
   })
 
   const deleteMutation = useMutation(deleteInboxItem, {
-    onSuccess: () => qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listInboxItems, cardinality: "finite" }) }),
+    onSuccess: () =>
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listInboxItems,
+          cardinality: "finite",
+        }),
+      }),
   })
 
   const handleSave = () => {
     if (!editValue.trim()) return
-    updateMutation.mutate({ id: item.id, data: editValue.trim(), additionalData: item.additionalData })
+    updateMutation.mutate({
+      id: item.id,
+      data: editValue.trim(),
+      additionalData: item.additionalData,
+    })
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -74,7 +100,7 @@ export function InboxCard({ item }: Props) {
           )}
         </div>
 
-        <div className="flex flex-shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {editing ? (
             <>
               <Button
@@ -121,7 +147,7 @@ export function InboxCard({ item }: Props) {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 text-destructive hover:text-destructive"
-                onClick={() => deleteMutation.mutate({ id: item.id })}
+                onClick={() => setDeleteOpen(true)}
                 disabled={deleteMutation.isPending}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -131,7 +157,31 @@ export function InboxCard({ item }: Props) {
         </div>
       </div>
 
-      <ConvertToTodoDialog item={item} open={convertOpen} onOpenChange={setConvertOpen} />
+      <ConvertToTodoDialog
+        item={item}
+        open={convertOpen}
+        onOpenChange={setConvertOpen}
+      />
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => deleteMutation.mutate({ id: item.id })}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

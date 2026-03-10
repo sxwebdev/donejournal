@@ -50,7 +50,7 @@ export function TodoFilters() {
     navigate({ search: {} })
   }
 
-  const hasFilters = statuses.length > 0 || from || to
+  const hasFilters = statuses.length > 0 || !!from || !!to
 
   return (
     <div className="flex flex-wrap items-center gap-2">

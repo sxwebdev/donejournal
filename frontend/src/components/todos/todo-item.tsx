@@ -1,6 +1,14 @@
 import { useState } from "react"
 import { format } from "date-fns"
-import { MoreHorizontal, Pencil, Trash2, Circle, CheckCircle2, XCircle } from "lucide-react"
+import {
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+  Circle,
+  CheckCircle2,
+  XCircle,
+  Check,
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +16,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { StatusBadge } from "./status-badge"
 import { TodoDialog } from "./todo-dialog"
 import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
@@ -38,16 +60,32 @@ type Props = {
 
 export function TodoItem({ todo }: Props) {
   const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [statusOpen, setStatusOpen] = useState(false)
   const qc = useQueryClient()
 
-  const invalidateTodos = () => Promise.all([
-    qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listTodos, cardinality: "finite" }) }),
-    qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: getCalendarEntries, cardinality: "finite" }) }),
-  ])
+  const invalidateTodos = () =>
+    Promise.all([
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listTodos,
+          cardinality: "finite",
+        }),
+      }),
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: getCalendarEntries,
+          cardinality: "finite",
+        }),
+      }),
+    ])
 
-  const completeMutation = useMutation(completeTodo, { onSuccess: invalidateTodos })
-  const uncheckMutation = useMutation(updateTodo, { onSuccess: invalidateTodos })
+  const completeMutation = useMutation(completeTodo, {
+    onSuccess: invalidateTodos,
+  })
+  const uncheckMutation = useMutation(updateTodo, {
+    onSuccess: invalidateTodos,
+  })
   const deleteMutation = useMutation(deleteTodo, { onSuccess: invalidateTodos })
 
   const isDone =
@@ -69,16 +107,24 @@ export function TodoItem({ todo }: Props) {
 
   return (
     <>
-      <div className="flex items-start gap-3 rounded-lg border bg-card p-3 shadow-sm hover:bg-accent/30 transition-colors">
+      <div className="flex items-start gap-3 rounded-lg border bg-card p-3 shadow-sm transition-colors hover:bg-accent/30">
         <button
           onClick={() => {
             if (canComplete) completeMutation.mutate({ id: todo.id })
-            else if (canUncheck) uncheckMutation.mutate({ id: todo.id, status: TodoStatus.PENDING })
+            else if (canUncheck)
+              uncheckMutation.mutate({
+                id: todo.id,
+                status: TodoStatus.PENDING,
+              })
           }}
-          disabled={(!canComplete && !canUncheck) || completeMutation.isPending || uncheckMutation.isPending}
+          disabled={
+            (!canComplete && !canUncheck) ||
+            completeMutation.isPending ||
+            uncheckMutation.isPending
+          }
           className={cn(
             "mt-0.5 shrink-0 text-muted-foreground transition-colors",
-            (canComplete || canUncheck) && "hover:text-primary cursor-pointer",
+            (canComplete || canUncheck) && "cursor-pointer hover:text-primary",
             !canComplete && !canUncheck && "cursor-default"
           )}
           aria-label={canUncheck ? "Uncheck todo" : "Complete todo"}
@@ -95,14 +141,16 @@ export function TodoItem({ todo }: Props) {
         <div className="min-w-0 flex-1">
           <p
             className={cn(
-              "text-sm font-medium leading-snug",
-              isDone && "line-through text-muted-foreground"
+              "text-sm leading-snug font-medium",
+              isDone && "text-muted-foreground line-through"
             )}
           >
             {todo.title}
           </p>
           {todo.description && (
-            <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{todo.description}</p>
+            <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+              {todo.description}
+            </p>
           )}
           {plannedDate && (
             <p className="mt-1 text-xs text-muted-foreground">
@@ -116,25 +164,29 @@ export function TodoItem({ todo }: Props) {
             <PopoverTrigger className="cursor-pointer">
               <StatusBadge status={todo.status} />
             </PopoverTrigger>
-            <PopoverContent className="w-40 p-1" align="end">
-              {STATUS_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => changeStatus(opt.value)}
-                  className={cn(
-                    "flex w-full items-center rounded-sm px-2 py-1.5 text-xs transition-colors hover:bg-accent",
-                    todo.status === opt.value && "font-medium"
-                  )}
-                >
-                  {opt.label}
-                  {todo.status === opt.value && <span className="ml-auto">✓</span>}
-                </button>
-              ))}
+            <PopoverContent className="w-44 p-2" align="end">
+              <div className="flex flex-col gap-1">
+                {STATUS_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => changeStatus(opt.value)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-md px-1.5 py-1 transition-colors hover:bg-accent",
+                      todo.status === opt.value && ""
+                    )}
+                  >
+                    <StatusBadge status={opt.value} />
+                    {todo.status === opt.value && (
+                      <Check className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </button>
+                ))}
+              </div>
             </PopoverContent>
           </Popover>
 
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted transition-colors">
+            <DropdownMenuTrigger className="inline-flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-muted">
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -144,8 +196,8 @@ export function TodoItem({ todo }: Props) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => deleteMutation.mutate({ id: todo.id })}
+                variant="destructive"
+                onClick={() => setDeleteOpen(true)}
               >
                 <Trash2 className="mr-2 h-3.5 w-3.5" />
                 Delete
@@ -155,7 +207,32 @@ export function TodoItem({ todo }: Props) {
         </div>
       </div>
 
-      <TodoDialog mode="edit" todo={todo} open={editOpen} onOpenChange={setEditOpen} />
+      <TodoDialog
+        mode="edit"
+        todo={todo}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete todo?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => deleteMutation.mutate({ id: todo.id })}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
