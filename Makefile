@@ -26,3 +26,10 @@ genenvs:
 gensql:
 	pgxgen --pgxgen-config sql/pgxgen.yaml --sqlc-config sql/sqlc.yaml crud
 	pgxgen --pgxgen-config sql/pgxgen.yaml --sqlc-config sql/sqlc.yaml sqlc generate
+
+genproto:
+	rm -rf api/gen
+	rm -rf frontend/src/api/gen
+	cd api && \
+	buf lint && \
+	buf generate

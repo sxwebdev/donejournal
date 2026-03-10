@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Checkbox rounded square -->
+  <rect x="2" y="2" width="28" height="28" rx="7" stroke="#6366f1" stroke-width="2.5" fill="none"/>
+  <!-- Checkmark -->
+  <polyline points="7,16 13,22 25,10" stroke="#6366f1" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Small lines suggesting list items -->
+  <!-- (kept minimal — just the checkbox is clean enough for favicon size) -->
+</svg>

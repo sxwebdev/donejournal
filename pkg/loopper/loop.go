@@ -1,4 +1,4 @@
-package loop
+package loopper
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type Loop struct {
+type Loopper struct {
 	options Options
 
 	running atomic.Bool
@@ -19,7 +19,7 @@ type Loop struct {
 	fn func(context.Context)
 }
 
-func New(fn func(context.Context), opts ...Option) *Loop {
+func New(fn func(context.Context), opts ...Option) *Loopper {
 	if fn == nil {
 		panic("function cannot be nil")
 	}
@@ -34,13 +34,13 @@ func New(fn func(context.Context), opts ...Option) *Loop {
 		o(&options)
 	}
 
-	return &Loop{
+	return &Loopper{
 		options: options,
 		fn:      fn,
 	}
 }
 
-func (l *Loop) Start(parent context.Context) {
+func (l *Loopper) Start(parent context.Context) {
 	ctx, cancel := context.WithCancel(parent)
 	l.cancel = cancel
 
@@ -68,12 +68,12 @@ func (l *Loop) Start(parent context.Context) {
 }
 
 // Trigger triggers the loop to run the provided function immediately if not already running
-func (l *Loop) Trigger(ctx context.Context) bool {
+func (l *Loopper) Trigger(ctx context.Context) bool {
 	return l.tryRun(ctx, l.fn)
 }
 
 // Stop stops the loop
-func (l *Loop) Stop() {
+func (l *Loopper) Stop() {
 	if l.stopped.Swap(true) {
 		return
 	}
@@ -83,12 +83,12 @@ func (l *Loop) Stop() {
 }
 
 // Wait waits for all running operations to complete (graceful shutdown)
-func (l *Loop) Wait() {
+func (l *Loopper) Wait() {
 	l.wg.Wait()
 }
 
 // tryRun tries to run a function within the loop's context
-func (l *Loop) tryRun(parent context.Context, fn func(context.Context)) bool {
+func (l *Loopper) tryRun(parent context.Context, fn func(context.Context)) bool {
 	if l.stopped.Load() {
 		return false
 	}

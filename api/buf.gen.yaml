@@ -1,0 +1,28 @@
+version: v2
+managed:
+  enabled: true
+  disable:
+    - file_option: go_package
+      module: buf.build/googleapis/googleapis
+    - file_option: go_package
+      module: buf.build/grpc-ecosystem/grpc-gateway
+  override:
+    - file_option: go_package_prefix
+      value: github.com/sxwebdev/donejournal/api/gen/go
+plugins:
+  # Golang
+  - remote: buf.build/protocolbuffers/go
+    out: gen/go
+    opt: paths=source_relative
+  - remote: buf.build/connectrpc/go
+    out: gen/go
+    opt: paths=source_relative
+
+  # TypeScript
+  - remote: buf.build/bufbuild/es
+    out: ../frontend/src/api/gen
+    opt: target=ts
+    include_imports: true
+  - remote: buf.build/connectrpc/query-es
+    out: ../frontend/src/api/gen
+    opt: target=ts

@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package donejournal.auth.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// AuthService handles authentication via Telegram Login Widget.
+service AuthService {
+  // LoginWithTelegram authenticates a user using Telegram Login Widget data.
+  // The server validates the HMAC-SHA-256 hash against the bot token and returns a session token.
+  rpc LoginWithTelegram(LoginWithTelegramRequest) returns (LoginWithTelegramResponse);
+
+  // GetCurrentUser returns the currently authenticated user's profile.
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse);
+
+  // Logout invalidates the current session token.
+  rpc Logout(LogoutRequest) returns (LogoutResponse);
+}
+
+// TelegramLoginData contains the data sent by the Telegram Login Widget.
+message TelegramLoginData {
+  // Telegram user ID.
+  int64 id = 1;
+  // User's first name.
+  string first_name = 2;
+  // User's last name.
+  string last_name = 3;
+  // Telegram username.
+  string username = 4;
+  // URL to user's profile photo.
+  string photo_url = 5;
+  // Unix timestamp of the authentication.
+  int64 auth_date = 6;
+  // HMAC-SHA-256 hash for data verification.
+  string hash = 7;
+}
+
+// User represents an authenticated user profile.
+message User {
+  // Telegram user ID.
+  int64 id = 1;
+  // User's first name.
+  string first_name = 2;
+  // User's last name.
+  string last_name = 3;
+  // Telegram username.
+  string username = 4;
+  // URL to user's profile photo.
+  string photo_url = 5;
+}
+
+// LoginWithTelegramRequest is the request to authenticate via Telegram.
+message LoginWithTelegramRequest {
+  // Telegram login widget data.
+  TelegramLoginData telegram_data = 1;
+}
+
+// LoginWithTelegramResponse is the response containing the session token.
+message LoginWithTelegramResponse {
+  // JWT access token to use as Bearer token in subsequent requests.
+  string access_token = 1;
+  // Token expiration time.
+  google.protobuf.Timestamp expires_at = 2;
+  // Authenticated user profile.
+  User user = 3;
+}
+
+// GetCurrentUserRequest is the request to get the current user's profile.
+message GetCurrentUserRequest {}
+
+// GetCurrentUserResponse is the response containing the current user's profile.
+message GetCurrentUserResponse {
+  // Authenticated user profile.
+  User user = 1;
+}
+
+// LogoutRequest is the request to invalidate the current session.
+message LogoutRequest {}
+
+// LogoutResponse is the response after logout.
+message LogoutResponse {}

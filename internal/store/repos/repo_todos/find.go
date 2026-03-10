@@ -11,13 +11,13 @@ import (
 )
 
 type FindParams struct {
-	IsCompleted *bool
-	UserID      int64
-	DateFrom    *time.Time
-	DateTo      *time.Time
-	OrderBy     string
-	Page        *uint32
-	PageSize    *uint32
+	Statuses []models.TodoStatusType
+	UserID   int64
+	DateFrom *time.Time
+	DateTo   *time.Time
+	OrderBy  string
+	Page     *uint32
+	PageSize *uint32
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -26,36 +26,24 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 	sb.From(TableNameTodos.String()).
 		Where(sb.Equal(ColumnNameTodosUserId.String(), params.UserID))
 
-	if params.IsCompleted != nil {
-		if *params.IsCompleted {
-			sb.Where(sb.EQ(ColumnNameTodosStatus.String(), models.TodoStatusCompleted))
+	if len(params.Statuses) > 0 {
+		vals := make([]interface{}, len(params.Statuses))
+		for i, s := range params.Statuses {
+			vals[i] = s
+		}
+		sb.Where(sb.In(ColumnNameTodosStatus.String(), vals...))
+	}
 
-			// For completed tasks, filter by completed_at date
-			if params.DateFrom != nil {
-				sb.Where(sb.GreaterEqualThan(ColumnNameTodosCompletedAt.String(), *params.DateFrom))
-			}
-			if params.DateTo != nil {
-				sb.Where(sb.LessEqualThan(ColumnNameTodosCompletedAt.String(), *params.DateTo))
-			}
-		} else {
-			sb.Where(
-				sb.In(
-					ColumnNameTodosStatus.String(),
-					models.TodoStatusPending,
-					models.TodoStatusInProgress,
-				),
-			)
-
-			// For pending/in-progress tasks, filter by planned_date
-			if params.DateFrom != nil {
-				sb.Where(sb.GreaterEqualThan(ColumnNameTodosPlannedDate.String(), *params.DateFrom))
-			}
-			if params.DateTo != nil {
-				sb.Where(sb.LessEqualThan(ColumnNameTodosPlannedDate.String(), *params.DateTo))
-			}
+	// Use completed_at for date filtering only when filtering exclusively by completed status
+	onlyCompleted := len(params.Statuses) == 1 && params.Statuses[0] == models.TodoStatusCompleted
+	if onlyCompleted {
+		if params.DateFrom != nil {
+			sb.Where(sb.GreaterEqualThan(ColumnNameTodosCompletedAt.String(), *params.DateFrom))
+		}
+		if params.DateTo != nil {
+			sb.Where(sb.LessEqualThan(ColumnNameTodosCompletedAt.String(), *params.DateTo))
 		}
 	} else {
-		// If IsCompleted is not set, use planned_date for filtering
 		if params.DateFrom != nil {
 			sb.Where(sb.GreaterEqualThan(ColumnNameTodosPlannedDate.String(), *params.DateFrom))
 		}

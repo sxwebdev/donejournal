@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package donejournal.todos.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// TodoService manages todos — tasks with a planned date, status, and optional description.
+service TodoService {
+  // ListTodos returns a paginated and filtered list of todos for the authenticated user.
+  rpc ListTodos(ListTodosRequest) returns (ListTodosResponse);
+
+  // GetTodo returns a single todo by ID.
+  rpc GetTodo(GetTodoRequest) returns (GetTodoResponse);
+
+  // CreateTodo creates a new todo.
+  rpc CreateTodo(CreateTodoRequest) returns (CreateTodoResponse);
+
+  // UpdateTodo updates an existing todo's fields.
+  rpc UpdateTodo(UpdateTodoRequest) returns (UpdateTodoResponse);
+
+  // DeleteTodo deletes a todo by ID.
+  rpc DeleteTodo(DeleteTodoRequest) returns (google.protobuf.Empty);
+
+  // CompleteTodo marks a todo as completed with the current timestamp.
+  rpc CompleteTodo(CompleteTodoRequest) returns (CompleteTodoResponse);
+
+  // GetCalendarEntries returns todos grouped by date for a date range (calendar view).
+  rpc GetCalendarEntries(GetCalendarEntriesRequest) returns (GetCalendarEntriesResponse);
+}
+
+// TodoStatus represents the status of a todo item.
+enum TodoStatus {
+  // Unspecified status.
+  TODO_STATUS_UNSPECIFIED = 0;
+  // Todo is pending and has not been started.
+  TODO_STATUS_PENDING = 1;
+  // Todo is currently in progress.
+  TODO_STATUS_IN_PROGRESS = 2;
+  // Todo has been completed.
+  TODO_STATUS_COMPLETED = 3;
+  // Todo has been cancelled.
+  TODO_STATUS_CANCELLED = 4;
+}
+
+// Todo represents a single todo item.
+message Todo {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Todo title.
+  string title = 2;
+  // Todo description.
+  string description = 3;
+  // Current status.
+  TodoStatus status = 4;
+  // Planned date for the todo.
+  google.protobuf.Timestamp planned_date = 5;
+  // Timestamp when the todo was completed. Only set when status is COMPLETED.
+  optional google.protobuf.Timestamp completed_at = 6;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 7;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// ListTodosRequest is the request to list todos with optional filters.
+message ListTodosRequest {
+  // Maximum number of items to return (default: 20, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page.
+  string page_token = 2;
+  // Filter by status. If empty, all statuses are included.
+  repeated TodoStatus statuses = 3;
+  // Filter by planned_date range start (inclusive).
+  optional google.protobuf.Timestamp planned_date_from = 4;
+  // Filter by planned_date range end (inclusive).
+  optional google.protobuf.Timestamp planned_date_to = 5;
+}
+
+// ListTodosResponse is the response containing a list of todos.
+message ListTodosResponse {
+  // The list of todos.
+  repeated Todo todos = 1;
+  // Token for the next page. Empty if no more results.
+  string next_page_token = 2;
+  // Total number of todos matching the filters.
+  int32 total_count = 3;
+}
+
+// GetTodoRequest is the request to get a single todo.
+message GetTodoRequest {
+  // The ID of the todo to retrieve.
+  string id = 1;
+}
+
+// GetTodoResponse is the response containing a single todo.
+message GetTodoResponse {
+  // The todo.
+  Todo todo = 1;
+}
+
+// CreateTodoRequest is the request to create a new todo.
+message CreateTodoRequest {
+  // Todo title.
+  string title = 1;
+  // Todo description.
+  string description = 2;
+  // Planned date for the todo.
+  google.protobuf.Timestamp planned_date = 3;
+}
+
+// CreateTodoResponse is the response after creating a todo.
+message CreateTodoResponse {
+  // The created todo.
+  Todo todo = 1;
+}
+
+// UpdateTodoRequest is the request to update a todo.
+message UpdateTodoRequest {
+  // The ID of the todo to update.
+  string id = 1;
+  // Updated title. If not set, title is not changed.
+  optional string title = 2;
+  // Updated description. If not set, description is not changed.
+  optional string description = 3;
+  // Updated status. If not set, status is not changed.
+  optional TodoStatus status = 4;
+  // Updated planned date. If not set, planned_date is not changed.
+  optional google.protobuf.Timestamp planned_date = 5;
+}
+
+// UpdateTodoResponse is the response after updating a todo.
+message UpdateTodoResponse {
+  // The updated todo.
+  Todo todo = 1;
+}
+
+// DeleteTodoRequest is the request to delete a todo.
+message DeleteTodoRequest {
+  // The ID of the todo to delete.
+  string id = 1;
+}
+
+// CompleteTodoRequest is the request to mark a todo as completed.
+message CompleteTodoRequest {
+  // The ID of the todo to complete.
+  string id = 1;
+}
+
+// CompleteTodoResponse is the response after completing a todo.
+message CompleteTodoResponse {
+  // The updated todo with completed status and completed_at timestamp.
+  Todo todo = 1;
+}
+
+// GetCalendarEntriesRequest is the request to get todos grouped by date for a calendar view.
+message GetCalendarEntriesRequest {
+  // Start of the date range (inclusive).
+  google.protobuf.Timestamp from = 1;
+  // End of the date range (inclusive).
+  google.protobuf.Timestamp to = 2;
+}
+
+// CalendarDay represents todos for a single day along with summary statistics.
+message CalendarDay {
+  // The date (time component should be ignored by clients).
+  google.protobuf.Timestamp date = 1;
+  // Todos planned for this date.
+  repeated Todo todos = 2;
+  // Number of total todos for this date.
+  int32 total_count = 3;
+  // Number of completed todos for this date.
+  int32 completed_count = 4;
+}
+
+// GetCalendarEntriesResponse is the response containing calendar data.
+message GetCalendarEntriesResponse {
+  // Todos grouped by date within the requested range.
+  repeated CalendarDay days = 1;
+}
