@@ -29,9 +29,10 @@ func (s *Service) Create(ctx context.Context, data, userID string) (*models.Inbo
 	}
 
 	req := repo_inbox.CreateParams{
-		ID:     utils.GenerateULID(),
-		Data:   data,
-		UserID: userID,
+		ID:             utils.GenerateULID(),
+		Data:           data,
+		UserID:         userID,
+		AdditionalData: storecmn.JSONField("{}"),
 	}
 
 	return s.store.Inbox().Create(ctx, req)
