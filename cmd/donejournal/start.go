@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,10 +19,13 @@ import (
 	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store"
+	"github.com/sxwebdev/donejournal/internal/store/badgerdb"
 	"github.com/sxwebdev/donejournal/internal/tmanager"
 	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
+	"github.com/sxwebdev/donejournal/pkg/utils"
 	"github.com/sxwebdev/donejournal/sql"
+	"github.com/sxwebdev/tokenmanager"
 	"github.com/tkcrm/mx/launcher"
 	"github.com/tkcrm/mx/logger"
 	"github.com/tkcrm/mx/service"
@@ -75,6 +79,61 @@ func startCMD() *cli.Command {
 				}
 			}
 
+			var authConfig config.AuthConfig
+
+			// get file datadir/auth_secrets.json
+			// if not exists create it with generated values
+			secretsFilePath := filepath.Join(conf.DataDir, "auth_secrets.json")
+			if _, err := os.Stat(secretsFilePath); os.IsNotExist(err) {
+				l.Infof("creating secrets file in %s", secretsFilePath)
+				if err := os.MkdirAll(filepath.Dir(secretsFilePath), 0o700); err != nil {
+					return fmt.Errorf("failed to create secrets dir: %w", err)
+				}
+
+				accessToken, err := utils.GenerateRandomString(48, "")
+				if err != nil {
+					return fmt.Errorf("failed to generate access token secret key: %w", err)
+				}
+
+				refreshToken, err := utils.GenerateRandomString(48, "")
+				if err != nil {
+					return fmt.Errorf("failed to generate refresh token secret key: %w", err)
+				}
+
+				authConfig = config.AuthConfig{
+					AccessTokenSecretKey:  accessToken,
+					RefreshTokenSecretKey: refreshToken,
+				}
+
+				data, err := json.MarshalIndent(authConfig, "", "  ")
+				if err != nil {
+					return fmt.Errorf("failed to marshal secrets: %w", err)
+				}
+
+				if err := os.WriteFile(secretsFilePath, data, 0o600); err != nil {
+					return fmt.Errorf("failed to create secrets file: %w", err)
+				}
+			} else {
+				data, err := os.ReadFile(secretsFilePath)
+				if err != nil {
+					return fmt.Errorf("failed to read secrets file: %w", err)
+				}
+
+				if err := json.Unmarshal(data, &authConfig); err != nil {
+					return fmt.Errorf("failed to unmarshal secrets file: %w", err)
+				}
+
+				if authConfig.AccessTokenSecretKey == "" || authConfig.RefreshTokenSecretKey == "" {
+					return fmt.Errorf("invalid secrets file: missing keys")
+				}
+			}
+
+			badgerDbPath := filepath.Join(conf.DataDir, "badger")
+			badgerDB, err := badgerdb.New(l, badgerDbPath)
+			if err != nil {
+				return fmt.Errorf("failed to initialize badgerdb: %w", err)
+			}
+
 			sqliteDbPath := filepath.Join(conf.DataDir, "sqlite", "db.sqlite")
 
 			// init sqlite
@@ -112,12 +171,15 @@ func startCMD() *cli.Command {
 				return fmt.Errorf("failed to migrate river sqlite database: %w", err)
 			}
 
-			st, err := store.New(sqliteDB.DB)
+			st, err := store.New(sqliteDB.DB, badgerDB)
 			if err != nil {
 				return fmt.Errorf("failed to initialize store: %w", err)
 			}
 
 			baseService := baseservices.New(l, st)
+
+			// Initialize token manager with BadgerDB as token store
+			tokenMgr := tokenmanager.New[api.TokenData](badgerDB, authConfig.AccessTokenSecretKey, 30*24*time.Hour)
 
 			// Initialize MCP provider and service
 			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
@@ -138,15 +200,13 @@ func startCMD() *cli.Command {
 				return fmt.Errorf("failed to initialize task manager: %w", err)
 			}
 
-			// Initialize API service
-			var apiService *api.API
-			if conf.Server.IsEnabled {
-				apiService = api.New(l, conf, taskManager)
-			}
+			// Initialize API service with Connect-RPC
+			apiService := api.New(l, conf, baseService, st, taskManager, tokenMgr)
 
 			// register services
 			ln.ServicesRunner().Register(
 				service.New(service.WithService(pingpong.New(l))),
+				service.New(service.WithService(badgerDB)),
 				service.New(service.WithService(sqliteDB)),
 				service.New(service.WithService(riverSqliteDB)),
 				service.New(
@@ -154,13 +214,8 @@ func startCMD() *cli.Command {
 					service.WithShutdownTimeout(time.Minute),
 				),
 				service.New(service.WithService(botService)),
+				service.New(service.WithService(apiService)),
 			)
-
-			if conf.Server.IsEnabled {
-				ln.ServicesRunner().Register(
-					service.New(service.WithService(apiService)),
-				)
-			}
 
 			return ln.Run()
 		},

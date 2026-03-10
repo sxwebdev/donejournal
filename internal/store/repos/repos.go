@@ -8,19 +8,19 @@ import (
 )
 
 type Repos struct {
-	inbox *repo_inbox.Queries
+	inbox *repo_inbox.CustomQueries
 	todos *repo_todos.CustomQueries
 }
 
 func New(sqlite *sql.DB) *Repos {
 	return &Repos{
-		inbox: repo_inbox.New(sqlite),
+		inbox: repo_inbox.NewCustom(sqlite),
 		todos: repo_todos.NewCustom(sqlite),
 	}
 }
 
 // Inbox returns repo for requests
-func (s *Repos) Inbox(opts ...Option) repo_inbox.Querier {
+func (s *Repos) Inbox(opts ...Option) repo_inbox.ICustomQuerier {
 	options := parseOptions(opts...)
 
 	if options.Tx != nil {

@@ -3,23 +3,29 @@ module github.com/sxwebdev/donejournal
 go 1.26.1
 
 require (
+	connectrpc.com/connect v1.19.1
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/gobeam/stringy v0.0.7
 	github.com/goccy/go-yaml v1.19.2
-	github.com/gofiber/fiber/v3 v3.1.0
 	github.com/huandu/go-sqlbuilder v1.39.1
 	github.com/mymmrac/telego v1.7.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/riverqueue/river v0.31.0
 	github.com/riverqueue/river/riverdriver/riversqlite v0.31.0
+	github.com/sxwebdev/tokenmanager v0.0.0-20260113130624-437d3b251605
 	github.com/sxwebdev/xconfig v0.3.1
 	github.com/sxwebdev/xconfig/decoders/xconfigyaml v0.0.0-20260204103015-8002f9e58740
 	github.com/tkcrm/mx v0.2.34
 	github.com/urfave/cli/v3 v3.7.0
 	google.golang.org/protobuf v1.36.11
 	modernc.org/sqlite v1.46.1
+)
+
+require (
+	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
+	github.com/google/flatbuffers v25.2.10+incompatible // indirect
 )
 
 require (
@@ -31,6 +37,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgraph-io/badger/v4 v4.9.1
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
@@ -38,8 +45,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/gofiber/schema v1.7.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/grbit/go-json v0.11.0 // indirect
 	github.com/huandu/go-clone v1.7.3 // indirect
@@ -51,11 +56,9 @@ require (
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
-	github.com/philhofer/fwd v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
@@ -70,7 +73,6 @@ require (
 	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
-	github.com/tinylib/msgp v1.6.3 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.69.0 // indirect

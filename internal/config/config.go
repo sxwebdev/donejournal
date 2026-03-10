@@ -15,9 +15,15 @@ type Config struct {
 	Timezone string `yaml:"timezone" validate:"required" default:"UTC"`
 }
 
+type AuthConfig struct {
+	AccessTokenSecretKey  string `json:"access_token_secret_key"`
+	RefreshTokenSecretKey string `json:"refresh_token_secret_key"`
+}
+
 type ServerConfig struct {
-	IsEnabled bool   `yaml:"is_enabled" default:"false"`
-	Addr      string `yaml:"addr" validate:"required" default:":8080"`
+	Addr           string     `yaml:"addr" validate:"required" default:":9000"`
+	ReflectEnabled bool       `yaml:"reflect_enabled" default:"false"`
+	Auth           AuthConfig `yaml:"auth"`
 }
 
 type TelegramConfig struct {
