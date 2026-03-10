@@ -6,13 +6,7 @@ import { TodoItem } from "./todo-item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckSquare } from "lucide-react"
 import { fromDate, toDate } from "@/lib/dates"
-import {
-  isToday,
-  isTomorrow,
-  format,
-  startOfDay,
-  parseISO,
-} from "date-fns"
+import { isToday, isTomorrow, format, startOfDay, parseISO } from "date-fns"
 
 type Props = {
   statuses?: TodoStatus[]
@@ -97,7 +91,7 @@ export function TodoList({ statuses, from, to }: Props) {
     <div className="space-y-6">
       {groups.map((group) => (
         <div key={group.label}>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <h3 className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
             {group.label}
           </h3>
           <div className="space-y-2">

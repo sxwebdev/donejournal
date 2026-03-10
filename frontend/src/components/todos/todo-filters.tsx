@@ -2,7 +2,11 @@ import { useNavigate, useSearch } from "@tanstack/react-router"
 import { format } from "date-fns"
 import { CalendarIcon, X } from "lucide-react"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
@@ -16,7 +20,11 @@ const STATUS_OPTIONS = [
 
 export function TodoFilters() {
   const navigate = useNavigate({ from: "/todos" })
-  const { statuses = [], from, to } = useSearch({ from: "/_authenticated/todos" })
+  const {
+    statuses = [],
+    from,
+    to,
+  } = useSearch({ from: "/_authenticated/todos" })
 
   const fromDate = from ? new Date(from) : undefined
   const toDate = to ? new Date(to) : undefined
@@ -25,7 +33,9 @@ export function TodoFilters() {
     const next = statuses.includes(status)
       ? statuses.filter((s) => s !== status)
       : [...statuses, status]
-    navigate({ search: (prev) => ({ ...prev, statuses: next.length ? next : undefined }) })
+    navigate({
+      search: (prev) => ({ ...prev, statuses: next.length ? next : undefined }),
+    })
   }
 
   const setFrom = (date: Date | undefined) => {
@@ -69,7 +79,11 @@ export function TodoFilters() {
       <Popover>
         <PopoverTrigger
           type="button"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 text-xs", fromDate && "border-primary")}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "h-7 text-xs",
+            fromDate && "border-primary"
+          )}
         >
           <CalendarIcon className="mr-1.5 h-3 w-3" />
           {fromDate ? format(fromDate, "MMM d") : "From"}
@@ -82,7 +96,11 @@ export function TodoFilters() {
       <Popover>
         <PopoverTrigger
           type="button"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-7 text-xs", toDate && "border-primary")}
+          className={cn(
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "h-7 text-xs",
+            toDate && "border-primary"
+          )}
         >
           <CalendarIcon className="mr-1.5 h-3 w-3" />
           {toDate ? format(toDate, "MMM d") : "To"}
@@ -93,7 +111,12 @@ export function TodoFilters() {
       </Popover>
 
       {hasFilters && (
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={clearAll}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs"
+          onClick={clearAll}
+        >
           <X className="mr-1 h-3 w-3" />
           Clear
         </Button>

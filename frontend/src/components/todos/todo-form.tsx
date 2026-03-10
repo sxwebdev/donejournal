@@ -7,7 +7,11 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import {
   Select,
@@ -22,7 +26,7 @@ import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
-  plannedDate: z.date({ required_error: "Planned date is required" }),
+  plannedDate: z.date(),
   status: z.nativeEnum(TodoStatus).optional(),
 })
 
@@ -43,7 +47,13 @@ type Props = {
   showStatus?: boolean
 }
 
-export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPending, showStatus }: Props) {
+export function TodoForm({
+  defaultValues,
+  onSubmit,
+  submitLabel = "Save",
+  isPending,
+  showStatus,
+}: Props) {
   const {
     register,
     handleSubmit,
@@ -62,8 +72,14 @@ export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPend
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1.5">
         <Label htmlFor="title">Title</Label>
-        <Input id="title" placeholder="What needs to be done?" {...register("title")} />
-        {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
+        <Input
+          id="title"
+          placeholder="What needs to be done?"
+          {...register("title")}
+        />
+        {errors.title && (
+          <p className="text-xs text-destructive">{errors.title.message}</p>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -75,7 +91,9 @@ export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPend
           {...register("description")}
         />
         {errors.description && (
-          <p className="text-xs text-destructive">{errors.description.message}</p>
+          <p className="text-xs text-destructive">
+            {errors.description.message}
+          </p>
         )}
       </div>
 
@@ -97,12 +115,16 @@ export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPend
             <Calendar
               mode="single"
               selected={plannedDate}
-              onSelect={(d) => setValue("plannedDate", d, { shouldValidate: true })}
+              onSelect={(d) =>
+                setValue("plannedDate", d!, { shouldValidate: true })
+              }
             />
           </PopoverContent>
         </Popover>
         {errors.plannedDate && (
-          <p className="text-xs text-destructive">{errors.plannedDate.message}</p>
+          <p className="text-xs text-destructive">
+            {errors.plannedDate.message}
+          </p>
         )}
       </div>
 
@@ -116,7 +138,8 @@ export function TodoForm({ defaultValues, onSubmit, submitLabel = "Save", isPend
             <SelectTrigger className="w-full">
               <SelectValue>
                 {status !== undefined
-                  ? STATUS_OPTIONS.find((o) => o.value === status)?.label ?? "Select status"
+                  ? (STATUS_OPTIONS.find((o) => o.value === status)?.label ??
+                    "Select status")
                   : "Select status"}
               </SelectValue>
             </SelectTrigger>

@@ -1,6 +1,10 @@
 import { format } from "date-fns"
 import { Link } from "@tanstack/react-router"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { StatusBadge } from "@/components/todos/status-badge"
 import type { CalendarDay } from "@/api/gen/donejournal/todos/v1/todos_pb"
 
@@ -15,14 +19,24 @@ export function CalendarDayPopover({ day, date, children }: Props) {
 
   return (
     <Popover>
-      <PopoverTrigger className="w-full h-full bg-transparent border-0 p-0 cursor-pointer">{children}</PopoverTrigger>
+      <PopoverTrigger className="h-full w-full cursor-pointer border-0 bg-transparent p-0">
+        {children}
+      </PopoverTrigger>
       <PopoverContent className="w-72 p-3" align="center">
-        <p className="mb-2 text-sm font-semibold">{format(date, "MMMM d, yyyy")}</p>
+        <p className="mb-2 text-sm font-semibold">
+          {format(date, "MMMM d, yyyy")}
+        </p>
         <div className="space-y-1.5">
           {day.todos.slice(0, 5).map((todo) => (
-            <div key={todo.id} className="flex items-center justify-between gap-2">
+            <div
+              key={todo.id}
+              className="flex items-center justify-between gap-2"
+            >
               <p className="min-w-0 truncate text-sm">{todo.title}</p>
-              <StatusBadge status={todo.status} className="flex-shrink-0 text-[10px]" />
+              <StatusBadge
+                status={todo.status}
+                className="shrink-0 text-[10px]"
+              />
             </div>
           ))}
         </div>

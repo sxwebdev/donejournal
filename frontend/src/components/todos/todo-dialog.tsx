@@ -37,17 +37,34 @@ type Props = CreateProps | EditProps
 export function TodoDialog(props: Props) {
   const qc = useQueryClient()
 
-  const invalidate = () => Promise.all([
-    qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listTodos, cardinality: "finite" }) }),
-    qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: getCalendarEntries, cardinality: "finite" }) }),
-  ])
+  const invalidate = () =>
+    Promise.all([
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listTodos,
+          cardinality: "finite",
+        }),
+      }),
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: getCalendarEntries,
+          cardinality: "finite",
+        }),
+      }),
+    ])
 
   const createMutation = useMutation(createTodo, {
-    onSuccess: () => { invalidate(); props.onOpenChange(false) },
+    onSuccess: () => {
+      invalidate()
+      props.onOpenChange(false)
+    },
   })
 
   const updateMutation = useMutation(updateTodo, {
-    onSuccess: () => { invalidate(); props.onOpenChange(false) },
+    onSuccess: () => {
+      invalidate()
+      props.onOpenChange(false)
+    },
   })
 
   const handleSubmit = async (values: TodoFormValues) => {
@@ -56,19 +73,24 @@ export function TodoDialog(props: Props) {
         await createMutation.mutateAsync({
           title: values.title,
           description: values.description ?? "",
-          plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
+          plannedDate: values.plannedDate
+            ? fromDate(values.plannedDate)
+            : undefined,
         })
       } else {
         await updateMutation.mutateAsync({
           id: props.todo.id,
           title: values.title,
           description: values.description,
-          plannedDate: values.plannedDate ? fromDate(values.plannedDate) : undefined,
+          plannedDate: values.plannedDate
+            ? fromDate(values.plannedDate)
+            : undefined,
           status: values.status !== undefined ? values.status : undefined,
         })
       }
     } catch (err) {
-      const message = err instanceof ConnectError ? err.rawMessage : "Something went wrong"
+      const message =
+        err instanceof ConnectError ? err.rawMessage : "Something went wrong"
       toast.error(message)
     }
   }
@@ -89,7 +111,9 @@ export function TodoDialog(props: Props) {
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{props.mode === "create" ? "New Todo" : "Edit Todo"}</DialogTitle>
+          <DialogTitle>
+            {props.mode === "create" ? "New Todo" : "Edit Todo"}
+          </DialogTitle>
         </DialogHeader>
         <TodoForm
           defaultValues={defaultValues}
