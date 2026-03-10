@@ -70,6 +70,7 @@ func startCMD() *cli.Command {
 			}
 
 			carbon.SetTimezone(conf.Timezone)
+			carbon.SetWeekStartsAt(carbon.Monday)
 
 			// check if exists data dir, if not create it
 			if _, err := os.Stat(conf.DataDir); os.IsNotExist(err) {

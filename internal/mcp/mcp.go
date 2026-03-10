@@ -57,6 +57,14 @@ func addDaysToDate(days int) string {
 	return carbon.Now().AddDays(days).ToDateTimeString()
 }
 
+// weekDate returns the YYYY-MM-DD date for a day relative to the current week.
+// weekOffset: 0=this week, -1=last week, +1=next week.
+// dayOffset: 0=Mon, 1=Tue, 2=Wed, 3=Thu, 4=Fri, 5=Sat, 6=Sun.
+// Note: carbon.AddDays mutates in place, so each call starts from a fresh carbon.Now().
+func weekDate(weekOffset, dayOffset int) string {
+	return carbon.Now().StartOfWeek().AddDays(weekOffset*7 + dayOffset).ToDateString()
+}
+
 // ParseMessage processes user message through LLM provider and returns parsed entries
 func (m *MCP) ParseMessage(ctx context.Context, text string) (*ParsedResponse, error) {
 	m.log.Debugw(
@@ -66,8 +74,12 @@ func (m *MCP) ParseMessage(ctx context.Context, text string) (*ParsedResponse, e
 
 	now := time.Now()
 	today := carbon.Now().ToDateTimeString()
+	todayWeekday := carbon.Now().ToWeekString()
+	thisWeekDates := fmt.Sprintf("%s, %s, %s, %s, %s, %s, %s",
+		weekDate(0, 0), weekDate(0, 1), weekDate(0, 2), weekDate(0, 3),
+		weekDate(0, 4), weekDate(0, 5), weekDate(0, 6))
 
-	systemPrompt := fmt.Sprintf(`Parse tasks from user messages. Today: %s
+	systemPrompt := fmt.Sprintf(`Parse tasks from user messages. Today: %s (%s)
 
 CRITICAL RULES:
 1. If user lists MULTIPLE tasks, create SEPARATE entry for EACH task
@@ -75,11 +87,17 @@ CRITICAL RULES:
 3. If no date mentioned, use today's date for all tasks
 
 Date words:
-- "завтра"/"tomorrow" = %s
-- "послезавтра"/"day after tomorrow" = %s  
-- "вчера"/"yesterday" = %s
+- "завтра"/"tomorrow"                = %s
+- "послезавтра"/"day after tomorrow" = %s
+- "вчера"/"yesterday"               = %s
 - "позавчера"/"day before yesterday" = %s
-- no date = %s
+- no date                            = %s
+
+This week Mon–Sun: %s
+- "в [день]" / "в эту/этот [день]" → use date from this week above
+- "в прошлую/прошлый [день]" → subtract 7 days from this week's date
+- "в следующую/следующий [день]" → add 7 days to this week's date
+Russian: понедельник=Mon, вторник=Tue, среду=Wed, четверг=Thu, пятницу=Fri, субботу=Sat, воскресенье=Sun
 
 Task type:
 - "сделал"/"done"/"completed" -> kind:"done"
@@ -88,12 +106,13 @@ Task type:
 IMPORTANT: Keep original language in title and description
 
 Format: {"entries":[...]} where each entry is a separate task`,
-		today,
+		today, todayWeekday,
 		addDaysToDate(1),
 		addDaysToDate(2),
 		addDaysToDate(-1),
 		addDaysToDate(-2),
-		today)
+		today,
+		thisWeekDates)
 
 	// Few-shot examples - showing EXACTLY how to split multiple tasks
 	messages := []mcptypes.ChatMessage{
@@ -104,7 +123,10 @@ Format: {"entries":[...]} where each entry is a separate task`,
 		// Example 2: Multiple tasks without date - all get today
 		{Role: "user", Content: "сделал X, Y и Z"},
 		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"done","title":"X","date":"%s","description":"X","language":"ru","confidence":0.95},{"kind":"done","title":"Y","date":"%s","description":"Y","language":"ru","confidence":0.95},{"kind":"done","title":"Z","date":"%s","description":"Z","language":"ru","confidence":0.95}]}`, today, today, today)},
-		// Example 3: Single task with date
+		// Example 3: Day-of-week — "в субботу"=this week, "в прошлую субботу"=-7 days
+		{Role: "user", Content: "в субботу сделал рефакторинг, в прошлую субботу завершил дизайн"},
+		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"done","title":"рефакторинг","date":"%s","description":"рефакторинг","language":"ru","confidence":0.95},{"kind":"done","title":"дизайн","date":"%s","description":"дизайн","language":"ru","confidence":0.95}]}`, weekDate(0, 5), weekDate(-1, 5))},
+		// Example 4: Single task with date
 		{Role: "user", Content: "добавь задачу на завтра - обновить домен"},
 		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"todo","title":"обновить домен","date":"%s","description":"обновить домен","language":"ru","confidence":0.97}]}`, addDaysToDate(1))},
 		// Actual user input
