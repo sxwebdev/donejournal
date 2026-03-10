@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Inbox, CheckSquare, Calendar, LogOut, Sun, Moon, Monitor } from "lucide-react"
+import { Inbox, CheckSquare, Calendar, LogOut, Sun, Moon } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
@@ -19,6 +20,21 @@ import {
 import { useAuth } from "@/hooks/use-auth"
 import { useTheme } from "@/components/theme-provider"
 
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+      title="Toggle theme"
+    >
+      <Sun className="h-4 w-4 hidden dark:block" />
+      <Moon className="h-4 w-4 block dark:hidden" />
+      <span className="text-muted-foreground capitalize">{theme}</span>
+    </button>
+  )
+}
+
 const navItems = [
   { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/todos", label: "Todos", icon: CheckSquare },
@@ -27,7 +43,6 @@ const navItems = [
 
 export function AppSidebar() {
   const { user, logout } = useAuth()
-  const { theme, setTheme } = useTheme()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   const initials = user
@@ -44,27 +59,22 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarMenu>
-          {navItems.map(({ to, label, icon: Icon }) => (
-            <SidebarMenuItem key={to}>
-              <SidebarMenuButton render={<Link to={to} />} isActive={pathname.startsWith(to)}>
-                <Icon className="h-4 w-4" />
-                <span>{label}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        <SidebarGroup>
+          <SidebarMenu>
+            {navItems.map(({ to, label, icon: Icon }) => (
+              <SidebarMenuItem key={to}>
+                <SidebarMenuButton render={<Link to={to} />} isActive={pathname.startsWith(to)}>
+                  <Icon className="h-4 w-4" />
+                  <span>{label}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-2">
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : theme === "light" ? "system" : "dark")}
-          className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-left"
-          title={`Theme: ${theme}`}
-        >
-          {theme === "dark" ? <Moon className="h-4 w-4" /> : theme === "light" ? <Sun className="h-4 w-4" /> : <Monitor className="h-4 w-4" />}
-          <span className="text-muted-foreground capitalize">{theme}</span>
-        </button>
+      <SidebarFooter className="border-t border-sidebar-border">
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors text-left bg-transparent border-0">
               <Avatar className="h-7 w-7">
