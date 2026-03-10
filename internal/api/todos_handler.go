@@ -170,7 +170,7 @@ func (h *TodosHandler) UpdateTodo(ctx context.Context, req *connect.Request[todo
 		params.PlannedDate = &t
 	}
 
-	todo, err := h.baseService.Todos().Update(ctx, req.Msg.GetId(), params)
+	todo, err := h.baseService.Todos().Update(ctx, userID, req.Msg.GetId(), params)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -195,7 +195,7 @@ func (h *TodosHandler) DeleteTodo(ctx context.Context, req *connect.Request[todo
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("todo not found"))
 	}
 
-	if err := h.baseService.Todos().Delete(ctx, req.Msg.GetId()); err != nil {
+	if err := h.baseService.Todos().Delete(ctx, userID, req.Msg.GetId()); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
@@ -217,7 +217,7 @@ func (h *TodosHandler) CompleteTodo(ctx context.Context, req *connect.Request[to
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("todo not found"))
 	}
 
-	todo, err := h.baseService.Todos().Complete(ctx, req.Msg.GetId())
+	todo, err := h.baseService.Todos().Complete(ctx, userID, req.Msg.GetId())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -284,4 +284,38 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 
 func timestampFromDate(t time.Time) *timestamppb.Timestamp {
 	return timestamppb.New(time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location()))
+}
+
+func (h *TodosHandler) SubscribeTodos(
+	ctx context.Context,
+	req *connect.Request[todosv1.SubscribeTodosRequest],
+	stream *connect.ServerStream[todosv1.SubscribeTodosResponse],
+) error {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	ch := h.baseService.Todos().Broker().Subscribe()
+	if ch == nil {
+		return connect.NewError(connect.CodeUnavailable, fmt.Errorf("subscription unavailable"))
+	}
+	defer h.baseService.Todos().Broker().Unsubscribe(ch)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case event, ok := <-ch:
+			if !ok {
+				return nil
+			}
+			if event.UserID != userID {
+				continue
+			}
+			if err := stream.Send(&todosv1.SubscribeTodosResponse{}); err != nil {
+				return err
+			}
+		}
+	}
 }

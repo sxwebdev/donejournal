@@ -124,7 +124,7 @@ func (h *InboxHandler) UpdateInboxItem(ctx context.Context, req *connect.Request
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("inbox item not found"))
 	}
 
-	item, err := h.baseService.Inbox().Update(ctx, req.Msg.GetId(), req.Msg.GetData(), req.Msg.GetAdditionalData())
+	item, err := h.baseService.Inbox().Update(ctx, userID, req.Msg.GetId(), req.Msg.GetData(), req.Msg.GetAdditionalData())
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -149,7 +149,7 @@ func (h *InboxHandler) DeleteInboxItem(ctx context.Context, req *connect.Request
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("inbox item not found"))
 	}
 
-	if err := h.baseService.Inbox().Delete(ctx, req.Msg.GetId()); err != nil {
+	if err := h.baseService.Inbox().Delete(ctx, userID, req.Msg.GetId()); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
@@ -191,4 +191,38 @@ func (h *InboxHandler) ConvertToTodo(ctx context.Context, req *connect.Request[i
 	return connect.NewResponse(&inboxv1.ConvertToTodoResponse{
 		TodoId: todoID,
 	}), nil
+}
+
+func (h *InboxHandler) SubscribeInbox(
+	ctx context.Context,
+	req *connect.Request[inboxv1.SubscribeInboxRequest],
+	stream *connect.ServerStream[inboxv1.SubscribeInboxResponse],
+) error {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	ch := h.baseService.Inbox().Broker().Subscribe()
+	if ch == nil {
+		return connect.NewError(connect.CodeUnavailable, fmt.Errorf("subscription unavailable"))
+	}
+	defer h.baseService.Inbox().Broker().Unsubscribe(ch)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case event, ok := <-ch:
+			if !ok {
+				return nil
+			}
+			if event.UserID != userID {
+				continue
+			}
+			if err := stream.Send(&inboxv1.SubscribeInboxResponse{}); err != nil {
+				return err
+			}
+		}
+	}
 }

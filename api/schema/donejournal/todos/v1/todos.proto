@@ -27,6 +27,10 @@ service TodoService {
 
   // GetCalendarEntries returns todos grouped by date for a date range (calendar view).
   rpc GetCalendarEntries(GetCalendarEntriesRequest) returns (GetCalendarEntriesResponse);
+
+  // SubscribeTodos opens a server-streaming subscription that sends an event whenever
+  // any todo belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeTodos(SubscribeTodosRequest) returns (stream SubscribeTodosResponse);
 }
 
 // TodoStatus represents the status of a todo item.
@@ -178,3 +182,9 @@ message GetCalendarEntriesResponse {
   // Todos grouped by date within the requested range.
   repeated CalendarDay days = 1;
 }
+
+// SubscribeTodosRequest is the request to subscribe to todo change events.
+message SubscribeTodosRequest {}
+
+// SubscribeTodosResponse is sent whenever a todo is created, updated, or deleted.
+message SubscribeTodosResponse {}

@@ -52,6 +52,9 @@ const (
 	// InboxServiceConvertToTodoProcedure is the fully-qualified name of the InboxService's
 	// ConvertToTodo RPC.
 	InboxServiceConvertToTodoProcedure = "/donejournal.inbox.v1.InboxService/ConvertToTodo"
+	// InboxServiceSubscribeInboxProcedure is the fully-qualified name of the InboxService's
+	// SubscribeInbox RPC.
+	InboxServiceSubscribeInboxProcedure = "/donejournal.inbox.v1.InboxService/SubscribeInbox"
 )
 
 // InboxServiceClient is a client for the donejournal.inbox.v1.InboxService service.
@@ -68,6 +71,9 @@ type InboxServiceClient interface {
 	DeleteInboxItem(context.Context, *connect.Request[v1.DeleteInboxItemRequest]) (*connect.Response[emptypb.Empty], error)
 	// ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
 	ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error)
+	// SubscribeInbox opens a server-streaming subscription that sends an event whenever
+	// any inbox item belonging to the authenticated user is created, updated, or deleted.
+	SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest]) (*connect.ServerStreamForClient[v1.SubscribeInboxResponse], error)
 }
 
 // NewInboxServiceClient constructs a client for the donejournal.inbox.v1.InboxService service. By
@@ -117,6 +123,12 @@ func NewInboxServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(inboxServiceMethods.ByName("ConvertToTodo")),
 			connect.WithClientOptions(opts...),
 		),
+		subscribeInbox: connect.NewClient[v1.SubscribeInboxRequest, v1.SubscribeInboxResponse](
+			httpClient,
+			baseURL+InboxServiceSubscribeInboxProcedure,
+			connect.WithSchema(inboxServiceMethods.ByName("SubscribeInbox")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -128,6 +140,7 @@ type inboxServiceClient struct {
 	updateInboxItem *connect.Client[v1.UpdateInboxItemRequest, v1.UpdateInboxItemResponse]
 	deleteInboxItem *connect.Client[v1.DeleteInboxItemRequest, emptypb.Empty]
 	convertToTodo   *connect.Client[v1.ConvertToTodoRequest, v1.ConvertToTodoResponse]
+	subscribeInbox  *connect.Client[v1.SubscribeInboxRequest, v1.SubscribeInboxResponse]
 }
 
 // ListInboxItems calls donejournal.inbox.v1.InboxService.ListInboxItems.
@@ -160,6 +173,11 @@ func (c *inboxServiceClient) ConvertToTodo(ctx context.Context, req *connect.Req
 	return c.convertToTodo.CallUnary(ctx, req)
 }
 
+// SubscribeInbox calls donejournal.inbox.v1.InboxService.SubscribeInbox.
+func (c *inboxServiceClient) SubscribeInbox(ctx context.Context, req *connect.Request[v1.SubscribeInboxRequest]) (*connect.ServerStreamForClient[v1.SubscribeInboxResponse], error) {
+	return c.subscribeInbox.CallServerStream(ctx, req)
+}
+
 // InboxServiceHandler is an implementation of the donejournal.inbox.v1.InboxService service.
 type InboxServiceHandler interface {
 	// ListInboxItems returns a paginated list of inbox items for the authenticated user.
@@ -174,6 +192,9 @@ type InboxServiceHandler interface {
 	DeleteInboxItem(context.Context, *connect.Request[v1.DeleteInboxItemRequest]) (*connect.Response[emptypb.Empty], error)
 	// ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
 	ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error)
+	// SubscribeInbox opens a server-streaming subscription that sends an event whenever
+	// any inbox item belonging to the authenticated user is created, updated, or deleted.
+	SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest], *connect.ServerStream[v1.SubscribeInboxResponse]) error
 }
 
 // NewInboxServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -219,6 +240,12 @@ func NewInboxServiceHandler(svc InboxServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(inboxServiceMethods.ByName("ConvertToTodo")),
 		connect.WithHandlerOptions(opts...),
 	)
+	inboxServiceSubscribeInboxHandler := connect.NewServerStreamHandler(
+		InboxServiceSubscribeInboxProcedure,
+		svc.SubscribeInbox,
+		connect.WithSchema(inboxServiceMethods.ByName("SubscribeInbox")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/donejournal.inbox.v1.InboxService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case InboxServiceListInboxItemsProcedure:
@@ -233,6 +260,8 @@ func NewInboxServiceHandler(svc InboxServiceHandler, opts ...connect.HandlerOpti
 			inboxServiceDeleteInboxItemHandler.ServeHTTP(w, r)
 		case InboxServiceConvertToTodoProcedure:
 			inboxServiceConvertToTodoHandler.ServeHTTP(w, r)
+		case InboxServiceSubscribeInboxProcedure:
+			inboxServiceSubscribeInboxHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -264,4 +293,8 @@ func (UnimplementedInboxServiceHandler) DeleteInboxItem(context.Context, *connec
 
 func (UnimplementedInboxServiceHandler) ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.inbox.v1.InboxService.ConvertToTodo is not implemented"))
+}
+
+func (UnimplementedInboxServiceHandler) SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest], *connect.ServerStream[v1.SubscribeInboxResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.inbox.v1.InboxService.SubscribeInbox is not implemented"))
 }

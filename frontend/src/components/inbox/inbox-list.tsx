@@ -1,11 +1,26 @@
+import { useCallback, useRef } from "react"
 import { useQuery } from "@connectrpc/connect-query"
+import { create } from "@bufbuild/protobuf"
 import { listInboxItems } from "@/api/gen/donejournal/inbox/v1/inbox-InboxService_connectquery"
+import { SubscribeInboxRequestSchema } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
+import { inboxClient } from "@/api/client"
+import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { InboxCard } from "./inbox-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Inbox } from "lucide-react"
 
 export function InboxList() {
-  const { data, isLoading } = useQuery(listInboxItems, { pageSize: 50, pageToken: "" })
+  const query = useQuery(listInboxItems, { pageSize: 50, pageToken: "" })
+
+  const subRef = useRef<{ abort: () => void } | null>(null)
+  const subscribe = useCallback(
+    (signal: AbortSignal) =>
+      inboxClient.subscribeInbox(create(SubscribeInboxRequestSchema), { signal }),
+    [],
+  )
+  useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
+
+  const { data, isLoading } = query
 
   if (isLoading) {
     return (

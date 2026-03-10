@@ -50,6 +50,9 @@ const (
 	// TodoServiceGetCalendarEntriesProcedure is the fully-qualified name of the TodoService's
 	// GetCalendarEntries RPC.
 	TodoServiceGetCalendarEntriesProcedure = "/donejournal.todos.v1.TodoService/GetCalendarEntries"
+	// TodoServiceSubscribeTodosProcedure is the fully-qualified name of the TodoService's
+	// SubscribeTodos RPC.
+	TodoServiceSubscribeTodosProcedure = "/donejournal.todos.v1.TodoService/SubscribeTodos"
 )
 
 // TodoServiceClient is a client for the donejournal.todos.v1.TodoService service.
@@ -68,6 +71,9 @@ type TodoServiceClient interface {
 	CompleteTodo(context.Context, *connect.Request[v1.CompleteTodoRequest]) (*connect.Response[v1.CompleteTodoResponse], error)
 	// GetCalendarEntries returns todos grouped by date for a date range (calendar view).
 	GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error)
+	// SubscribeTodos opens a server-streaming subscription that sends an event whenever
+	// any todo belonging to the authenticated user is created, updated, or deleted.
+	SubscribeTodos(context.Context, *connect.Request[v1.SubscribeTodosRequest]) (*connect.ServerStreamForClient[v1.SubscribeTodosResponse], error)
 }
 
 // NewTodoServiceClient constructs a client for the donejournal.todos.v1.TodoService service. By
@@ -123,6 +129,12 @@ func NewTodoServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(todoServiceMethods.ByName("GetCalendarEntries")),
 			connect.WithClientOptions(opts...),
 		),
+		subscribeTodos: connect.NewClient[v1.SubscribeTodosRequest, v1.SubscribeTodosResponse](
+			httpClient,
+			baseURL+TodoServiceSubscribeTodosProcedure,
+			connect.WithSchema(todoServiceMethods.ByName("SubscribeTodos")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -135,6 +147,7 @@ type todoServiceClient struct {
 	deleteTodo         *connect.Client[v1.DeleteTodoRequest, emptypb.Empty]
 	completeTodo       *connect.Client[v1.CompleteTodoRequest, v1.CompleteTodoResponse]
 	getCalendarEntries *connect.Client[v1.GetCalendarEntriesRequest, v1.GetCalendarEntriesResponse]
+	subscribeTodos     *connect.Client[v1.SubscribeTodosRequest, v1.SubscribeTodosResponse]
 }
 
 // ListTodos calls donejournal.todos.v1.TodoService.ListTodos.
@@ -172,6 +185,11 @@ func (c *todoServiceClient) GetCalendarEntries(ctx context.Context, req *connect
 	return c.getCalendarEntries.CallUnary(ctx, req)
 }
 
+// SubscribeTodos calls donejournal.todos.v1.TodoService.SubscribeTodos.
+func (c *todoServiceClient) SubscribeTodos(ctx context.Context, req *connect.Request[v1.SubscribeTodosRequest]) (*connect.ServerStreamForClient[v1.SubscribeTodosResponse], error) {
+	return c.subscribeTodos.CallServerStream(ctx, req)
+}
+
 // TodoServiceHandler is an implementation of the donejournal.todos.v1.TodoService service.
 type TodoServiceHandler interface {
 	// ListTodos returns a paginated and filtered list of todos for the authenticated user.
@@ -188,6 +206,9 @@ type TodoServiceHandler interface {
 	CompleteTodo(context.Context, *connect.Request[v1.CompleteTodoRequest]) (*connect.Response[v1.CompleteTodoResponse], error)
 	// GetCalendarEntries returns todos grouped by date for a date range (calendar view).
 	GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error)
+	// SubscribeTodos opens a server-streaming subscription that sends an event whenever
+	// any todo belonging to the authenticated user is created, updated, or deleted.
+	SubscribeTodos(context.Context, *connect.Request[v1.SubscribeTodosRequest], *connect.ServerStream[v1.SubscribeTodosResponse]) error
 }
 
 // NewTodoServiceHandler builds an HTTP handler from the service implementation. It returns the path
@@ -239,6 +260,12 @@ func NewTodoServiceHandler(svc TodoServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(todoServiceMethods.ByName("GetCalendarEntries")),
 		connect.WithHandlerOptions(opts...),
 	)
+	todoServiceSubscribeTodosHandler := connect.NewServerStreamHandler(
+		TodoServiceSubscribeTodosProcedure,
+		svc.SubscribeTodos,
+		connect.WithSchema(todoServiceMethods.ByName("SubscribeTodos")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/donejournal.todos.v1.TodoService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case TodoServiceListTodosProcedure:
@@ -255,6 +282,8 @@ func NewTodoServiceHandler(svc TodoServiceHandler, opts ...connect.HandlerOption
 			todoServiceCompleteTodoHandler.ServeHTTP(w, r)
 		case TodoServiceGetCalendarEntriesProcedure:
 			todoServiceGetCalendarEntriesHandler.ServeHTTP(w, r)
+		case TodoServiceSubscribeTodosProcedure:
+			todoServiceSubscribeTodosHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -290,4 +319,8 @@ func (UnimplementedTodoServiceHandler) CompleteTodo(context.Context, *connect.Re
 
 func (UnimplementedTodoServiceHandler) GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.todos.v1.TodoService.GetCalendarEntries is not implemented"))
+}
+
+func (UnimplementedTodoServiceHandler) SubscribeTodos(context.Context, *connect.Request[v1.SubscribeTodosRequest], *connect.ServerStream[v1.SubscribeTodosResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.todos.v1.TodoService.SubscribeTodos is not implemented"))
 }

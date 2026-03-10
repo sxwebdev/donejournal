@@ -1,7 +1,11 @@
+import { useCallback, useRef } from "react"
 import { useQuery } from "@connectrpc/connect-query"
+import { create } from "@bufbuild/protobuf"
 import { listTodos } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { TodoStatus, SubscribeTodosRequestSchema } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { todosClient } from "@/api/client"
+import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoItem } from "./todo-item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckSquare } from "lucide-react"
@@ -54,12 +58,22 @@ function groupTodos(todos: Todo[]): Group[] {
 }
 
 export function TodoList({ statuses, from, to }: Props) {
-  const { data, isLoading } = useQuery(listTodos, {
+  const query = useQuery(listTodos, {
     pageSize: 100,
     statuses: statuses ?? [],
     plannedDateFrom: from ? fromDate(parseISO(from)) : undefined,
     plannedDateTo: to ? fromDate(parseISO(to)) : undefined,
   })
+
+  const subRef = useRef<{ abort: () => void } | null>(null)
+  const subscribe = useCallback(
+    (signal: AbortSignal) =>
+      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), { signal }),
+    [],
+  )
+  useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
+
+  const { data, isLoading } = query
 
   if (isLoading) {
     return (

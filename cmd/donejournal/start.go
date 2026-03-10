@@ -177,6 +177,11 @@ func startCMD() *cli.Command {
 			}
 
 			baseService := baseservices.New(l, st)
+			// Stop brokers when the context is cancelled (server shutting down)
+			go func() {
+				<-ctx.Done()
+				baseService.Stop()
+			}()
 
 			// Initialize token manager with BadgerDB as token store
 			tokenMgr := tokenmanager.New[api.TokenData](badgerDB, authConfig.AccessTokenSecretKey, 30*24*time.Hour)

@@ -692,6 +692,80 @@ func (x *ConvertToTodoResponse) GetTodoId() string {
 	return ""
 }
 
+// SubscribeInboxRequest is the request to subscribe to inbox change events.
+type SubscribeInboxRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeInboxRequest) Reset() {
+	*x = SubscribeInboxRequest{}
+	mi := &file_donejournal_inbox_v1_inbox_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeInboxRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeInboxRequest) ProtoMessage() {}
+
+func (x *SubscribeInboxRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_donejournal_inbox_v1_inbox_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeInboxRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeInboxRequest) Descriptor() ([]byte, []int) {
+	return file_donejournal_inbox_v1_inbox_proto_rawDescGZIP(), []int{12}
+}
+
+// SubscribeInboxResponse is sent whenever an inbox item is created, updated, or deleted.
+type SubscribeInboxResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SubscribeInboxResponse) Reset() {
+	*x = SubscribeInboxResponse{}
+	mi := &file_donejournal_inbox_v1_inbox_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeInboxResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeInboxResponse) ProtoMessage() {}
+
+func (x *SubscribeInboxResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_donejournal_inbox_v1_inbox_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeInboxResponse.ProtoReflect.Descriptor instead.
+func (*SubscribeInboxResponse) Descriptor() ([]byte, []int) {
+	return file_donejournal_inbox_v1_inbox_proto_rawDescGZIP(), []int{13}
+}
+
 var File_donejournal_inbox_v1_inbox_proto protoreflect.FileDescriptor
 
 const file_donejournal_inbox_v1_inbox_proto_rawDesc = "" +
@@ -737,14 +811,17 @@ const file_donejournal_inbox_v1_inbox_proto_rawDesc = "" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\"0\n" +
 	"\x15ConvertToTodoResponse\x12\x17\n" +
-	"\atodo_id\x18\x01 \x01(\tR\x06todoId2\x85\x05\n" +
+	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\x17\n" +
+	"\x15SubscribeInboxRequest\"\x18\n" +
+	"\x16SubscribeInboxResponse2\xf4\x05\n" +
 	"\fInboxService\x12k\n" +
 	"\x0eListInboxItems\x12+.donejournal.inbox.v1.ListInboxItemsRequest\x1a,.donejournal.inbox.v1.ListInboxItemsResponse\x12e\n" +
 	"\fGetInboxItem\x12).donejournal.inbox.v1.GetInboxItemRequest\x1a*.donejournal.inbox.v1.GetInboxItemResponse\x12n\n" +
 	"\x0fCreateInboxItem\x12,.donejournal.inbox.v1.CreateInboxItemRequest\x1a-.donejournal.inbox.v1.CreateInboxItemResponse\x12n\n" +
 	"\x0fUpdateInboxItem\x12,.donejournal.inbox.v1.UpdateInboxItemRequest\x1a-.donejournal.inbox.v1.UpdateInboxItemResponse\x12W\n" +
 	"\x0fDeleteInboxItem\x12,.donejournal.inbox.v1.DeleteInboxItemRequest\x1a\x16.google.protobuf.Empty\x12h\n" +
-	"\rConvertToTodo\x12*.donejournal.inbox.v1.ConvertToTodoRequest\x1a+.donejournal.inbox.v1.ConvertToTodoResponseB\xe1\x01\n" +
+	"\rConvertToTodo\x12*.donejournal.inbox.v1.ConvertToTodoRequest\x1a+.donejournal.inbox.v1.ConvertToTodoResponse\x12m\n" +
+	"\x0eSubscribeInbox\x12+.donejournal.inbox.v1.SubscribeInboxRequest\x1a,.donejournal.inbox.v1.SubscribeInboxResponse0\x01B\xe1\x01\n" +
 	"\x18com.donejournal.inbox.v1B\n" +
 	"InboxProtoP\x01ZGgithub.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1;inboxv1\xa2\x02\x03DIX\xaa\x02\x14Donejournal.Inbox.V1\xca\x02\x14Donejournal\\Inbox\\V1\xe2\x02 Donejournal\\Inbox\\V1\\GPBMetadata\xea\x02\x16Donejournal::Inbox::V1b\x06proto3"
 
@@ -760,7 +837,7 @@ func file_donejournal_inbox_v1_inbox_proto_rawDescGZIP() []byte {
 	return file_donejournal_inbox_v1_inbox_proto_rawDescData
 }
 
-var file_donejournal_inbox_v1_inbox_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_donejournal_inbox_v1_inbox_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_donejournal_inbox_v1_inbox_proto_goTypes = []any{
 	(*InboxItem)(nil),               // 0: donejournal.inbox.v1.InboxItem
 	(*ListInboxItemsRequest)(nil),   // 1: donejournal.inbox.v1.ListInboxItemsRequest
@@ -774,31 +851,35 @@ var file_donejournal_inbox_v1_inbox_proto_goTypes = []any{
 	(*DeleteInboxItemRequest)(nil),  // 9: donejournal.inbox.v1.DeleteInboxItemRequest
 	(*ConvertToTodoRequest)(nil),    // 10: donejournal.inbox.v1.ConvertToTodoRequest
 	(*ConvertToTodoResponse)(nil),   // 11: donejournal.inbox.v1.ConvertToTodoResponse
-	(*timestamppb.Timestamp)(nil),   // 12: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),           // 13: google.protobuf.Empty
+	(*SubscribeInboxRequest)(nil),   // 12: donejournal.inbox.v1.SubscribeInboxRequest
+	(*SubscribeInboxResponse)(nil),  // 13: donejournal.inbox.v1.SubscribeInboxResponse
+	(*timestamppb.Timestamp)(nil),   // 14: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),           // 15: google.protobuf.Empty
 }
 var file_donejournal_inbox_v1_inbox_proto_depIdxs = []int32{
-	12, // 0: donejournal.inbox.v1.InboxItem.created_at:type_name -> google.protobuf.Timestamp
-	12, // 1: donejournal.inbox.v1.InboxItem.updated_at:type_name -> google.protobuf.Timestamp
+	14, // 0: donejournal.inbox.v1.InboxItem.created_at:type_name -> google.protobuf.Timestamp
+	14, // 1: donejournal.inbox.v1.InboxItem.updated_at:type_name -> google.protobuf.Timestamp
 	0,  // 2: donejournal.inbox.v1.ListInboxItemsResponse.items:type_name -> donejournal.inbox.v1.InboxItem
 	0,  // 3: donejournal.inbox.v1.GetInboxItemResponse.item:type_name -> donejournal.inbox.v1.InboxItem
 	0,  // 4: donejournal.inbox.v1.CreateInboxItemResponse.item:type_name -> donejournal.inbox.v1.InboxItem
 	0,  // 5: donejournal.inbox.v1.UpdateInboxItemResponse.item:type_name -> donejournal.inbox.v1.InboxItem
-	12, // 6: donejournal.inbox.v1.ConvertToTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
+	14, // 6: donejournal.inbox.v1.ConvertToTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
 	1,  // 7: donejournal.inbox.v1.InboxService.ListInboxItems:input_type -> donejournal.inbox.v1.ListInboxItemsRequest
 	3,  // 8: donejournal.inbox.v1.InboxService.GetInboxItem:input_type -> donejournal.inbox.v1.GetInboxItemRequest
 	5,  // 9: donejournal.inbox.v1.InboxService.CreateInboxItem:input_type -> donejournal.inbox.v1.CreateInboxItemRequest
 	7,  // 10: donejournal.inbox.v1.InboxService.UpdateInboxItem:input_type -> donejournal.inbox.v1.UpdateInboxItemRequest
 	9,  // 11: donejournal.inbox.v1.InboxService.DeleteInboxItem:input_type -> donejournal.inbox.v1.DeleteInboxItemRequest
 	10, // 12: donejournal.inbox.v1.InboxService.ConvertToTodo:input_type -> donejournal.inbox.v1.ConvertToTodoRequest
-	2,  // 13: donejournal.inbox.v1.InboxService.ListInboxItems:output_type -> donejournal.inbox.v1.ListInboxItemsResponse
-	4,  // 14: donejournal.inbox.v1.InboxService.GetInboxItem:output_type -> donejournal.inbox.v1.GetInboxItemResponse
-	6,  // 15: donejournal.inbox.v1.InboxService.CreateInboxItem:output_type -> donejournal.inbox.v1.CreateInboxItemResponse
-	8,  // 16: donejournal.inbox.v1.InboxService.UpdateInboxItem:output_type -> donejournal.inbox.v1.UpdateInboxItemResponse
-	13, // 17: donejournal.inbox.v1.InboxService.DeleteInboxItem:output_type -> google.protobuf.Empty
-	11, // 18: donejournal.inbox.v1.InboxService.ConvertToTodo:output_type -> donejournal.inbox.v1.ConvertToTodoResponse
-	13, // [13:19] is the sub-list for method output_type
-	7,  // [7:13] is the sub-list for method input_type
+	12, // 13: donejournal.inbox.v1.InboxService.SubscribeInbox:input_type -> donejournal.inbox.v1.SubscribeInboxRequest
+	2,  // 14: donejournal.inbox.v1.InboxService.ListInboxItems:output_type -> donejournal.inbox.v1.ListInboxItemsResponse
+	4,  // 15: donejournal.inbox.v1.InboxService.GetInboxItem:output_type -> donejournal.inbox.v1.GetInboxItemResponse
+	6,  // 16: donejournal.inbox.v1.InboxService.CreateInboxItem:output_type -> donejournal.inbox.v1.CreateInboxItemResponse
+	8,  // 17: donejournal.inbox.v1.InboxService.UpdateInboxItem:output_type -> donejournal.inbox.v1.UpdateInboxItemResponse
+	15, // 18: donejournal.inbox.v1.InboxService.DeleteInboxItem:output_type -> google.protobuf.Empty
+	11, // 19: donejournal.inbox.v1.InboxService.ConvertToTodo:output_type -> donejournal.inbox.v1.ConvertToTodoResponse
+	13, // 20: donejournal.inbox.v1.InboxService.SubscribeInbox:output_type -> donejournal.inbox.v1.SubscribeInboxResponse
+	14, // [14:21] is the sub-list for method output_type
+	7,  // [7:14] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -815,7 +896,7 @@ func file_donejournal_inbox_v1_inbox_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_donejournal_inbox_v1_inbox_proto_rawDesc), len(file_donejournal_inbox_v1_inbox_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -1,8 +1,11 @@
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { useQuery } from "@connectrpc/connect-query"
+import { create } from "@bufbuild/protobuf"
 import { getCalendarEntries } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { CalendarDay, Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { TodoStatus, SubscribeTodosRequestSchema } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { todosClient } from "@/api/client"
+import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoDialog } from "@/components/todos/todo-dialog"
 import { fromDate, toDate, formatDateISO } from "@/lib/dates" // formatDateISO used for UTC-based dayMap keys
 import { ChevronLeft, ChevronRight } from "lucide-react"
@@ -129,10 +132,20 @@ export function CalendarView({ currentMonth, onMonthChange }: Props) {
   const start = startOfWeek(startOfMonth(currentMonth))
   const end = endOfWeek(endOfMonth(currentMonth))
 
-  const { data } = useQuery(getCalendarEntries, {
+  const query = useQuery(getCalendarEntries, {
     from: fromDate(start),
     to: fromDate(end),
   })
+
+  const subRef = useRef<{ abort: () => void } | null>(null)
+  const subscribe = useCallback(
+    (signal: AbortSignal) =>
+      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), { signal }),
+    [],
+  )
+  useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
+
+  const { data } = query
 
   const dayMap = new Map<string, CalendarDay>()
   for (const day of data?.days ?? []) {

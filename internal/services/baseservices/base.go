@@ -34,3 +34,9 @@ func (b *BaseServices) Inbox() *inbox.Service {
 func (b *BaseServices) Todos() *todos.Service {
 	return b.todosService
 }
+
+// Stop stops all services and their brokers.
+func (b *BaseServices) Stop() {
+	b.todosService.Stop()
+	b.inboxService.Stop()
+}

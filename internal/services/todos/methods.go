@@ -56,14 +56,19 @@ func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse 
 		return nil
 	}
 
-	return storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
+	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		for _, entry := range parsedResponse.Entries {
 			if _, err := s.Create(ctx, tx, userID, entry); err != nil {
 				return fmt.Errorf("create todo for entry '%s': %w", entry.Title, err)
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
+
+	s.broker.Publish(TodoEvent{UserID: userID})
+	return nil
 }
 
 // Find todos by params
@@ -73,7 +78,7 @@ func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*stor
 
 // CreateFromAPI creates a new todo from API request (without MCP)
 func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time) (*models.Todo, error) {
-	return s.store.Todos().Create(ctx, repo_todos.CreateParams{
+	todo, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
 		Title:       title,
@@ -81,6 +86,11 @@ func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, descri
 		Status:      models.TodoStatusPending,
 		PlannedDate: plannedDate,
 	})
+	if err != nil {
+		return nil, err
+	}
+	s.broker.Publish(TodoEvent{UserID: userID})
+	return todo, nil
 }
 
 // GetByID returns a single todo
@@ -100,7 +110,7 @@ type UpdateParams struct {
 }
 
 // Update performs a partial update on a todo
-func (s *Service) Update(ctx context.Context, id string, params UpdateParams) (*models.Todo, error) {
+func (s *Service) Update(ctx context.Context, userID int64, id string, params UpdateParams) (*models.Todo, error) {
 	if id == "" {
 		return nil, storecmn.ErrEmptyID
 	}
@@ -144,11 +154,17 @@ func (s *Service) Update(ctx context.Context, id string, params UpdateParams) (*
 		return nil, err
 	}
 
-	return s.store.Todos().GetByID(ctx, id)
+	todo, err := s.store.Todos().GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	s.broker.Publish(TodoEvent{UserID: userID})
+	return todo, nil
 }
 
 // Complete marks a todo as completed
-func (s *Service) Complete(ctx context.Context, id string) (*models.Todo, error) {
+func (s *Service) Complete(ctx context.Context, userID int64, id string) (*models.Todo, error) {
 	if id == "" {
 		return nil, storecmn.ErrEmptyID
 	}
@@ -162,13 +178,23 @@ func (s *Service) Complete(ctx context.Context, id string) (*models.Todo, error)
 		return nil, err
 	}
 
-	return s.store.Todos().GetByID(ctx, id)
+	todo, err := s.store.Todos().GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	s.broker.Publish(TodoEvent{UserID: userID})
+	return todo, nil
 }
 
 // Delete deletes a todo
-func (s *Service) Delete(ctx context.Context, id string) error {
+func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 	if id == "" {
 		return storecmn.ErrEmptyID
 	}
-	return s.store.Todos().Delete(ctx, id)
+	if err := s.store.Todos().Delete(ctx, id); err != nil {
+		return err
+	}
+	s.broker.Publish(TodoEvent{UserID: userID})
+	return nil
 }

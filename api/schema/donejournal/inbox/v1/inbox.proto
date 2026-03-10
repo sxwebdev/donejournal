@@ -25,6 +25,10 @@ service InboxService {
 
   // ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
   rpc ConvertToTodo(ConvertToTodoRequest) returns (ConvertToTodoResponse);
+
+  // SubscribeInbox opens a server-streaming subscription that sends an event whenever
+  // any inbox item belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeInbox(SubscribeInboxRequest) returns (stream SubscribeInboxResponse);
 }
 
 // InboxItem represents a single inbox entry.
@@ -124,3 +128,9 @@ message ConvertToTodoResponse {
   // The ID of the newly created todo.
   string todo_id = 1;
 }
+
+// SubscribeInboxRequest is the request to subscribe to inbox change events.
+message SubscribeInboxRequest {}
+
+// SubscribeInboxResponse is sent whenever an inbox item is created, updated, or deleted.
+message SubscribeInboxResponse {}

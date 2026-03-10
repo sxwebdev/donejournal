@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/sxwebdev/donejournal/internal/models"
@@ -35,7 +36,15 @@ func (s *Service) Create(ctx context.Context, data, userID string) (*models.Inbo
 		AdditionalData: storecmn.JSONField("{}"),
 	}
 
-	return s.store.Inbox().Create(ctx, req)
+	item, err := s.store.Inbox().Create(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	if uid, err := strconv.ParseInt(userID, 10, 64); err == nil {
+		s.broker.Publish(InboxEvent{UserID: uid})
+	}
+	return item, nil
 }
 
 // List returns paginated inbox items for a user
@@ -56,7 +65,7 @@ func (s *Service) GetByID(ctx context.Context, id string) (*models.Inbox, error)
 }
 
 // Update updates an inbox item
-func (s *Service) Update(ctx context.Context, id, data, additionalData string) (*models.Inbox, error) {
+func (s *Service) Update(ctx context.Context, userID int64, id, data, additionalData string) (*models.Inbox, error) {
 	if id == "" {
 		return nil, storecmn.ErrEmptyID
 	}
@@ -69,15 +78,25 @@ func (s *Service) Update(ctx context.Context, id, data, additionalData string) (
 		return nil, err
 	}
 
-	return s.store.Inbox().GetByID(ctx, id)
+	item, err := s.store.Inbox().GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	s.broker.Publish(InboxEvent{UserID: userID})
+	return item, nil
 }
 
 // Delete deletes an inbox item
-func (s *Service) Delete(ctx context.Context, id string) error {
+func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 	if id == "" {
 		return storecmn.ErrEmptyID
 	}
-	return s.store.Inbox().Delete(ctx, id)
+	if err := s.store.Inbox().Delete(ctx, id); err != nil {
+		return err
+	}
+	s.broker.Publish(InboxEvent{UserID: userID})
+	return nil
 }
 
 // ConvertToTodo converts an inbox item to a todo and deletes the inbox item
@@ -97,7 +116,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 
 	todoID := utils.GenerateULID()
 
-	err = storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
+	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		_, err := s.store.Todos(repos.WithTx(tx)).Create(ctx, repo_todos.CreateParams{
 			ID:          todoID,
 			UserID:      userID,
@@ -115,7 +134,11 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 		}
 
 		return nil
-	})
+	}); err != nil {
+		return "", err
+	}
 
-	return todoID, err
+	// Publish inbox deletion event (item was consumed) and todos creation event
+	s.broker.Publish(InboxEvent{UserID: userID})
+	return todoID, nil
 }
