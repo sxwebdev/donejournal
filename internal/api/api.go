@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/tmanager"
 	"github.com/tkcrm/mx/logger"
@@ -26,9 +26,7 @@ func New(log logger.Logger, conf *config.Config, taskManager *tmanager.Manager) 
 		logger:      log,
 		config:      conf,
 		taskManager: taskManager,
-		app: fiber.New(fiber.Config{
-			DisableStartupMessage: true,
-		}),
+		app:         fiber.New(),
 	}
 
 	s.setupRoutes()
@@ -72,12 +70,12 @@ func (s *API) Stop(ctx context.Context) error {
 
 // setupRoutes sets up the API routes
 func (s *API) setupRoutes() {
-	s.app.Post("/ingest", func(c *fiber.Ctx) error {
+	s.app.Post("/ingest", func(c fiber.Ctx) error {
 		var req struct {
 			UserID int64  `json:"user_id"`
 			Text   string `json:"text"`
 		}
-		if err := c.BodyParser(&req); err != nil {
+		if err := c.Bind().Body(&req); err != nil {
 			return errorMessage(c, fiber.StatusBadRequest, err)
 		}
 

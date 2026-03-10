@@ -53,7 +53,6 @@ Humans should refer to `README.md` for the high-level overview.
 High-level components:
 
 1. **Telegram Bot**
-
    - Handles user interaction in Telegram (commands, inline buttons, messages).
    - Sends structured requests to the backend via HTTP/ConnectRPC.
    - Main flows:
@@ -62,7 +61,6 @@ High-level components:
      - Show “yesterday” / “today” / “day X” summary.
 
 2. **Backend (Go + SQLite + ConnectRPC)**
-
    - Single service (at least in v1) exposing a ConnectRPC API.
    - Responsibilities:
      - Store “done” entries.
@@ -72,7 +70,6 @@ High-level components:
    - Uses SQLite as the primary storage.
 
 3. **MiniApp Frontend (React + Vite)**
-
    - Telegram MiniApp served as a web UI.
    - Responsibilities:
      - Provide interactive view for:
@@ -344,16 +341,13 @@ Focus points:
 
 - Prefer small, focused changes rather than huge rewrites.
 - Keep **backend, bot, and frontend contracts in sync**:
-
   - If you change a proto → update Go server → update frontend hooks.
 
 - Always validate data:
-
   - Backend: type-safe & basic validation.
   - Frontend: zod schemas + React forms.
 
 - Use existing patterns:
-
   - For HTTP/RPC handlers, mimic existing handlers.
   - For UI, reuse Shadcn components and shared form patterns.
 

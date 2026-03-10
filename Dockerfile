@@ -1,5 +1,5 @@
 # Backend build stage
-FROM golang:1.25.3-alpine AS backend-builder
+FROM golang:1.26.1-alpine AS backend-builder
 
 # Define build arguments for version, commit, and date.
 ARG VERSION="unknown"
