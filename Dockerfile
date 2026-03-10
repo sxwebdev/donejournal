@@ -45,6 +45,7 @@ FROM debian:bookworm-slim
 # Install runtime dependencies: tzdata, ffmpeg for OGG→WAV conversion,
 # libstdc++ and libgomp for whisper-cli shared library dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
     tzdata \
     ffmpeg \
     libstdc++6 \
