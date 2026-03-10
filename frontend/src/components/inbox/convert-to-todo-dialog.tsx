@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -13,7 +14,11 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
@@ -23,11 +28,14 @@ import {
   listInboxItems,
 } from "@/api/gen/donejournal/inbox/v1/inbox-InboxService_connectquery"
 import type { InboxItem } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
-import { listTodos, getCalendarEntries } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
+import {
+  listTodos,
+  getCalendarEntries,
+} from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import { fromDate } from "@/lib/dates"
 
 const schema = z.object({
-  title: z.string().max(200).optional(),
+  title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
 })
@@ -48,17 +56,39 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { title: item.data },
   })
 
+  useEffect(() => {
+    if (open) {
+      reset({ title: item.data, description: "", plannedDate: undefined })
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const { mutate, isPending } = useMutation(convertToTodo, {
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listInboxItems, cardinality: "finite" }) })
-      qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: listTodos, cardinality: "finite" }) })
-      qc.invalidateQueries({ queryKey: createConnectQueryKey({ schema: getCalendarEntries, cardinality: "finite" }) })
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listInboxItems,
+          cardinality: "finite",
+        }),
+      })
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: listTodos,
+          cardinality: "finite",
+        }),
+      })
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: getCalendarEntries,
+          cardinality: "finite",
+        }),
+      })
       onOpenChange(false)
     },
   })
@@ -68,7 +98,7 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
   const onSubmit = (values: FormValues) => {
     mutate({
       inboxItemId: item.id,
-      title: values.title ?? "",
+      title: values.title,
       description: values.description ?? "",
       plannedDate: fromDate(values.plannedDate),
     })
@@ -82,9 +112,13 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">
+              Title <span className="text-destructive">*</span>
+            </Label>
             <Input id="title" {...register("title")} />
-            {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
+            {errors.title && (
+              <p className="text-xs text-destructive">{errors.title.message}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -93,7 +127,9 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Planned date <span className="text-destructive">*</span></Label>
+            <Label>
+              Planned date <span className="text-destructive">*</span>
+            </Label>
             <Popover>
               <PopoverTrigger
                 type="button"
@@ -110,12 +146,16 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
                 <Calendar
                   mode="single"
                   selected={plannedDate}
-                  onSelect={(d) => setValue("plannedDate", d!)}
+                  onSelect={(d) =>
+                    setValue("plannedDate", d!, { shouldValidate: true })
+                  }
                 />
               </PopoverContent>
             </Popover>
             {errors.plannedDate && (
-              <p className="text-xs text-destructive">{errors.plannedDate.message}</p>
+              <p className="text-xs text-destructive">
+                {errors.plannedDate.message}
+              </p>
             )}
           </div>
 

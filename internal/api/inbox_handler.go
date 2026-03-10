@@ -172,6 +172,9 @@ func (h *InboxHandler) ConvertToTodo(ctx context.Context, req *connect.Request[i
 	}
 
 	plannedDate := req.Msg.GetPlannedDate().AsTime()
+	if plannedDate.IsZero() {
+		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("planned_date is required"))
+	}
 
 	todoID, err := h.baseService.Inbox().ConvertToTodo(
 		ctx,
