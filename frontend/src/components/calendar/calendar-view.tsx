@@ -3,7 +3,10 @@ import { useQuery } from "@connectrpc/connect-query"
 import { create } from "@bufbuild/protobuf"
 import { getCalendarEntries } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { CalendarDay, Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { TodoStatus, SubscribeTodosRequestSchema } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import {
+  TodoStatus,
+  SubscribeTodosRequestSchema,
+} from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { todosClient } from "@/api/client"
 import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoDialog } from "@/components/todos/todo-dialog"
@@ -50,7 +53,10 @@ function chunk<T>(arr: T[], size: number): T[][] {
 function TodoRow({ todo, onClick }: { todo: Todo; onClick: () => void }) {
   return (
     <button
-      onClick={(e) => { e.stopPropagation(); onClick() }}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick()
+      }}
       className={cn(
         "w-full truncate rounded px-1 py-0.5 text-left text-xs",
         statusStyle[todo.status] ?? "bg-muted text-muted-foreground"
@@ -75,14 +81,14 @@ function DayCell({
   // Use local date for URL (so user sees correct date), UTC-based key is handled in CalendarView
   const linkDateStr = format(date, "yyyy-MM-dd")
   const todos = calDay?.todos ?? []
-  const visibleTodos = todos.slice(0, 3)
+  const visibleTodos = todos.slice(0, 2)
   const remaining = todos.length - visibleTodos.length
 
   return (
     <>
       <div
         className={cn(
-          "flex min-h-30 flex-col border-r border-b p-1",
+          "flex min-h-25 flex-col border-r border-b p-1",
           !isCurrentMonth && "opacity-40"
         )}
         onClick={() => setCreateOpen(true)}
@@ -154,8 +160,10 @@ export function CalendarView({ currentMonth, onMonthChange }: Props) {
   const subRef = useRef<{ abort: () => void } | null>(null)
   const subscribe = useCallback(
     (signal: AbortSignal) =>
-      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), { signal }),
-    [],
+      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), {
+        signal,
+      }),
+    []
   )
   useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
 

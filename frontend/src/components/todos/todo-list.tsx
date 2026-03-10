@@ -3,13 +3,16 @@ import { useQuery } from "@connectrpc/connect-query"
 import { create } from "@bufbuild/protobuf"
 import { listTodos } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { TodoStatus, SubscribeTodosRequestSchema } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import {
+  TodoStatus,
+  SubscribeTodosRequestSchema,
+} from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { todosClient } from "@/api/client"
 import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoItem } from "./todo-item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckSquare } from "lucide-react"
-import { fromDate, toDate } from "@/lib/dates"
+import { fromDateOnly, endOfDateOnly, toDate } from "@/lib/dates"
 import { isToday, isTomorrow, format, startOfDay, parseISO } from "date-fns"
 
 type Props = {
@@ -61,15 +64,17 @@ export function TodoList({ statuses, from, to }: Props) {
   const query = useQuery(listTodos, {
     pageSize: 100,
     statuses: statuses ?? [],
-    plannedDateFrom: from ? fromDate(parseISO(from)) : undefined,
-    plannedDateTo: to ? fromDate(parseISO(to)) : undefined,
+    plannedDateFrom: from ? fromDateOnly(parseISO(from)) : undefined,
+    plannedDateTo: to ? endOfDateOnly(parseISO(to)) : undefined,
   })
 
   const subRef = useRef<{ abort: () => void } | null>(null)
   const subscribe = useCallback(
     (signal: AbortSignal) =>
-      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), { signal }),
-    [],
+      todosClient.subscribeTodos(create(SubscribeTodosRequestSchema), {
+        signal,
+      }),
+    []
   )
   useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
 

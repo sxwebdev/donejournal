@@ -16,7 +16,25 @@ export function fromDate(date: Date): Timestamp {
 // Use for date-only fields (plannedDate): sends UTC midnight of the local date,
 // so the backend (which groups by UTC date) places it on the correct calendar day.
 export function fromDateOnly(date: Date): Timestamp {
-  const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const utc = new Date(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  )
+  return timestampFromDate(utc)
+}
+
+// Use for range end filter: sends 23:59:59.999Z of the local date in UTC.
+export function endOfDateOnly(date: Date): Timestamp {
+  const utc = new Date(
+    Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      23,
+      59,
+      59,
+      999
+    )
+  )
   return timestampFromDate(utc)
 }
 
