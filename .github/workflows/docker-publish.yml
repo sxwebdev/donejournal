@@ -63,4 +63,3 @@ jobs:
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             COMMIT_HASH=${{ github.sha }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-            VITE_TELEGRAM_BOT_USERNAME=doneJournalBot

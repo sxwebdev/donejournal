@@ -19,6 +19,7 @@ type Props = {
 declare global {
   interface Window {
     onTelegramAuth: (data: TelegramWidgetData) => void
+    __ENV__?: { telegramBotUsername?: string }
   }
 }
 
@@ -45,7 +46,8 @@ export function TelegramLoginButton({ onAuth }: Props) {
     script.src = "https://telegram.org/js/telegram-widget.js?22"
     script.setAttribute(
       "data-telegram-login",
-      import.meta.env.VITE_TELEGRAM_BOT_USERNAME ?? "your_bot"
+      window.__ENV__?.telegramBotUsername ??
+        import.meta.env.VITE_TELEGRAM_BOT_USERNAME
     )
     script.setAttribute("data-size", "large")
     script.setAttribute("data-radius", "8")

@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -67,7 +69,7 @@ func New(
 	if err != nil {
 		l.Warnf("failed to load frontend assets: %v", err)
 	} else {
-		mux.Handle("/", spaHandler(http.FS(frontendFS)))
+		mux.Handle("/", spaHandler(http.FS(frontendFS), conf))
 	}
 
 	s := &Server{
@@ -117,7 +119,7 @@ func (s *Server) Stop(ctx context.Context) error {
 }
 
 // spaHandler serves static files and falls back to index.html for SPA routing
-func spaHandler(filesystem http.FileSystem) http.Handler {
+func spaHandler(filesystem http.FileSystem, conf *config.Config) http.Handler {
 	fileServer := http.FileServer(filesystem)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path
@@ -126,12 +128,40 @@ func spaHandler(filesystem http.FileSystem) http.Handler {
 		f, err := filesystem.Open(path)
 		if err != nil {
 			// File not found — serve index.html for SPA routing
-			r.URL.Path = "/"
-			fileServer.ServeHTTP(w, r)
+			serveIndexHTML(w, filesystem, conf)
 			return
 		}
 		f.Close()
 
+		if path == "/" || path == "/index.html" {
+			serveIndexHTML(w, filesystem, conf)
+			return
+		}
+
 		fileServer.ServeHTTP(w, r)
 	})
+}
+
+func serveIndexHTML(w http.ResponseWriter, filesystem http.FileSystem, conf *config.Config) {
+	f, err := filesystem.Open("/index.html")
+	if err != nil {
+		http.Error(w, "index.html not found", http.StatusInternalServerError)
+		return
+	}
+	defer f.Close()
+
+	content, err := io.ReadAll(f)
+	if err != nil {
+		http.Error(w, "failed to read index.html", http.StatusInternalServerError)
+		return
+	}
+
+	script := fmt.Sprintf(
+		`<script>window.__ENV__={"telegramBotUsername":%q}</script>`,
+		conf.Telegram.BotUsername,
+	)
+	injected := strings.Replace(string(content), "</head>", script+"</head>", 1)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(injected))
 }

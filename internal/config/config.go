@@ -27,7 +27,8 @@ type ServerConfig struct {
 }
 
 type TelegramConfig struct {
-	BotToken string `yaml:"bot_token" validate:"required"`
+	BotToken    string `yaml:"bot_token" validate:"required"`
+	BotUsername string `yaml:"bot_username"`
 }
 
 type MCPConfig struct {
