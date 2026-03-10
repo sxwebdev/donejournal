@@ -27,7 +27,8 @@ type Props = {
   onMonthChange: (month: Date) => void
 }
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+const WEEK_START = { weekStartsOn: 1 as const }
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 const statusStyle: Partial<Record<TodoStatus, string>> = {
   [TodoStatus.PENDING]:
@@ -129,8 +130,8 @@ function DayCell({
 }
 
 export function CalendarView({ currentMonth, onMonthChange }: Props) {
-  const start = startOfWeek(startOfMonth(currentMonth))
-  const end = endOfWeek(endOfMonth(currentMonth))
+  const start = startOfWeek(startOfMonth(currentMonth), WEEK_START)
+  const end = endOfWeek(endOfMonth(currentMonth), WEEK_START)
 
   const query = useQuery(getCalendarEntries, {
     from: fromDate(start),
