@@ -145,6 +145,12 @@ Format: {"entries":[...]} where each entry is a separate task`,
 		return nil, fmt.Errorf("parse response: %w", err)
 	}
 
+	for i := range parsed.Entries {
+		if parsed.Entries[i].Title == parsed.Entries[i].Description {
+			parsed.Entries[i].Description = ""
+		}
+	}
+
 	if len(parsed.Entries) > 0 {
 		m.log.Infow(
 			"Successfully parsed entries from LLM response",
