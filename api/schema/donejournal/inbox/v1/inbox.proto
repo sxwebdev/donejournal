@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package donejournal.inbox.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// InboxService manages inbox items — quick-capture entries that can later
+// be converted into structured todos.
+service InboxService {
+  // ListInboxItems returns a paginated list of inbox items for the authenticated user.
+  rpc ListInboxItems(ListInboxItemsRequest) returns (ListInboxItemsResponse);
+
+  // GetInboxItem returns a single inbox item by ID.
+  rpc GetInboxItem(GetInboxItemRequest) returns (GetInboxItemResponse);
+
+  // CreateInboxItem creates a new inbox item.
+  rpc CreateInboxItem(CreateInboxItemRequest) returns (CreateInboxItemResponse);
+
+  // UpdateInboxItem updates an existing inbox item.
+  rpc UpdateInboxItem(UpdateInboxItemRequest) returns (UpdateInboxItemResponse);
+
+  // DeleteInboxItem deletes an inbox item by ID.
+  rpc DeleteInboxItem(DeleteInboxItemRequest) returns (google.protobuf.Empty);
+
+  // ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
+  rpc ConvertToTodo(ConvertToTodoRequest) returns (ConvertToTodoResponse);
+}
+
+// InboxItem represents a single inbox entry.
+message InboxItem {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Message content (max 200 characters).
+  string data = 2;
+  // Additional structured data as JSON string.
+  string additional_data = 3;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 4;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+// ListInboxItemsRequest is the request to list inbox items.
+message ListInboxItemsRequest {
+  // Maximum number of items to return (default: 20, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page. Empty for the first page.
+  string page_token = 2;
+}
+
+// ListInboxItemsResponse is the response containing a list of inbox items.
+message ListInboxItemsResponse {
+  // The list of inbox items.
+  repeated InboxItem items = 1;
+  // Token for the next page. Empty if there are no more results.
+  string next_page_token = 2;
+  // Total number of inbox items for the user.
+  int32 total_count = 3;
+}
+
+// GetInboxItemRequest is the request to get a single inbox item.
+message GetInboxItemRequest {
+  // The ID of the inbox item to retrieve.
+  string id = 1;
+}
+
+// GetInboxItemResponse is the response containing a single inbox item.
+message GetInboxItemResponse {
+  // The inbox item.
+  InboxItem item = 1;
+}
+
+// CreateInboxItemRequest is the request to create an inbox item.
+message CreateInboxItemRequest {
+  // Message content (max 200 characters).
+  string data = 1;
+  // Optional additional structured data as JSON string.
+  string additional_data = 2;
+}
+
+// CreateInboxItemResponse is the response after creating an inbox item.
+message CreateInboxItemResponse {
+  // The created inbox item.
+  InboxItem item = 1;
+}
+
+// UpdateInboxItemRequest is the request to update an inbox item.
+message UpdateInboxItemRequest {
+  // The ID of the inbox item to update.
+  string id = 1;
+  // Updated message content.
+  string data = 2;
+  // Updated additional data.
+  string additional_data = 3;
+}
+
+// UpdateInboxItemResponse is the response after updating an inbox item.
+message UpdateInboxItemResponse {
+  // The updated inbox item.
+  InboxItem item = 1;
+}
+
+// DeleteInboxItemRequest is the request to delete an inbox item.
+message DeleteInboxItemRequest {
+  // The ID of the inbox item to delete.
+  string id = 1;
+}
+
+// ConvertToTodoRequest is the request to convert an inbox item to a todo.
+message ConvertToTodoRequest {
+  // The ID of the inbox item to convert.
+  string inbox_item_id = 1;
+  // The planned date for the new todo.
+  google.protobuf.Timestamp planned_date = 2;
+  // Optional title override. If empty, the inbox item's data field is used.
+  string title = 3;
+  // Optional description for the new todo.
+  string description = 4;
+}
+
+// ConvertToTodoResponse is the response after converting an inbox item to a todo.
+message ConvertToTodoResponse {
+  // The ID of the newly created todo.
+  string todo_id = 1;
+}

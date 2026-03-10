@@ -1,4 +1,4 @@
-package loop
+package loopper
 
 type logger interface {
 	Debugf(format string, args ...any)

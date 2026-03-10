@@ -18,6 +18,7 @@ require (
 	github.com/sxwebdev/xconfig/decoders/xconfigyaml v0.0.0-20260204103015-8002f9e58740
 	github.com/tkcrm/mx v0.2.34
 	github.com/urfave/cli/v3 v3.7.0
+	google.golang.org/protobuf v1.36.11
 	modernc.org/sqlite v1.46.1
 )
 
@@ -89,7 +90,6 @@ require (
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.34.0 // indirect
-	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
