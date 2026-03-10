@@ -9,7 +9,7 @@ COPY frontend/package.json frontend/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 COPY frontend/ .
-RUN pnpm run build
+RUN VITE_TELEGRAM_BOT_USERNAME=${VITE_TELEGRAM_BOT_USERNAME} pnpm run build
 
 # Backend build stage
 FROM golang:1.26.1-alpine AS backend-builder
