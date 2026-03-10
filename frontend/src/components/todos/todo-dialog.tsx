@@ -15,7 +15,7 @@ import {
 } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { fromDate, toDate } from "@/lib/dates"
+import { fromDateOnly, toDate } from "@/lib/dates"
 import { ConnectError } from "@connectrpc/connect"
 import { toast } from "sonner"
 
@@ -23,6 +23,7 @@ type CreateProps = {
   mode: "create"
   open: boolean
   onOpenChange: (open: boolean) => void
+  initialDate?: Date
 }
 
 type EditProps = {
@@ -74,7 +75,7 @@ export function TodoDialog(props: Props) {
           title: values.title,
           description: values.description ?? "",
           plannedDate: values.plannedDate
-            ? fromDate(values.plannedDate)
+            ? fromDateOnly(values.plannedDate)
             : undefined,
         })
       } else {
@@ -83,7 +84,7 @@ export function TodoDialog(props: Props) {
           title: values.title,
           description: values.description,
           plannedDate: values.plannedDate
-            ? fromDate(values.plannedDate)
+            ? fromDateOnly(values.plannedDate)
             : undefined,
           status: values.status !== undefined ? values.status : undefined,
         })
@@ -103,7 +104,9 @@ export function TodoDialog(props: Props) {
           plannedDate: toDate(props.todo.plannedDate),
           status: props.todo.status as TodoStatus,
         }
-      : undefined
+      : props.initialDate
+        ? { plannedDate: props.initialDate }
+        : undefined
 
   const isPending = createMutation.isPending || updateMutation.isPending
 

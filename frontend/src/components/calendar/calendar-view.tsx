@@ -50,7 +50,7 @@ function chunk<T>(arr: T[], size: number): T[][] {
 function TodoRow({ todo, onClick }: { todo: Todo; onClick: () => void }) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => { e.stopPropagation(); onClick() }}
       className={cn(
         "w-full truncate rounded px-1 py-0.5 text-left text-xs",
         statusStyle[todo.status] ?? "bg-muted text-muted-foreground"
@@ -71,6 +71,7 @@ function DayCell({
   isCurrentMonth: boolean
 }) {
   const [editTodo, setEditTodo] = useState<Todo | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
   // Use local date for URL (so user sees correct date), UTC-based key is handled in CalendarView
   const linkDateStr = format(date, "yyyy-MM-dd")
   const todos = calDay?.todos ?? []
@@ -84,6 +85,7 @@ function DayCell({
           "flex min-h-30 flex-col border-r border-b p-1",
           !isCurrentMonth && "opacity-40"
         )}
+        onClick={() => setCreateOpen(true)}
       >
         <div className="mb-1 flex items-center justify-center">
           <span
@@ -108,6 +110,7 @@ function DayCell({
               to="/todos"
               search={{ from: linkDateStr, to: linkDateStr }}
               className="px-1 text-xs text-muted-foreground hover:text-primary"
+              onClick={(e) => e.stopPropagation()}
             >
               +{remaining} more
             </Link>
@@ -123,6 +126,16 @@ function DayCell({
           onOpenChange={(open) => {
             if (!open) setEditTodo(null)
           }}
+        />
+      )}
+      {createOpen && (
+        <TodoDialog
+          mode="create"
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setCreateOpen(false)
+          }}
+          initialDate={date}
         />
       )}
     </>
