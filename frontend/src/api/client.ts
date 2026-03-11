@@ -3,6 +3,7 @@ import { createConnectTransport } from "@connectrpc/connect-web"
 import { getToken } from "@/lib/auth"
 import { TodoService } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { InboxService } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
+import { NoteService } from "@/api/gen/donejournal/notes/v1/notes_pb"
 
 export const transport = createConnectTransport({
   baseUrl: "/api/v1",
@@ -19,3 +20,4 @@ export const transport = createConnectTransport({
 
 export const todosClient = createClient(TodoService, transport)
 export const inboxClient = createClient(InboxService, transport)
+export const notesClient = createClient(NoteService, transport)

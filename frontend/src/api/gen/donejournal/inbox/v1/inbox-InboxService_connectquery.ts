@@ -45,3 +45,10 @@ export const deleteInboxItem = InboxService.method.deleteInboxItem;
  * @generated from rpc donejournal.inbox.v1.InboxService.ConvertToTodo
  */
 export const convertToTodo = InboxService.method.convertToTodo;
+
+/**
+ * ConvertToNote converts an inbox item into a note and deletes the inbox item.
+ *
+ * @generated from rpc donejournal.inbox.v1.InboxService.ConvertToNote
+ */
+export const convertToNote = InboxService.method.convertToNote;

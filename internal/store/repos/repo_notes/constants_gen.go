@@ -2,7 +2,7 @@
 // versions:
 //
 //	pgxgen v0.3.14
-package repo_inbox
+package repo_notes
 
 import (
 	"strings"
@@ -15,7 +15,7 @@ type TableName string
 func (s TableName) String() string { return string(s) }
 
 const (
-	TableNameInbox TableName = "inbox"
+	TableNameNotes TableName = "notes"
 )
 
 type ColumnName string
@@ -39,21 +39,21 @@ func (s ColumnNames) Strings() []string {
 }
 
 const (
-	ColumnNameInboxId             ColumnName = "id"
-	ColumnNameInboxData           ColumnName = "data"
-	ColumnNameInboxAdditionalData ColumnName = "additional_data"
-	ColumnNameInboxUserId         ColumnName = "user_id"
-	ColumnNameInboxCreatedAt      ColumnName = "created_at"
-	ColumnNameInboxUpdatedAt      ColumnName = "updated_at"
+	ColumnNameNotesId        ColumnName = "id"
+	ColumnNameNotesUserId    ColumnName = "user_id"
+	ColumnNameNotesTitle     ColumnName = "title"
+	ColumnNameNotesBody      ColumnName = "body"
+	ColumnNameNotesCreatedAt ColumnName = "created_at"
+	ColumnNameNotesUpdatedAt ColumnName = "updated_at"
 )
 
-func InboxColumnNames() ColumnNames {
+func NotesColumnNames() ColumnNames {
 	return ColumnNames{
-		ColumnNameInboxId,
-		ColumnNameInboxData,
-		ColumnNameInboxAdditionalData,
-		ColumnNameInboxUserId,
-		ColumnNameInboxCreatedAt,
-		ColumnNameInboxUpdatedAt,
+		ColumnNameNotesId,
+		ColumnNameNotesUserId,
+		ColumnNameNotesTitle,
+		ColumnNameNotesBody,
+		ColumnNameNotesCreatedAt,
+		ColumnNameNotesUpdatedAt,
 	}
 }

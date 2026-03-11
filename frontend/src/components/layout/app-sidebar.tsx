@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Inbox, CheckSquare, Calendar, LogOut, Sun, Moon } from "lucide-react"
+import { Inbox, CheckSquare, Calendar, FileText, LogOut, Sun, Moon } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +40,7 @@ function ThemeToggle() {
 const navItems = [
   { to: "/inbox", label: "Inbox", icon: Inbox },
   { to: "/todos", label: "Todos", icon: CheckSquare },
+  { to: "/notes", label: "Notes", icon: FileText },
   { to: "/calendar", label: "Calendar", icon: Calendar },
 ] as const
 

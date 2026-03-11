@@ -9,12 +9,9 @@ import {
 } from "@/api/gen/donejournal/inbox/v1/inbox-InboxService_connectquery"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-
-const MAX = 200
 
 const schema = z.object({
-  data: z.string().min(1, "Can't be empty").max(MAX, `Max ${MAX} characters`),
+  data: z.string().min(1, "Can't be empty"),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -26,7 +23,6 @@ export function InboxQuickAdd() {
     register,
     handleSubmit,
     reset,
-    watch,
     formState: { errors },
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
@@ -37,8 +33,6 @@ export function InboxQuickAdd() {
     },
   })
 
-  const value = watch("data") ?? ""
-
   const onSubmit = (values: FormValues) => {
     mutate({ data: values.data, additionalData: "" })
   }
@@ -48,8 +42,8 @@ export function InboxQuickAdd() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
         <Textarea
           placeholder="Capture a thought..."
-          rows={2}
-          className="resize-none"
+          rows={3}
+          className="resize-y"
           {...register("data")}
           onKeyDown={(e) => {
             if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -57,18 +51,13 @@ export function InboxQuickAdd() {
             }
           }}
         />
-        <div className="flex items-center justify-between">
-          <span className={cn("text-xs text-muted-foreground", value.length > MAX && "text-destructive")}>
-            {value.length}/{MAX}
-          </span>
-          <div className="flex items-center gap-2">
-            {errors.data && (
-              <p className="text-xs text-destructive">{errors.data.message}</p>
-            )}
-            <Button type="submit" size="sm" disabled={isPending}>
-              {isPending ? "Adding..." : "Add"}
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-2">
+          {errors.data && (
+            <p className="text-xs text-destructive">{errors.data.message}</p>
+          )}
+          <Button type="submit" size="sm" disabled={isPending}>
+            {isPending ? "Adding..." : "Add"}
+          </Button>
         </div>
       </form>
     </div>

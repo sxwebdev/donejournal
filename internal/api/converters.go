@@ -5,6 +5,7 @@ import (
 
 	authv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1"
 	inboxv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1"
+	notesv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/notes/v1"
 	todosv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1"
 	"github.com/sxwebdev/donejournal/internal/models"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -63,6 +64,16 @@ func inboxItemToProto(i *models.Inbox) *inboxv1.InboxItem {
 		AdditionalData: string(i.AdditionalData),
 		CreatedAt:      timestamppb.New(i.CreatedAt),
 		UpdatedAt:      timestamppb.New(i.UpdatedAt),
+	}
+}
+
+func noteToProto(n *models.Note) *notesv1.Note {
+	return &notesv1.Note{
+		Id:        n.ID,
+		Title:     n.Title,
+		Body:      n.Body,
+		CreatedAt: timestamppb.New(n.CreatedAt),
+		UpdatedAt: timestamppb.New(n.UpdatedAt),
 	}
 }
 

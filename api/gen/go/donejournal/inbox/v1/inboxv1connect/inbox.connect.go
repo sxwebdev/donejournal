@@ -52,6 +52,9 @@ const (
 	// InboxServiceConvertToTodoProcedure is the fully-qualified name of the InboxService's
 	// ConvertToTodo RPC.
 	InboxServiceConvertToTodoProcedure = "/donejournal.inbox.v1.InboxService/ConvertToTodo"
+	// InboxServiceConvertToNoteProcedure is the fully-qualified name of the InboxService's
+	// ConvertToNote RPC.
+	InboxServiceConvertToNoteProcedure = "/donejournal.inbox.v1.InboxService/ConvertToNote"
 	// InboxServiceSubscribeInboxProcedure is the fully-qualified name of the InboxService's
 	// SubscribeInbox RPC.
 	InboxServiceSubscribeInboxProcedure = "/donejournal.inbox.v1.InboxService/SubscribeInbox"
@@ -71,6 +74,8 @@ type InboxServiceClient interface {
 	DeleteInboxItem(context.Context, *connect.Request[v1.DeleteInboxItemRequest]) (*connect.Response[emptypb.Empty], error)
 	// ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
 	ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error)
+	// ConvertToNote converts an inbox item into a note and deletes the inbox item.
+	ConvertToNote(context.Context, *connect.Request[v1.ConvertToNoteRequest]) (*connect.Response[v1.ConvertToNoteResponse], error)
 	// SubscribeInbox opens a server-streaming subscription that sends an event whenever
 	// any inbox item belonging to the authenticated user is created, updated, or deleted.
 	SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest]) (*connect.ServerStreamForClient[v1.SubscribeInboxResponse], error)
@@ -123,6 +128,12 @@ func NewInboxServiceClient(httpClient connect.HTTPClient, baseURL string, opts .
 			connect.WithSchema(inboxServiceMethods.ByName("ConvertToTodo")),
 			connect.WithClientOptions(opts...),
 		),
+		convertToNote: connect.NewClient[v1.ConvertToNoteRequest, v1.ConvertToNoteResponse](
+			httpClient,
+			baseURL+InboxServiceConvertToNoteProcedure,
+			connect.WithSchema(inboxServiceMethods.ByName("ConvertToNote")),
+			connect.WithClientOptions(opts...),
+		),
 		subscribeInbox: connect.NewClient[v1.SubscribeInboxRequest, v1.SubscribeInboxResponse](
 			httpClient,
 			baseURL+InboxServiceSubscribeInboxProcedure,
@@ -140,6 +151,7 @@ type inboxServiceClient struct {
 	updateInboxItem *connect.Client[v1.UpdateInboxItemRequest, v1.UpdateInboxItemResponse]
 	deleteInboxItem *connect.Client[v1.DeleteInboxItemRequest, emptypb.Empty]
 	convertToTodo   *connect.Client[v1.ConvertToTodoRequest, v1.ConvertToTodoResponse]
+	convertToNote   *connect.Client[v1.ConvertToNoteRequest, v1.ConvertToNoteResponse]
 	subscribeInbox  *connect.Client[v1.SubscribeInboxRequest, v1.SubscribeInboxResponse]
 }
 
@@ -173,6 +185,11 @@ func (c *inboxServiceClient) ConvertToTodo(ctx context.Context, req *connect.Req
 	return c.convertToTodo.CallUnary(ctx, req)
 }
 
+// ConvertToNote calls donejournal.inbox.v1.InboxService.ConvertToNote.
+func (c *inboxServiceClient) ConvertToNote(ctx context.Context, req *connect.Request[v1.ConvertToNoteRequest]) (*connect.Response[v1.ConvertToNoteResponse], error) {
+	return c.convertToNote.CallUnary(ctx, req)
+}
+
 // SubscribeInbox calls donejournal.inbox.v1.InboxService.SubscribeInbox.
 func (c *inboxServiceClient) SubscribeInbox(ctx context.Context, req *connect.Request[v1.SubscribeInboxRequest]) (*connect.ServerStreamForClient[v1.SubscribeInboxResponse], error) {
 	return c.subscribeInbox.CallServerStream(ctx, req)
@@ -192,6 +209,8 @@ type InboxServiceHandler interface {
 	DeleteInboxItem(context.Context, *connect.Request[v1.DeleteInboxItemRequest]) (*connect.Response[emptypb.Empty], error)
 	// ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
 	ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error)
+	// ConvertToNote converts an inbox item into a note and deletes the inbox item.
+	ConvertToNote(context.Context, *connect.Request[v1.ConvertToNoteRequest]) (*connect.Response[v1.ConvertToNoteResponse], error)
 	// SubscribeInbox opens a server-streaming subscription that sends an event whenever
 	// any inbox item belonging to the authenticated user is created, updated, or deleted.
 	SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest], *connect.ServerStream[v1.SubscribeInboxResponse]) error
@@ -240,6 +259,12 @@ func NewInboxServiceHandler(svc InboxServiceHandler, opts ...connect.HandlerOpti
 		connect.WithSchema(inboxServiceMethods.ByName("ConvertToTodo")),
 		connect.WithHandlerOptions(opts...),
 	)
+	inboxServiceConvertToNoteHandler := connect.NewUnaryHandler(
+		InboxServiceConvertToNoteProcedure,
+		svc.ConvertToNote,
+		connect.WithSchema(inboxServiceMethods.ByName("ConvertToNote")),
+		connect.WithHandlerOptions(opts...),
+	)
 	inboxServiceSubscribeInboxHandler := connect.NewServerStreamHandler(
 		InboxServiceSubscribeInboxProcedure,
 		svc.SubscribeInbox,
@@ -260,6 +285,8 @@ func NewInboxServiceHandler(svc InboxServiceHandler, opts ...connect.HandlerOpti
 			inboxServiceDeleteInboxItemHandler.ServeHTTP(w, r)
 		case InboxServiceConvertToTodoProcedure:
 			inboxServiceConvertToTodoHandler.ServeHTTP(w, r)
+		case InboxServiceConvertToNoteProcedure:
+			inboxServiceConvertToNoteHandler.ServeHTTP(w, r)
 		case InboxServiceSubscribeInboxProcedure:
 			inboxServiceSubscribeInboxHandler.ServeHTTP(w, r)
 		default:
@@ -293,6 +320,10 @@ func (UnimplementedInboxServiceHandler) DeleteInboxItem(context.Context, *connec
 
 func (UnimplementedInboxServiceHandler) ConvertToTodo(context.Context, *connect.Request[v1.ConvertToTodoRequest]) (*connect.Response[v1.ConvertToTodoResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.inbox.v1.InboxService.ConvertToTodo is not implemented"))
+}
+
+func (UnimplementedInboxServiceHandler) ConvertToNote(context.Context, *connect.Request[v1.ConvertToNoteRequest]) (*connect.Response[v1.ConvertToNoteResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.inbox.v1.InboxService.ConvertToNote is not implemented"))
 }
 
 func (UnimplementedInboxServiceHandler) SubscribeInbox(context.Context, *connect.Request[v1.SubscribeInboxRequest], *connect.ServerStream[v1.SubscribeInboxResponse]) error {

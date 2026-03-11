@@ -19,6 +19,15 @@ type Inbox struct {
 	UpdatedAt      time.Time          `db:"updated_at" json:"updated_at"`
 }
 
+type Note struct {
+	ID        string    `db:"id" json:"id" validate:"required"`
+	UserID    int64     `db:"user_id" json:"user_id" validate:"required"`
+	Title     string    `db:"title" json:"title" validate:"required"`
+	Body      string    `db:"body" json:"body"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+}
+
 type Todo struct {
 	ID          string         `db:"id" json:"id" validate:"required"`
 	UserID      int64          `db:"user_id" json:"user_id" validate:"required"`

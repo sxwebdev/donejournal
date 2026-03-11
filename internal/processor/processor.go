@@ -56,11 +56,7 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		if content == "" {
 			content = data
 		}
-		runes := []rune(content)
-		if len(runes) > 200 {
-			runes = runes[:200]
-		}
-		if _, err := s.baseService.Inbox().Create(ctx, string(runes), strconv.FormatInt(userID, 10)); err != nil {
+		if _, err := s.baseService.Inbox().Create(ctx, content, strconv.FormatInt(userID, 10)); err != nil {
 			return "", fmt.Errorf("failed to create inbox item: %w", err)
 		}
 		return "Saved to inbox 📥", nil
@@ -69,26 +65,44 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 	resp, err := s.mcpService.ParseMessage(ctx, data)
 	if err != nil {
 		s.logger.Errorf("failed to parse message via MCP, saving to inbox: %v", err)
-		runes := []rune(data)
-		if len(runes) > 200 {
-			runes = runes[:200]
-		}
-		if _, inboxErr := s.baseService.Inbox().Create(ctx, string(runes), strconv.FormatInt(userID, 10)); inboxErr != nil {
+		if _, inboxErr := s.baseService.Inbox().Create(ctx, data, strconv.FormatInt(userID, 10)); inboxErr != nil {
 			return "", fmt.Errorf("mcp error: %w; inbox fallback also failed: %v", err, inboxErr)
 		}
 		return "Saved to inbox 📥", nil
 	}
 
-	if err := s.baseService.Todos().BatchCreate(ctx, userID, resp); err != nil {
-		return "", fmt.Errorf("failed to batch create todos: %w", err)
+	// Separate note entries from todo/done entries
+	var todoEntries []mcp.ParsedEntry
+	var noteEntries []mcp.ParsedEntry
+	for _, entry := range resp.Entries {
+		if entry.Kind == mcp.EntryKindNote {
+			noteEntries = append(noteEntries, entry)
+		} else {
+			todoEntries = append(todoEntries, entry)
+		}
+	}
+
+	// Create todos
+	if len(todoEntries) > 0 {
+		todoResp := &mcp.ParsedResponse{Entries: todoEntries}
+		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp); err != nil {
+			return "", fmt.Errorf("failed to batch create todos: %w", err)
+		}
+	}
+
+	// Create notes
+	for _, entry := range noteEntries {
+		body := entry.Body
+		if body == "" {
+			body = entry.Description
+		}
+		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body); err != nil {
+			return "", fmt.Errorf("failed to create note '%s': %w", entry.Title, err)
+		}
 	}
 
 	if len(resp.Entries) == 0 {
-		runes := []rune(data)
-		if len(runes) > 200 {
-			runes = runes[:200]
-		}
-		if _, err := s.baseService.Inbox().Create(ctx, string(runes), strconv.FormatInt(userID, 10)); err != nil {
+		if _, err := s.baseService.Inbox().Create(ctx, data, strconv.FormatInt(userID, 10)); err != nil {
 			return "", fmt.Errorf("failed to create inbox item: %w", err)
 		}
 		return "Saved to inbox 📥", nil
@@ -97,8 +111,11 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 	if len(resp.Entries) == 1 {
 		entry := resp.Entries[0]
 		prefix := "✅"
-		if entry.Kind == mcp.EntryKindTodo {
+		switch entry.Kind {
+		case mcp.EntryKindTodo:
 			prefix = "📝"
+		case mcp.EntryKindNote:
+			prefix = "🗒️"
 		}
 		return fmt.Sprintf("%s %s", prefix, entry.Title), nil
 	}
@@ -109,8 +126,11 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 	}
 	for i, entry := range resp.Entries {
 		formatPreffix := "\n✅"
-		if entry.Kind == mcp.EntryKindTodo {
+		switch entry.Kind {
+		case mcp.EntryKindTodo:
 			formatPreffix = "\n📝"
+		case mcp.EntryKindNote:
+			formatPreffix = "\n🗒️"
 		}
 		if _, err := fmt.Fprintf(responseText, formatPreffix+" %d. %s", i+1, entry.Title); err != nil {
 			return "", fmt.Errorf("failed to write result text: %w", err)

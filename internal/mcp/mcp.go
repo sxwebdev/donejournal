@@ -16,15 +16,17 @@ type EntryKind string
 const (
 	EntryKindTodo EntryKind = "todo"
 	EntryKindDone EntryKind = "done"
+	EntryKindNote EntryKind = "note"
 )
 
 // ParsedEntry represents a single parsed task entry from the LLM
 type ParsedEntry struct {
-	Kind        EntryKind `json:"kind"`        // "todo" or "done"
+	Kind        EntryKind `json:"kind"`        // "todo", "done", or "note"
 	Title       string    `json:"title"`       // short title
 	Date        string    `json:"date"`        // YYYY-MM-DD
 	Description string    `json:"description"` // cleaned text
-	Language    string    `json:"language"`    // "ru" | "en" | "unknown"
+	Body        string    `json:"body"`        // full text (for notes)
+	Language    string    `json:"language"`     // "ru" | "en" | "unknown"
 	Confidence  float64   `json:"confidence"`  // 0..1
 }
 
@@ -102,10 +104,13 @@ Russian: понедельник=Mon, вторник=Tue, среду=Wed, чет�
 Task type:
 - "сделал"/"done"/"completed" -> kind:"done"
 - "нужно"/"надо"/"добавь" -> kind:"todo"
+- "запиши"/"заметка"/"note"/"remember"/"запомни" -> kind:"note"
 
-IMPORTANT: Keep original language in title and description
+For notes: "title" is a short title, "body" is the full text content (markdown). Date is not used for notes.
 
-Format: {"entries":[...]} where each entry is a separate task`,
+IMPORTANT: Keep original language in title, description, and body
+
+Format: {"entries":[...]} where each entry is a separate task or note`,
 		today, todayWeekday,
 		addDaysToDate(1),
 		addDaysToDate(2),
@@ -129,6 +134,9 @@ Format: {"entries":[...]} where each entry is a separate task`,
 		// Example 4: Single task with date
 		{Role: "user", Content: "добавь задачу на завтра - обновить домен"},
 		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"todo","title":"обновить домен","date":"%s","description":"обновить домен","language":"ru","confidence":0.97}]}`, addDaysToDate(1))},
+		// Example 5: Note creation
+		{Role: "user", Content: "заметка: идеи для нового проекта\nИспользовать Go + React\nДобавить авторизацию через Telegram"},
+		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"note","title":"идеи для нового проекта","date":"%s","description":"","body":"Использовать Go + React\nДобавить авторизацию через Telegram","language":"ru","confidence":0.95}]}`, today)},
 		// Actual user input
 		{Role: "user", Content: text},
 	}

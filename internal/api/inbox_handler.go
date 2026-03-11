@@ -193,6 +193,37 @@ func (h *InboxHandler) ConvertToTodo(ctx context.Context, req *connect.Request[i
 	}), nil
 }
 
+func (h *InboxHandler) ConvertToNote(ctx context.Context, req *connect.Request[inboxv1.ConvertToNoteRequest]) (*connect.Response[inboxv1.ConvertToNoteResponse], error) {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check ownership
+	existing, err := h.baseService.Inbox().GetByID(ctx, req.Msg.GetInboxItemId())
+	if err != nil {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("inbox item not found"))
+	}
+	if existing.UserID != strconv.FormatInt(userID, 10) {
+		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("inbox item not found"))
+	}
+
+	noteID, err := h.baseService.Inbox().ConvertToNote(
+		ctx,
+		req.Msg.GetInboxItemId(),
+		userID,
+		req.Msg.GetTitle(),
+		req.Msg.GetBody(),
+	)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&inboxv1.ConvertToNoteResponse{
+		NoteId: noteID,
+	}), nil
+}
+
 func (h *InboxHandler) SubscribeInbox(
 	ctx context.Context,
 	req *connect.Request[inboxv1.SubscribeInboxRequest],

@@ -1,4 +1,4 @@
-version: 1
+version: "1"
 sqlc:
   - schema_dir: migrations
     models:
@@ -43,6 +43,20 @@ sqlc:
             get:
               name: GetByID
 
+        # notes
+        notes:
+          output_dir: queries/notes
+          primary_column: id
+          methods:
+            create:
+              skip_columns:
+                - created_at
+                - updated_at
+              returning: "*"
+            delete:
+            get:
+              name: GetByID
+
     constants:
       tables:
         inbox:
@@ -50,4 +64,7 @@ sqlc:
           include_column_names: true
         todos:
           output_dir: ../internal/store/repos/repo_todos
+          include_column_names: true
+        notes:
+          output_dir: ../internal/store/repos/repo_notes
           include_column_names: true

@@ -6,7 +6,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 // InboxService manages inbox items — quick-capture entries that can later
-// be converted into structured todos.
+// be converted into structured todos or notes.
 service InboxService {
   // ListInboxItems returns a paginated list of inbox items for the authenticated user.
   rpc ListInboxItems(ListInboxItemsRequest) returns (ListInboxItemsResponse);
@@ -26,6 +26,9 @@ service InboxService {
   // ConvertToTodo converts an inbox item into a todo and deletes the inbox item.
   rpc ConvertToTodo(ConvertToTodoRequest) returns (ConvertToTodoResponse);
 
+  // ConvertToNote converts an inbox item into a note and deletes the inbox item.
+  rpc ConvertToNote(ConvertToNoteRequest) returns (ConvertToNoteResponse);
+
   // SubscribeInbox opens a server-streaming subscription that sends an event whenever
   // any inbox item belonging to the authenticated user is created, updated, or deleted.
   rpc SubscribeInbox(SubscribeInboxRequest) returns (stream SubscribeInboxResponse);
@@ -35,7 +38,7 @@ service InboxService {
 message InboxItem {
   // Unique identifier (ULID).
   string id = 1;
-  // Message content (max 200 characters).
+  // Message content.
   string data = 2;
   // Additional structured data as JSON string.
   string additional_data = 3;
@@ -77,7 +80,7 @@ message GetInboxItemResponse {
 
 // CreateInboxItemRequest is the request to create an inbox item.
 message CreateInboxItemRequest {
-  // Message content (max 200 characters).
+  // Message content.
   string data = 1;
   // Optional additional structured data as JSON string.
   string additional_data = 2;
@@ -127,6 +130,22 @@ message ConvertToTodoRequest {
 message ConvertToTodoResponse {
   // The ID of the newly created todo.
   string todo_id = 1;
+}
+
+// ConvertToNoteRequest is the request to convert an inbox item to a note.
+message ConvertToNoteRequest {
+  // The ID of the inbox item to convert.
+  string inbox_item_id = 1;
+  // Optional title override. If empty, the inbox item's data field is used.
+  string title = 2;
+  // Note body (markdown).
+  string body = 3;
+}
+
+// ConvertToNoteResponse is the response after converting an inbox item to a note.
+message ConvertToNoteResponse {
+  // The ID of the newly created note.
+  string note_id = 1;
 }
 
 // SubscribeInboxRequest is the request to subscribe to inbox change events.

@@ -35,7 +35,7 @@ import {
 import { fromDate } from "@/lib/dates"
 
 const schema = z.object({
-  title: z.string().min(1, "Title is required").max(200),
+  title: z.string().min(1, "Title is required"),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
 })

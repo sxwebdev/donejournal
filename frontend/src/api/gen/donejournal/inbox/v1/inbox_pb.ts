@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file donejournal/inbox/v1/inbox.proto.
  */
 export const file_donejournal_inbox_v1_inbox: GenFile = /*@__PURE__*/
-  fileDesc("CiBkb25lam91cm5hbC9pbmJveC92MS9pbmJveC5wcm90bxIUZG9uZWpvdXJuYWwuaW5ib3gudjEingEKCUluYm94SXRlbRIKCgJpZBgBIAEoCRIMCgRkYXRhGAIgASgJEhcKD2FkZGl0aW9uYWxfZGF0YRgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCI+ChVMaXN0SW5ib3hJdGVtc1JlcXVlc3QSEQoJcGFnZV9zaXplGAEgASgFEhIKCnBhZ2VfdG9rZW4YAiABKAkidgoWTGlzdEluYm94SXRlbXNSZXNwb25zZRIuCgVpdGVtcxgBIAMoCzIfLmRvbmVqb3VybmFsLmluYm94LnYxLkluYm94SXRlbRIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkSEwoLdG90YWxfY291bnQYAyABKAUiIQoTR2V0SW5ib3hJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSJFChRHZXRJbmJveEl0ZW1SZXNwb25zZRItCgRpdGVtGAEgASgLMh8uZG9uZWpvdXJuYWwuaW5ib3gudjEuSW5ib3hJdGVtIj8KFkNyZWF0ZUluYm94SXRlbVJlcXVlc3QSDAoEZGF0YRgBIAEoCRIXCg9hZGRpdGlvbmFsX2RhdGEYAiABKAkiSAoXQ3JlYXRlSW5ib3hJdGVtUmVzcG9uc2USLQoEaXRlbRgBIAEoCzIfLmRvbmVqb3VybmFsLmluYm94LnYxLkluYm94SXRlbSJLChZVcGRhdGVJbmJveEl0ZW1SZXF1ZXN0EgoKAmlkGAEgASgJEgwKBGRhdGEYAiABKAkSFwoPYWRkaXRpb25hbF9kYXRhGAMgASgJIkgKF1VwZGF0ZUluYm94SXRlbVJlc3BvbnNlEi0KBGl0ZW0YASABKAsyHy5kb25lam91cm5hbC5pbmJveC52MS5JbmJveEl0ZW0iJAoWRGVsZXRlSW5ib3hJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSKDAQoUQ29udmVydFRvVG9kb1JlcXVlc3QSFQoNaW5ib3hfaXRlbV9pZBgBIAEoCRIwCgxwbGFubmVkX2RhdGUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg0KBXRpdGxlGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJIigKFUNvbnZlcnRUb1RvZG9SZXNwb25zZRIPCgd0b2RvX2lkGAEgASgJIhcKFVN1YnNjcmliZUluYm94UmVxdWVzdCIYChZTdWJzY3JpYmVJbmJveFJlc3BvbnNlMvQFCgxJbmJveFNlcnZpY2USawoOTGlzdEluYm94SXRlbXMSKy5kb25lam91cm5hbC5pbmJveC52MS5MaXN0SW5ib3hJdGVtc1JlcXVlc3QaLC5kb25lam91cm5hbC5pbmJveC52MS5MaXN0SW5ib3hJdGVtc1Jlc3BvbnNlEmUKDEdldEluYm94SXRlbRIpLmRvbmVqb3VybmFsLmluYm94LnYxLkdldEluYm94SXRlbVJlcXVlc3QaKi5kb25lam91cm5hbC5pbmJveC52MS5HZXRJbmJveEl0ZW1SZXNwb25zZRJuCg9DcmVhdGVJbmJveEl0ZW0SLC5kb25lam91cm5hbC5pbmJveC52MS5DcmVhdGVJbmJveEl0ZW1SZXF1ZXN0Gi0uZG9uZWpvdXJuYWwuaW5ib3gudjEuQ3JlYXRlSW5ib3hJdGVtUmVzcG9uc2USbgoPVXBkYXRlSW5ib3hJdGVtEiwuZG9uZWpvdXJuYWwuaW5ib3gudjEuVXBkYXRlSW5ib3hJdGVtUmVxdWVzdBotLmRvbmVqb3VybmFsLmluYm94LnYxLlVwZGF0ZUluYm94SXRlbVJlc3BvbnNlElcKD0RlbGV0ZUluYm94SXRlbRIsLmRvbmVqb3VybmFsLmluYm94LnYxLkRlbGV0ZUluYm94SXRlbVJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkSaAoNQ29udmVydFRvVG9kbxIqLmRvbmVqb3VybmFsLmluYm94LnYxLkNvbnZlcnRUb1RvZG9SZXF1ZXN0GisuZG9uZWpvdXJuYWwuaW5ib3gudjEuQ29udmVydFRvVG9kb1Jlc3BvbnNlEm0KDlN1YnNjcmliZUluYm94EisuZG9uZWpvdXJuYWwuaW5ib3gudjEuU3Vic2NyaWJlSW5ib3hSZXF1ZXN0GiwuZG9uZWpvdXJuYWwuaW5ib3gudjEuU3Vic2NyaWJlSW5ib3hSZXNwb25zZTABQuEBChhjb20uZG9uZWpvdXJuYWwuaW5ib3gudjFCCkluYm94UHJvdG9QAVpHZ2l0aHViLmNvbS9zeHdlYmRldi9kb25lam91cm5hbC9hcGkvZ2VuL2dvL2RvbmVqb3VybmFsL2luYm94L3YxO2luYm94djGiAgNESViqAhREb25lam91cm5hbC5JbmJveC5WMcoCFERvbmVqb3VybmFsXEluYm94XFYx4gIgRG9uZWpvdXJuYWxcSW5ib3hcVjFcR1BCTWV0YWRhdGHqAhZEb25lam91cm5hbDo6SW5ib3g6OlYxYgZwcm90bzM", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
+  fileDesc("CiBkb25lam91cm5hbC9pbmJveC92MS9pbmJveC5wcm90bxIUZG9uZWpvdXJuYWwuaW5ib3gudjEingEKCUluYm94SXRlbRIKCgJpZBgBIAEoCRIMCgRkYXRhGAIgASgJEhcKD2FkZGl0aW9uYWxfZGF0YRgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCI+ChVMaXN0SW5ib3hJdGVtc1JlcXVlc3QSEQoJcGFnZV9zaXplGAEgASgFEhIKCnBhZ2VfdG9rZW4YAiABKAkidgoWTGlzdEluYm94SXRlbXNSZXNwb25zZRIuCgVpdGVtcxgBIAMoCzIfLmRvbmVqb3VybmFsLmluYm94LnYxLkluYm94SXRlbRIXCg9uZXh0X3BhZ2VfdG9rZW4YAiABKAkSEwoLdG90YWxfY291bnQYAyABKAUiIQoTR2V0SW5ib3hJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSJFChRHZXRJbmJveEl0ZW1SZXNwb25zZRItCgRpdGVtGAEgASgLMh8uZG9uZWpvdXJuYWwuaW5ib3gudjEuSW5ib3hJdGVtIj8KFkNyZWF0ZUluYm94SXRlbVJlcXVlc3QSDAoEZGF0YRgBIAEoCRIXCg9hZGRpdGlvbmFsX2RhdGEYAiABKAkiSAoXQ3JlYXRlSW5ib3hJdGVtUmVzcG9uc2USLQoEaXRlbRgBIAEoCzIfLmRvbmVqb3VybmFsLmluYm94LnYxLkluYm94SXRlbSJLChZVcGRhdGVJbmJveEl0ZW1SZXF1ZXN0EgoKAmlkGAEgASgJEgwKBGRhdGEYAiABKAkSFwoPYWRkaXRpb25hbF9kYXRhGAMgASgJIkgKF1VwZGF0ZUluYm94SXRlbVJlc3BvbnNlEi0KBGl0ZW0YASABKAsyHy5kb25lam91cm5hbC5pbmJveC52MS5JbmJveEl0ZW0iJAoWRGVsZXRlSW5ib3hJdGVtUmVxdWVzdBIKCgJpZBgBIAEoCSKDAQoUQ29udmVydFRvVG9kb1JlcXVlc3QSFQoNaW5ib3hfaXRlbV9pZBgBIAEoCRIwCgxwbGFubmVkX2RhdGUYAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEg0KBXRpdGxlGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJIigKFUNvbnZlcnRUb1RvZG9SZXNwb25zZRIPCgd0b2RvX2lkGAEgASgJIkoKFENvbnZlcnRUb05vdGVSZXF1ZXN0EhUKDWluYm94X2l0ZW1faWQYASABKAkSDQoFdGl0bGUYAiABKAkSDAoEYm9keRgDIAEoCSIoChVDb252ZXJ0VG9Ob3RlUmVzcG9uc2USDwoHbm90ZV9pZBgBIAEoCSIXChVTdWJzY3JpYmVJbmJveFJlcXVlc3QiGAoWU3Vic2NyaWJlSW5ib3hSZXNwb25zZTLeBgoMSW5ib3hTZXJ2aWNlEmsKDkxpc3RJbmJveEl0ZW1zEisuZG9uZWpvdXJuYWwuaW5ib3gudjEuTGlzdEluYm94SXRlbXNSZXF1ZXN0GiwuZG9uZWpvdXJuYWwuaW5ib3gudjEuTGlzdEluYm94SXRlbXNSZXNwb25zZRJlCgxHZXRJbmJveEl0ZW0SKS5kb25lam91cm5hbC5pbmJveC52MS5HZXRJbmJveEl0ZW1SZXF1ZXN0GiouZG9uZWpvdXJuYWwuaW5ib3gudjEuR2V0SW5ib3hJdGVtUmVzcG9uc2USbgoPQ3JlYXRlSW5ib3hJdGVtEiwuZG9uZWpvdXJuYWwuaW5ib3gudjEuQ3JlYXRlSW5ib3hJdGVtUmVxdWVzdBotLmRvbmVqb3VybmFsLmluYm94LnYxLkNyZWF0ZUluYm94SXRlbVJlc3BvbnNlEm4KD1VwZGF0ZUluYm94SXRlbRIsLmRvbmVqb3VybmFsLmluYm94LnYxLlVwZGF0ZUluYm94SXRlbVJlcXVlc3QaLS5kb25lam91cm5hbC5pbmJveC52MS5VcGRhdGVJbmJveEl0ZW1SZXNwb25zZRJXCg9EZWxldGVJbmJveEl0ZW0SLC5kb25lam91cm5hbC5pbmJveC52MS5EZWxldGVJbmJveEl0ZW1SZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5EmgKDUNvbnZlcnRUb1RvZG8SKi5kb25lam91cm5hbC5pbmJveC52MS5Db252ZXJ0VG9Ub2RvUmVxdWVzdBorLmRvbmVqb3VybmFsLmluYm94LnYxLkNvbnZlcnRUb1RvZG9SZXNwb25zZRJoCg1Db252ZXJ0VG9Ob3RlEiouZG9uZWpvdXJuYWwuaW5ib3gudjEuQ29udmVydFRvTm90ZVJlcXVlc3QaKy5kb25lam91cm5hbC5pbmJveC52MS5Db252ZXJ0VG9Ob3RlUmVzcG9uc2USbQoOU3Vic2NyaWJlSW5ib3gSKy5kb25lam91cm5hbC5pbmJveC52MS5TdWJzY3JpYmVJbmJveFJlcXVlc3QaLC5kb25lam91cm5hbC5pbmJveC52MS5TdWJzY3JpYmVJbmJveFJlc3BvbnNlMAFC4QEKGGNvbS5kb25lam91cm5hbC5pbmJveC52MUIKSW5ib3hQcm90b1ABWkdnaXRodWIuY29tL3N4d2ViZGV2L2RvbmVqb3VybmFsL2FwaS9nZW4vZ28vZG9uZWpvdXJuYWwvaW5ib3gvdjE7aW5ib3h2MaICA0RJWKoCFERvbmVqb3VybmFsLkluYm94LlYxygIURG9uZWpvdXJuYWxcSW5ib3hcVjHiAiBEb25lam91cm5hbFxJbmJveFxWMVxHUEJNZXRhZGF0YeoCFkRvbmVqb3VybmFsOjpJbmJveDo6VjFiBnByb3RvMw", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
 
 /**
  * InboxItem represents a single inbox entry.
@@ -28,7 +28,7 @@ export type InboxItem = Message<"donejournal.inbox.v1.InboxItem"> & {
   id: string;
 
   /**
-   * Message content (max 200 characters).
+   * Message content.
    *
    * @generated from field: string data = 2;
    */
@@ -175,7 +175,7 @@ export const GetInboxItemResponseSchema: GenMessage<GetInboxItemResponse> = /*@_
  */
 export type CreateInboxItemRequest = Message<"donejournal.inbox.v1.CreateInboxItemRequest"> & {
   /**
-   * Message content (max 200 characters).
+   * Message content.
    *
    * @generated from field: string data = 1;
    */
@@ -358,6 +358,62 @@ export const ConvertToTodoResponseSchema: GenMessage<ConvertToTodoResponse> = /*
   messageDesc(file_donejournal_inbox_v1_inbox, 11);
 
 /**
+ * ConvertToNoteRequest is the request to convert an inbox item to a note.
+ *
+ * @generated from message donejournal.inbox.v1.ConvertToNoteRequest
+ */
+export type ConvertToNoteRequest = Message<"donejournal.inbox.v1.ConvertToNoteRequest"> & {
+  /**
+   * The ID of the inbox item to convert.
+   *
+   * @generated from field: string inbox_item_id = 1;
+   */
+  inboxItemId: string;
+
+  /**
+   * Optional title override. If empty, the inbox item's data field is used.
+   *
+   * @generated from field: string title = 2;
+   */
+  title: string;
+
+  /**
+   * Note body (markdown).
+   *
+   * @generated from field: string body = 3;
+   */
+  body: string;
+};
+
+/**
+ * Describes the message donejournal.inbox.v1.ConvertToNoteRequest.
+ * Use `create(ConvertToNoteRequestSchema)` to create a new message.
+ */
+export const ConvertToNoteRequestSchema: GenMessage<ConvertToNoteRequest> = /*@__PURE__*/
+  messageDesc(file_donejournal_inbox_v1_inbox, 12);
+
+/**
+ * ConvertToNoteResponse is the response after converting an inbox item to a note.
+ *
+ * @generated from message donejournal.inbox.v1.ConvertToNoteResponse
+ */
+export type ConvertToNoteResponse = Message<"donejournal.inbox.v1.ConvertToNoteResponse"> & {
+  /**
+   * The ID of the newly created note.
+   *
+   * @generated from field: string note_id = 1;
+   */
+  noteId: string;
+};
+
+/**
+ * Describes the message donejournal.inbox.v1.ConvertToNoteResponse.
+ * Use `create(ConvertToNoteResponseSchema)` to create a new message.
+ */
+export const ConvertToNoteResponseSchema: GenMessage<ConvertToNoteResponse> = /*@__PURE__*/
+  messageDesc(file_donejournal_inbox_v1_inbox, 13);
+
+/**
  * SubscribeInboxRequest is the request to subscribe to inbox change events.
  *
  * @generated from message donejournal.inbox.v1.SubscribeInboxRequest
@@ -370,7 +426,7 @@ export type SubscribeInboxRequest = Message<"donejournal.inbox.v1.SubscribeInbox
  * Use `create(SubscribeInboxRequestSchema)` to create a new message.
  */
 export const SubscribeInboxRequestSchema: GenMessage<SubscribeInboxRequest> = /*@__PURE__*/
-  messageDesc(file_donejournal_inbox_v1_inbox, 12);
+  messageDesc(file_donejournal_inbox_v1_inbox, 14);
 
 /**
  * SubscribeInboxResponse is sent whenever an inbox item is created, updated, or deleted.
@@ -385,11 +441,11 @@ export type SubscribeInboxResponse = Message<"donejournal.inbox.v1.SubscribeInbo
  * Use `create(SubscribeInboxResponseSchema)` to create a new message.
  */
 export const SubscribeInboxResponseSchema: GenMessage<SubscribeInboxResponse> = /*@__PURE__*/
-  messageDesc(file_donejournal_inbox_v1_inbox, 13);
+  messageDesc(file_donejournal_inbox_v1_inbox, 15);
 
 /**
  * InboxService manages inbox items — quick-capture entries that can later
- * be converted into structured todos.
+ * be converted into structured todos or notes.
  *
  * @generated from service donejournal.inbox.v1.InboxService
  */
@@ -453,6 +509,16 @@ export const InboxService: GenService<{
     methodKind: "unary";
     input: typeof ConvertToTodoRequestSchema;
     output: typeof ConvertToTodoResponseSchema;
+  },
+  /**
+   * ConvertToNote converts an inbox item into a note and deletes the inbox item.
+   *
+   * @generated from rpc donejournal.inbox.v1.InboxService.ConvertToNote
+   */
+  convertToNote: {
+    methodKind: "unary";
+    input: typeof ConvertToNoteRequestSchema;
+    output: typeof ConvertToNoteResponseSchema;
   },
   /**
    * SubscribeInbox opens a server-streaming subscription that sends an event whenever

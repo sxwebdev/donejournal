@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package donejournal.notes.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// NoteService manages notes — markdown documents with a title and body.
+service NoteService {
+  // ListNotes returns a paginated list of notes for the authenticated user with optional search.
+  rpc ListNotes(ListNotesRequest) returns (ListNotesResponse);
+
+  // GetNote returns a single note by ID.
+  rpc GetNote(GetNoteRequest) returns (GetNoteResponse);
+
+  // CreateNote creates a new note.
+  rpc CreateNote(CreateNoteRequest) returns (CreateNoteResponse);
+
+  // UpdateNote updates an existing note's fields.
+  rpc UpdateNote(UpdateNoteRequest) returns (UpdateNoteResponse);
+
+  // DeleteNote deletes a note by ID.
+  rpc DeleteNote(DeleteNoteRequest) returns (google.protobuf.Empty);
+
+  // SubscribeNotes opens a server-streaming subscription that sends an event whenever
+  // any note belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeNotes(SubscribeNotesRequest) returns (stream SubscribeNotesResponse);
+}
+
+// Note represents a single note.
+message Note {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Note title.
+  string title = 2;
+  // Note body (markdown).
+  string body = 3;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 4;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+// ListNotesRequest is the request to list notes with optional search.
+message ListNotesRequest {
+  // Maximum number of items to return (default: 20, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page.
+  string page_token = 2;
+  // Optional search query for partial matching on title and body.
+  optional string search = 3;
+}
+
+// ListNotesResponse is the response containing a list of notes.
+message ListNotesResponse {
+  // The list of notes.
+  repeated Note notes = 1;
+  // Token for the next page. Empty if no more results.
+  string next_page_token = 2;
+  // Total number of notes matching the filters.
+  int32 total_count = 3;
+}
+
+// GetNoteRequest is the request to get a single note.
+message GetNoteRequest {
+  // The ID of the note to retrieve.
+  string id = 1;
+}
+
+// GetNoteResponse is the response containing a single note.
+message GetNoteResponse {
+  // The note.
+  Note note = 1;
+}
+
+// CreateNoteRequest is the request to create a new note.
+message CreateNoteRequest {
+  // Note title.
+  string title = 1;
+  // Note body (markdown).
+  string body = 2;
+}
+
+// CreateNoteResponse is the response after creating a note.
+message CreateNoteResponse {
+  // The created note.
+  Note note = 1;
+}
+
+// UpdateNoteRequest is the request to update a note.
+message UpdateNoteRequest {
+  // The ID of the note to update.
+  string id = 1;
+  // Updated title. If not set, title is not changed.
+  optional string title = 2;
+  // Updated body. If not set, body is not changed.
+  optional string body = 3;
+}
+
+// UpdateNoteResponse is the response after updating a note.
+message UpdateNoteResponse {
+  // The updated note.
+  Note note = 1;
+}
+
+// DeleteNoteRequest is the request to delete a note.
+message DeleteNoteRequest {
+  // The ID of the note to delete.
+  string id = 1;
+}
+
+// SubscribeNotesRequest is the request to subscribe to note change events.
+message SubscribeNotesRequest {}
+
+// SubscribeNotesResponse is sent whenever a note is created, updated, or deleted.
+message SubscribeNotesResponse {}

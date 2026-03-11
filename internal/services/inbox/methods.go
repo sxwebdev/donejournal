@@ -10,6 +10,7 @@ import (
 	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/store/repos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_inbox"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_notes"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 	"github.com/sxwebdev/donejournal/pkg/utils"
@@ -19,10 +20,6 @@ import (
 func (s *Service) Create(ctx context.Context, data, userID string) (*models.Inbox, error) {
 	if data == "" {
 		return nil, fmt.Errorf("empty message")
-	}
-
-	if len(data) > 200 {
-		return nil, fmt.Errorf("message too long")
 	}
 
 	if userID == "" {
@@ -141,4 +138,45 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 	// Publish inbox deletion event (item was consumed) and todos creation event
 	s.broker.Publish(InboxEvent{UserID: userID})
 	return todoID, nil
+}
+
+// ConvertToNote converts an inbox item to a note and deletes the inbox item
+func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID int64, title, body string) (string, error) {
+	if inboxItemID == "" {
+		return "", storecmn.ErrEmptyID
+	}
+
+	item, err := s.store.Inbox().GetByID(ctx, inboxItemID)
+	if err != nil {
+		return "", fmt.Errorf("inbox item not found: %w", err)
+	}
+
+	if title == "" {
+		title = item.Data
+	}
+
+	noteID := utils.GenerateULID()
+
+	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
+		_, err := s.store.Notes(repos.WithTx(tx)).Create(ctx, repo_notes.CreateParams{
+			ID:     noteID,
+			UserID: userID,
+			Title:  title,
+			Body:   body,
+		})
+		if err != nil {
+			return fmt.Errorf("create note: %w", err)
+		}
+
+		if err := s.store.Inbox(repos.WithTx(tx)).Delete(ctx, inboxItemID); err != nil {
+			return fmt.Errorf("delete inbox item: %w", err)
+		}
+
+		return nil
+	}); err != nil {
+		return "", err
+	}
+
+	s.broker.Publish(InboxEvent{UserID: userID})
+	return noteID, nil
 }
