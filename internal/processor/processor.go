@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/sxwebdev/donejournal/internal/agent"
 	"github.com/sxwebdev/donejournal/internal/bot"
-	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/tkcrm/mx/logger"
 )
@@ -15,24 +15,22 @@ import (
 type Processor struct {
 	logger      logger.Logger
 	baseService *baseservices.BaseServices
-	mcpService  *mcp.MCP
+	agent       *agent.Agent
 	botService  *bot.Bot
 }
 
 func New(
 	l logger.Logger,
 	baseService *baseservices.BaseServices,
-	mcpService *mcp.MCP,
+	agentService *agent.Agent,
 	botService *bot.Bot,
 ) *Processor {
-	s := &Processor{
+	return &Processor{
 		logger:      l,
 		baseService: baseService,
-		mcpService:  mcpService,
+		agent:       agentService,
 		botService:  botService,
 	}
-
-	return s
 }
 
 // inboxPrefixes are lowercased phrases that indicate the user wants to save directly to inbox.
@@ -52,6 +50,7 @@ func parseInboxMessage(text string) (bool, string) {
 }
 
 func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data string) (string, error) {
+	// Direct inbox save
 	if isInbox, content := parseInboxMessage(data); isInbox {
 		if content == "" {
 			content = data
@@ -62,79 +61,15 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		return "Saved to inbox 📥", nil
 	}
 
-	resp, err := s.mcpService.ParseMessage(ctx, data)
+	// Delegate to agent
+	response, err := s.agent.Process(ctx, userID, data)
 	if err != nil {
-		s.logger.Errorf("failed to parse message via MCP, saving to inbox: %v", err)
+		s.logger.Errorf("agent failed, saving to inbox: %v", err)
 		if _, inboxErr := s.baseService.Inbox().Create(ctx, data, strconv.FormatInt(userID, 10)); inboxErr != nil {
-			return "", fmt.Errorf("mcp error: %w; inbox fallback also failed: %v", err, inboxErr)
+			return "", fmt.Errorf("agent error: %w; inbox fallback also failed: %v", err, inboxErr)
 		}
 		return "Saved to inbox 📥", nil
 	}
 
-	// Separate note entries from todo/done entries
-	var todoEntries []mcp.ParsedEntry
-	var noteEntries []mcp.ParsedEntry
-	for _, entry := range resp.Entries {
-		if entry.Kind == mcp.EntryKindNote {
-			noteEntries = append(noteEntries, entry)
-		} else {
-			todoEntries = append(todoEntries, entry)
-		}
-	}
-
-	// Create todos
-	if len(todoEntries) > 0 {
-		todoResp := &mcp.ParsedResponse{Entries: todoEntries}
-		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp); err != nil {
-			return "", fmt.Errorf("failed to batch create todos: %w", err)
-		}
-	}
-
-	// Create notes
-	for _, entry := range noteEntries {
-		body := entry.Body
-		if body == "" {
-			body = entry.Description
-		}
-		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body); err != nil {
-			return "", fmt.Errorf("failed to create note '%s': %w", entry.Title, err)
-		}
-	}
-
-	if len(resp.Entries) == 0 {
-		if _, err := s.baseService.Inbox().Create(ctx, data, strconv.FormatInt(userID, 10)); err != nil {
-			return "", fmt.Errorf("failed to create inbox item: %w", err)
-		}
-		return "Saved to inbox 📥", nil
-	}
-
-	if len(resp.Entries) == 1 {
-		entry := resp.Entries[0]
-		prefix := "✅"
-		switch entry.Kind {
-		case mcp.EntryKindTodo:
-			prefix = "📝"
-		case mcp.EntryKindNote:
-			prefix = "🗒️"
-		}
-		return fmt.Sprintf("%s %s", prefix, entry.Title), nil
-	}
-
-	responseText := new(strings.Builder)
-	if _, err := fmt.Fprintf(responseText, "%d items have been created.\n", len(resp.Entries)); err != nil {
-		return "", fmt.Errorf("failed to write result text: %w", err)
-	}
-	for i, entry := range resp.Entries {
-		formatPreffix := "\n✅"
-		switch entry.Kind {
-		case mcp.EntryKindTodo:
-			formatPreffix = "\n📝"
-		case mcp.EntryKindNote:
-			formatPreffix = "\n🗒️"
-		}
-		if _, err := fmt.Fprintf(responseText, formatPreffix+" %d. %s", i+1, entry.Title); err != nil {
-			return "", fmt.Errorf("failed to write result text: %w", err)
-		}
-	}
-	return responseText.String(), nil
+	return response, nil
 }

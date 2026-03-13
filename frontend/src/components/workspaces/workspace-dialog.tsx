@@ -4,15 +4,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { NoteForm, type NoteFormValues } from "./note-form"
+import { WorkspaceForm, type WorkspaceFormValues } from "./workspace-form"
 import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
 import { useQueryClient } from "@tanstack/react-query"
 import {
-  createNote,
-  updateNote,
-  listNotes,
-} from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
-import type { Note } from "@/api/gen/donejournal/notes/v1/notes_pb"
+  createWorkspace,
+  updateWorkspace,
+  listWorkspaces,
+} from "@/api/gen/donejournal/workspaces/v1/workspaces-WorkspaceService_connectquery"
+import type { Workspace } from "@/api/gen/donejournal/workspaces/v1/workspaces_pb"
 import { ConnectError } from "@connectrpc/connect"
 import { toast } from "sonner"
 
@@ -24,50 +24,50 @@ type CreateProps = {
 
 type EditProps = {
   mode: "edit"
-  note: Note
+  workspace: Workspace
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 type Props = CreateProps | EditProps
 
-export function NoteDialog(props: Props) {
+export function WorkspaceDialog(props: Props) {
   const qc = useQueryClient()
 
   const invalidate = () =>
     qc.invalidateQueries({
       queryKey: createConnectQueryKey({
-        schema: listNotes,
+        schema: listWorkspaces,
         cardinality: "finite",
       }),
     })
 
-  const createMutation = useMutation(createNote, {
+  const createMutation = useMutation(createWorkspace, {
     onSuccess: () => {
       invalidate()
       props.onOpenChange(false)
     },
   })
 
-  const updateMutation = useMutation(updateNote, {
+  const updateMutation = useMutation(updateWorkspace, {
     onSuccess: () => {
       invalidate()
       props.onOpenChange(false)
     },
   })
 
-  const handleSubmit = async (values: NoteFormValues) => {
+  const handleSubmit = async (values: WorkspaceFormValues) => {
     try {
       if (props.mode === "create") {
         await createMutation.mutateAsync({
-          title: values.title,
-          body: values.body ?? "",
+          name: values.name,
+          description: values.description ?? "",
         })
       } else {
         await updateMutation.mutateAsync({
-          id: props.note.id,
-          title: values.title,
-          body: values.body ?? "",
+          id: props.workspace.id,
+          name: values.name,
+          description: values.description,
         })
       }
     } catch (err) {
@@ -80,8 +80,8 @@ export function NoteDialog(props: Props) {
   const defaultValues =
     props.mode === "edit"
       ? {
-          title: props.note.title,
-          body: props.note.body || undefined,
+          name: props.workspace.name,
+          description: props.workspace.description || undefined,
         }
       : undefined
 
@@ -89,20 +89,18 @@ export function NoteDialog(props: Props) {
 
   return (
     <Dialog open={props.open} onOpenChange={props.onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {props.mode === "create" ? "New Note" : "Edit Note"}
+            {props.mode === "create" ? "New Workspace" : "Edit Workspace"}
           </DialogTitle>
         </DialogHeader>
-        {props.open && (
-          <NoteForm
-            defaultValues={defaultValues}
-            onSubmit={handleSubmit}
-            submitLabel={props.mode === "create" ? "Create" : "Save changes"}
-            isPending={isPending}
-          />
-        )}
+        <WorkspaceForm
+          defaultValues={defaultValues}
+          onSubmit={handleSubmit}
+          submitLabel={props.mode === "create" ? "Create" : "Save changes"}
+          isPending={isPending}
+        />
       </DialogContent>
     </Dialog>
   )

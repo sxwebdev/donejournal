@@ -25,6 +25,9 @@ service TodoService {
   // CompleteTodo marks a todo as completed with the current timestamp.
   rpc CompleteTodo(CompleteTodoRequest) returns (CompleteTodoResponse);
 
+  // CountTodos returns the count of todos matching the given filters (no pagination).
+  rpc CountTodos(CountTodosRequest) returns (CountTodosResponse);
+
   // GetCalendarEntries returns todos grouped by date for a date range (calendar view).
   rpc GetCalendarEntries(GetCalendarEntriesRequest) returns (GetCalendarEntriesResponse);
 
@@ -47,6 +50,22 @@ enum TodoStatus {
   TODO_STATUS_CANCELLED = 4;
 }
 
+// TodoPriority represents the priority level of a todo item.
+enum TodoPriority {
+  // Unspecified priority.
+  TODO_PRIORITY_UNSPECIFIED = 0;
+  // No priority set (default).
+  TODO_PRIORITY_NONE = 1;
+  // Low priority.
+  TODO_PRIORITY_LOW = 2;
+  // Medium priority.
+  TODO_PRIORITY_MEDIUM = 3;
+  // High priority.
+  TODO_PRIORITY_HIGH = 4;
+  // Critical priority.
+  TODO_PRIORITY_CRITICAL = 5;
+}
+
 // Todo represents a single todo item.
 message Todo {
   // Unique identifier (ULID).
@@ -65,6 +84,12 @@ message Todo {
   google.protobuf.Timestamp created_at = 7;
   // Last update timestamp.
   google.protobuf.Timestamp updated_at = 8;
+  // Optional workspace ID this todo belongs to.
+  optional string workspace_id = 9;
+  // Priority level.
+  TodoPriority priority = 10;
+  // IDs of tags attached to this todo.
+  repeated string tag_ids = 11;
 }
 
 // ListTodosRequest is the request to list todos with optional filters.
@@ -79,6 +104,10 @@ message ListTodosRequest {
   optional google.protobuf.Timestamp planned_date_from = 4;
   // Filter by planned_date range end (inclusive).
   optional google.protobuf.Timestamp planned_date_to = 5;
+  // Filter by workspace ID.
+  optional string workspace_id = 6;
+  // Filter by tag IDs. If not empty, only todos with any of these tags are returned.
+  repeated string tag_ids = 7;
 }
 
 // ListTodosResponse is the response containing a list of todos.
@@ -111,6 +140,12 @@ message CreateTodoRequest {
   string description = 2;
   // Planned date for the todo.
   google.protobuf.Timestamp planned_date = 3;
+  // Optional workspace ID.
+  optional string workspace_id = 4;
+  // Priority level.
+  TodoPriority priority = 5;
+  // Optional tag IDs to attach to the todo.
+  repeated string tag_ids = 6;
 }
 
 // CreateTodoResponse is the response after creating a todo.
@@ -131,6 +166,12 @@ message UpdateTodoRequest {
   optional TodoStatus status = 4;
   // Updated planned date. If not set, planned_date is not changed.
   optional google.protobuf.Timestamp planned_date = 5;
+  // Updated workspace ID. If not set, workspace_id is not changed.
+  optional string workspace_id = 6;
+  // Updated priority. If not set, priority is not changed.
+  optional TodoPriority priority = 7;
+  // Updated tag IDs. Replaces all existing tags.
+  repeated string tag_ids = 8;
 }
 
 // UpdateTodoResponse is the response after updating a todo.
@@ -157,12 +198,32 @@ message CompleteTodoResponse {
   Todo todo = 1;
 }
 
+// CountTodosRequest is the request to count todos matching the given filters.
+message CountTodosRequest {
+  // Filter by status. If empty, all statuses are included.
+  repeated TodoStatus statuses = 1;
+  // Filter by planned_date range start (inclusive).
+  optional google.protobuf.Timestamp planned_date_from = 2;
+  // Filter by planned_date range end (inclusive).
+  optional google.protobuf.Timestamp planned_date_to = 3;
+  // Filter by workspace ID.
+  optional string workspace_id = 4;
+}
+
+// CountTodosResponse is the response containing the count of matching todos.
+message CountTodosResponse {
+  // The number of todos matching the filters.
+  uint32 count = 1;
+}
+
 // GetCalendarEntriesRequest is the request to get todos grouped by date for a calendar view.
 message GetCalendarEntriesRequest {
   // Start of the date range (inclusive).
   google.protobuf.Timestamp from = 1;
   // End of the date range (inclusive).
   google.protobuf.Timestamp to = 2;
+  // Filter by workspace ID.
+  optional string workspace_id = 3;
 }
 
 // CalendarDay represents todos for a single day along with summary statistics.

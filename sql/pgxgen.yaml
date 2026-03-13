@@ -11,6 +11,8 @@ sqlc:
         imports:
           - path: github.com/sxwebdev/donejournal/internal/models
             go_type: TodoStatusType
+          - path: github.com/sxwebdev/donejournal/internal/models
+            go_type: TodoPriorityType
     crud:
       auto_remove_generated_files: true
       exclude_table_name_from_methods: true
@@ -57,6 +59,34 @@ sqlc:
             get:
               name: GetByID
 
+        # workspaces
+        workspaces:
+          output_dir: queries/workspaces
+          primary_column: id
+          methods:
+            create:
+              skip_columns:
+                - created_at
+                - updated_at
+              returning: "*"
+            delete:
+            get:
+              name: GetByID
+
+        # tags
+        tags:
+          output_dir: queries/tags
+          primary_column: id
+          methods:
+            create:
+              skip_columns:
+                - created_at
+                - updated_at
+              returning: "*"
+            delete:
+            get:
+              name: GetByID
+
     constants:
       tables:
         inbox:
@@ -67,4 +97,10 @@ sqlc:
           include_column_names: true
         notes:
           output_dir: ../internal/store/repos/repo_notes
+          include_column_names: true
+        workspaces:
+          output_dir: ../internal/store/repos/repo_workspaces
+          include_column_names: true
+        tags:
+          output_dir: ../internal/store/repos/repo_tags
           include_column_names: true

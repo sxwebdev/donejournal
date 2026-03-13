@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package donejournal.tags.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// TagService manages tags — colored labels that can be attached to todos and notes.
+service TagService {
+  // ListTags returns a list of tags for the authenticated user.
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
+
+  // CreateTag creates a new tag.
+  rpc CreateTag(CreateTagRequest) returns (CreateTagResponse);
+
+  // UpdateTag updates an existing tag's fields.
+  rpc UpdateTag(UpdateTagRequest) returns (UpdateTagResponse);
+
+  // DeleteTag deletes a tag by ID. Tag associations with todos and notes are removed automatically.
+  rpc DeleteTag(DeleteTagRequest) returns (google.protobuf.Empty);
+
+  // SubscribeTags opens a server-streaming subscription that sends an event whenever
+  // any tag belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeTags(SubscribeTagsRequest) returns (stream SubscribeTagsResponse);
+}
+
+// Tag represents a single tag/label.
+message Tag {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Tag name.
+  string name = 2;
+  // Tag color (hex, e.g. "#6366f1").
+  string color = 3;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 4;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+// ListTagsRequest is the request to list tags.
+message ListTagsRequest {
+  // Maximum number of items to return (default: 100, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page.
+  string page_token = 2;
+  // Optional search query for partial matching on name.
+  optional string search = 3;
+}
+
+// ListTagsResponse is the response containing a list of tags.
+message ListTagsResponse {
+  // The list of tags.
+  repeated Tag tags = 1;
+  // Token for the next page. Empty if no more results.
+  string next_page_token = 2;
+  // Total number of tags matching the filters.
+  int32 total_count = 3;
+}
+
+// CreateTagRequest is the request to create a new tag.
+message CreateTagRequest {
+  // Tag name.
+  string name = 1;
+  // Tag color (hex). Defaults to "#6366f1" if not specified.
+  string color = 2;
+}
+
+// CreateTagResponse is the response after creating a tag.
+message CreateTagResponse {
+  // The created tag.
+  Tag tag = 1;
+}
+
+// UpdateTagRequest is the request to update a tag.
+message UpdateTagRequest {
+  // The ID of the tag to update.
+  string id = 1;
+  // Updated name. If not set, name is not changed.
+  optional string name = 2;
+  // Updated color. If not set, color is not changed.
+  optional string color = 3;
+}
+
+// UpdateTagResponse is the response after updating a tag.
+message UpdateTagResponse {
+  // The updated tag.
+  Tag tag = 1;
+}
+
+// DeleteTagRequest is the request to delete a tag.
+message DeleteTagRequest {
+  // The ID of the tag to delete.
+  string id = 1;
+}
+
+// SubscribeTagsRequest is the request to subscribe to tag change events.
+message SubscribeTagsRequest {}
+
+// SubscribeTagsResponse is sent whenever a tag is created, updated, or deleted.
+message SubscribeTagsResponse {}

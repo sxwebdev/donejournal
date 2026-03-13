@@ -11,13 +11,15 @@ import (
 )
 
 type FindParams struct {
-	Statuses []models.TodoStatusType
-	UserID   int64
-	DateFrom *time.Time
-	DateTo   *time.Time
-	OrderBy  string
-	Page     *uint32
-	PageSize *uint32
+	Statuses    []models.TodoStatusType
+	UserID      int64
+	DateFrom    *time.Time
+	DateTo      *time.Time
+	WorkspaceID *string
+	TagIDs      []string
+	OrderBy     string
+	Page        *uint32
+	PageSize    *uint32
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -52,7 +54,31 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		}
 	}
 
+	if params.WorkspaceID != nil {
+		sb.Where(sb.Equal(ColumnNameTodosWorkspaceId.String(), *params.WorkspaceID))
+	}
+
+	if len(params.TagIDs) > 0 {
+		tagVals := make([]interface{}, len(params.TagIDs))
+		for i, id := range params.TagIDs {
+			tagVals[i] = id
+		}
+		sub := sqlbuilder.NewSelectBuilder()
+		sub.Select("todo_id").From("todo_tags").Where(sub.In("tag_id", tagVals...))
+		sb.Where(sb.In("id", sub))
+	}
+
 	return sb
+}
+
+// Count returns the number of todos matching the given filters.
+func (s *CustomQueries) Count(ctx context.Context, params FindParams) (uint32, error) {
+	var count uint32
+	sql, args := findBuilder(params, "count(*)").Build()
+	if err := sqlscan.Get(ctx, s.db, &count, sql, args...); err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 // Find todos by user ID and status

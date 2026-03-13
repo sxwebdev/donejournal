@@ -583,7 +583,9 @@ type ConvertToTodoRequest struct {
 	// Optional title override. If empty, the inbox item's data field is used.
 	Title string `protobuf:"bytes,3,opt,name=title,proto3" json:"title,omitempty"`
 	// Optional description for the new todo.
-	Description   string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Description string `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	// Optional workspace ID.
+	WorkspaceId   *string `protobuf:"bytes,5,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -646,6 +648,13 @@ func (x *ConvertToTodoRequest) GetDescription() string {
 	return ""
 }
 
+func (x *ConvertToTodoRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
+	}
+	return ""
+}
+
 // ConvertToTodoResponse is the response after converting an inbox item to a todo.
 type ConvertToTodoResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -700,7 +709,9 @@ type ConvertToNoteRequest struct {
 	// Optional title override. If empty, the inbox item's data field is used.
 	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	// Note body (markdown).
-	Body          string `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	Body string `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	// Optional workspace ID.
+	WorkspaceId   *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -752,6 +763,13 @@ func (x *ConvertToNoteRequest) GetTitle() string {
 func (x *ConvertToNoteRequest) GetBody() string {
 	if x != nil {
 		return x.Body
+	}
+	return ""
+}
+
+func (x *ConvertToNoteRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
 	}
 	return ""
 }
@@ -914,18 +932,22 @@ const file_donejournal_inbox_v1_inbox_proto_rawDesc = "" +
 	"\x17UpdateInboxItemResponse\x123\n" +
 	"\x04item\x18\x01 \x01(\v2\x1f.donejournal.inbox.v1.InboxItemR\x04item\"(\n" +
 	"\x16DeleteInboxItemRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xb1\x01\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xea\x01\n" +
 	"\x14ConvertToTodoRequest\x12\"\n" +
 	"\rinbox_item_id\x18\x01 \x01(\tR\vinboxItemId\x12=\n" +
 	"\fplanned_date\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\vplannedDate\x12\x14\n" +
 	"\x05title\x18\x03 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"0\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12&\n" +
+	"\fworkspace_id\x18\x05 \x01(\tH\x00R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\r_workspace_id\"0\n" +
 	"\x15ConvertToTodoResponse\x12\x17\n" +
-	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"d\n" +
+	"\atodo_id\x18\x01 \x01(\tR\x06todoId\"\x9d\x01\n" +
 	"\x14ConvertToNoteRequest\x12\"\n" +
 	"\rinbox_item_id\x18\x01 \x01(\tR\vinboxItemId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
-	"\x04body\x18\x03 \x01(\tR\x04body\"0\n" +
+	"\x04body\x18\x03 \x01(\tR\x04body\x12&\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x00R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\r_workspace_id\"0\n" +
 	"\x15ConvertToNoteResponse\x12\x17\n" +
 	"\anote_id\x18\x01 \x01(\tR\x06noteId\"\x17\n" +
 	"\x15SubscribeInboxRequest\"\x18\n" +
@@ -1011,6 +1033,8 @@ func file_donejournal_inbox_v1_inbox_proto_init() {
 	if File_donejournal_inbox_v1_inbox_proto != nil {
 		return
 	}
+	file_donejournal_inbox_v1_inbox_proto_msgTypes[10].OneofWrappers = []any{}
+	file_donejournal_inbox_v1_inbox_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

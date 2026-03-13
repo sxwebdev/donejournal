@@ -6,10 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
+import { TagSelector } from "@/components/tags/tag-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   body: z.string().optional(),
+  workspaceId: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
 })
 
 export type NoteFormValues = z.infer<typeof schema>
@@ -32,6 +36,8 @@ export function NoteForm({
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<NoteFormValues>({
     resolver: zodResolver(schema),
@@ -39,20 +45,19 @@ export function NoteForm({
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-1.5">
         <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          placeholder="Note title"
-          {...register("title")}
-        />
+        <Input id="title" placeholder="Note title" {...register("title")} />
         {errors.title && (
           <p className="text-xs text-destructive">{errors.title.message}</p>
         )}
       </div>
 
-      <div className="space-y-1.5" data-color-mode={theme === "dark" ? "dark" : "light"}>
+      <div
+        className="space-y-1.5"
+        data-color-mode={theme === "dark" ? "dark" : "light"}
+      >
         <Label>Body</Label>
         <Controller
           name="body"
@@ -65,6 +70,22 @@ export function NoteForm({
               preview="edit"
             />
           )}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Workspace</Label>
+        <WorkspaceSelector
+          value={watch("workspaceId")}
+          onChange={(v) => setValue("workspaceId", v)}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Tags</Label>
+        <TagSelector
+          value={watch("tagIds") ?? []}
+          onChange={(v) => setValue("tagIds", v)}
         />
       </div>
 

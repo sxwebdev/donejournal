@@ -72,14 +72,34 @@ func (h *TodosHandler) ListTodos(ctx context.Context, req *connect.Request[todos
 		}
 	}
 
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
+	}
+
+	if len(req.Msg.GetTagIds()) > 0 {
+		params.TagIDs = req.Msg.GetTagIds()
+	}
+
 	result, err := h.baseService.Todos().Find(ctx, params)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	// Batch load tag IDs for all todos
+	todoIDs := make([]string, len(result.Items))
+	for i, t := range result.Items {
+		todoIDs[i] = t.ID
+	}
+	tagIDsMap, err := h.baseService.Tags().FindTagIDsByTodoIDs(ctx, todoIDs)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	pbTodos := make([]*todosv1.Todo, len(result.Items))
 	for i, t := range result.Items {
-		pbTodos[i] = todoToProto(t)
+		pb := todoToProto(t)
+		pb.TagIds = tagIDsMap[t.ID]
+		pbTodos[i] = pb
 	}
 
 	var nextPageToken string
@@ -91,6 +111,45 @@ func (h *TodosHandler) ListTodos(ctx context.Context, req *connect.Request[todos
 		Todos:         pbTodos,
 		NextPageToken: nextPageToken,
 		TotalCount:    int32(result.Count),
+	}), nil
+}
+
+func (h *TodosHandler) CountTodos(ctx context.Context, req *connect.Request[todosv1.CountTodosRequest]) (*connect.Response[todosv1.CountTodosResponse], error) {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	params := repo_todos.FindParams{
+		UserID: userID,
+	}
+
+	if req.Msg.PlannedDateFrom != nil {
+		t := req.Msg.GetPlannedDateFrom().AsTime()
+		params.DateFrom = &t
+	}
+	if req.Msg.PlannedDateTo != nil {
+		t := req.Msg.GetPlannedDateTo().AsTime()
+		params.DateTo = &t
+	}
+
+	for _, s := range req.Msg.GetStatuses() {
+		if s != todosv1.TodoStatus_TODO_STATUS_UNSPECIFIED {
+			params.Statuses = append(params.Statuses, todoStatusFromProto(s))
+		}
+	}
+
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
+	}
+
+	count, err := h.baseService.Todos().Count(ctx, params)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&todosv1.CountTodosResponse{
+		Count: count,
 	}), nil
 }
 
@@ -109,8 +168,16 @@ func (h *TodosHandler) GetTodo(ctx context.Context, req *connect.Request[todosv1
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("todo not found"))
 	}
 
+	pb := todoToProto(todo)
+	tags, err := h.baseService.Tags().FindByTodoID(ctx, todo.ID)
+	if err == nil {
+		for _, t := range tags {
+			pb.TagIds = append(pb.TagIds, t.ID)
+		}
+	}
+
 	return connect.NewResponse(&todosv1.GetTodoResponse{
-		Todo: todoToProto(todo),
+		Todo: pb,
 	}), nil
 }
 
@@ -129,13 +196,22 @@ func (h *TodosHandler) CreateTodo(ctx context.Context, req *connect.Request[todo
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("planned_date is required"))
 	}
 
-	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate)
+	priority := todoPriorityFromProto(req.Msg.GetPriority())
+	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate, req.Msg.WorkspaceId, priority)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	pb := todoToProto(todo)
+	if len(req.Msg.GetTagIds()) > 0 {
+		if err := h.baseService.Tags().SetTodoTags(ctx, userID, todo.ID, req.Msg.GetTagIds()); err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+		pb.TagIds = req.Msg.GetTagIds()
+	}
+
 	return connect.NewResponse(&todosv1.CreateTodoResponse{
-		Todo: todoToProto(todo),
+		Todo: pb,
 	}), nil
 }
 
@@ -169,14 +245,29 @@ func (h *TodosHandler) UpdateTodo(ctx context.Context, req *connect.Request[todo
 		t := req.Msg.GetPlannedDate().AsTime()
 		params.PlannedDate = &t
 	}
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
+	}
+	if req.Msg.Priority != nil {
+		p := todoPriorityFromProto(*req.Msg.Priority)
+		params.Priority = &p
+	}
 
 	todo, err := h.baseService.Todos().Update(ctx, userID, req.Msg.GetId(), params)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	pb := todoToProto(todo)
+	if len(req.Msg.GetTagIds()) > 0 {
+		if err := h.baseService.Tags().SetTodoTags(ctx, userID, todo.ID, req.Msg.GetTagIds()); err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+		pb.TagIds = req.Msg.GetTagIds()
+	}
+
 	return connect.NewResponse(&todosv1.UpdateTodoResponse{
-		Todo: todoToProto(todo),
+		Todo: pb,
 	}), nil
 }
 
@@ -243,13 +334,17 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 	// Fetch all todos in the date range (no pagination limit for calendar)
 	pageSize := uint32(100)
 	page := uint32(1)
-	result, err := h.baseService.Todos().Find(ctx, repo_todos.FindParams{
+	findParams := repo_todos.FindParams{
 		UserID:   userID,
 		DateFrom: &from,
 		DateTo:   &to,
 		Page:     &page,
 		PageSize: &pageSize,
-	})
+	}
+	if req.Msg.WorkspaceId != nil {
+		findParams.WorkspaceID = req.Msg.WorkspaceId
+	}
+	result, err := h.baseService.Todos().Find(ctx, findParams)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

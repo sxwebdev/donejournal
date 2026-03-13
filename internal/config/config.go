@@ -11,8 +11,8 @@ type Config struct {
 	DataDir  string `yaml:"data_dir" validate:"required" default:"./data"`
 	Server   ServerConfig
 	Telegram TelegramConfig
-	MCP      MCPConfig
-	STT      STTConfig `yaml:"stt"`
+	Agent    AgentConfig `yaml:"agent"`
+	STT      STTConfig  `yaml:"stt"`
 	Timezone string    `yaml:"timezone" validate:"required" default:"UTC"`
 }
 
@@ -32,8 +32,8 @@ type TelegramConfig struct {
 	BotUsername string `yaml:"bot_username"`
 }
 
-type MCPConfig struct {
-	Groq GroqConfig
+type AgentConfig struct {
+	Groq GroqConfig `yaml:"groq"`
 }
 
 type STTConfig struct {

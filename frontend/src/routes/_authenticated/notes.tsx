@@ -1,14 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { z } from "zod"
-import { useState, useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState } from "react"
 import { NoteList } from "@/components/notes/note-list"
-import { NoteDialog } from "@/components/notes/note-dialog"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const notesSearchSchema = z.object({
   search: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/notes")({
@@ -17,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/notes")({
 })
 
 function NotesPage() {
-  const [createOpen, setCreateOpen] = useState(false)
   const search = Route.useSearch()
   const navigate = useNavigate({ from: "/notes" })
   const [searchInput, setSearchInput] = useState(search.search ?? "")
@@ -52,29 +52,36 @@ function NotesPage() {
             Your markdown notes
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Link to="/notes/add" className={buttonVariants()}>
           <Plus className="mr-2 h-4 w-4" />
           New Note
-        </Button>
+        </Link>
       </div>
 
-      <div className="relative">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search notes..."
-          value={searchInput}
-          onChange={handleSearchChange}
-          className="pl-9"
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search notes..."
+            value={searchInput}
+            onChange={handleSearchChange}
+            className="pl-9"
+          />
+        </div>
+        <WorkspaceSelector
+          value={search.workspaceId}
+          onChange={(v) =>
+            navigate({
+              search: (prev) => ({ ...prev, workspaceId: v }),
+              replace: true,
+            })
+          }
+          placeholder="All workspaces"
+          className="w-auto min-w-35"
         />
       </div>
 
-      <NoteList search={search.search} />
-
-      <NoteDialog
-        mode="create"
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-      />
+      <NoteList search={search.search} workspaceId={search.workspaceId} />
     </div>
   )
 }

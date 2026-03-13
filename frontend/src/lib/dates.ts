@@ -1,5 +1,6 @@
 import { timestampDate, timestampFromDate } from "@bufbuild/protobuf/wkt"
 import type { Timestamp } from "@bufbuild/protobuf/wkt"
+import { format } from "date-fns"
 
 export { timestampDate, timestampFromDate }
 export type { Timestamp }
@@ -36,6 +37,25 @@ export function endOfDateOnly(date: Date): Timestamp {
     )
   )
   return timestampFromDate(utc)
+}
+
+/**
+ * Format date as relative label: "Сегодня", "Завтра", "Вчера", or "d MMM".
+ * Overdue dates (before today) get a flag.
+ */
+export function formatRelativeDate(date: Date): { label: string; isOverdue: boolean } {
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+
+  let label: string
+  if (diffDays === 0) label = "Сегодня"
+  else if (diffDays === 1) label = "Завтра"
+  else if (diffDays === -1) label = "Вчера"
+  else label = format(date, "d MMM")
+
+  return { label, isOverdue: diffDays < 0 }
 }
 
 export function formatDateISO(date: Date): string {

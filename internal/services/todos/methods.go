@@ -2,73 +2,17 @@ package todos
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
 	"time"
 
-	"github.com/dromara/carbon/v2"
-	"github.com/sxwebdev/donejournal/internal/mcp"
 	"github.com/sxwebdev/donejournal/internal/models"
-	"github.com/sxwebdev/donejournal/internal/store/repos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 	"github.com/sxwebdev/donejournal/pkg/utils"
 )
 
-// Create a new todo from a parsed MCP entry
-func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mcp.ParsedEntry) (*models.Todo, error) {
-	req := repo_todos.CreateParams{
-		ID:          utils.GenerateULID(),
-		UserID:      userID,
-		Title:       entry.Title,
-		Description: entry.Description,
-	}
-
-	date := carbon.Parse(entry.Date).StdTime()
-
-	if date.IsZero() {
-		return nil, fmt.Errorf("invalid date: %s", entry.Date)
-	}
-
-	req.PlannedDate = date
-
-	switch entry.Kind {
-	case mcp.EntryKindTodo:
-		req.Status = models.TodoStatusPending
-	case mcp.EntryKindDone:
-		req.Status = models.TodoStatusCompleted
-		req.CompletedAt = &req.PlannedDate
-	default:
-		return nil, fmt.Errorf("invalid entry kind: %s", entry.Kind)
-	}
-
-	todo, err := s.store.Todos(repos.WithTx(tx)).Create(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return todo, nil
-}
-
-// BatchCreate creates todos in batch
-func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse *mcp.ParsedResponse) error {
-	if len(parsedResponse.Entries) == 0 {
-		return nil
-	}
-
-	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
-		for _, entry := range parsedResponse.Entries {
-			if _, err := s.Create(ctx, tx, userID, entry); err != nil {
-				return fmt.Errorf("create todo for entry '%s': %w", entry.Title, err)
-			}
-		}
-		return nil
-	}); err != nil {
-		return err
-	}
-
-	s.broker.Publish(TodoEvent{UserID: userID})
-	return nil
+// Count returns the number of todos matching the given filters.
+func (s *Service) Count(ctx context.Context, params repo_todos.FindParams) (uint32, error) {
+	return s.store.Todos().Count(ctx, params)
 }
 
 // Find todos by params
@@ -76,8 +20,11 @@ func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*stor
 	return s.store.Todos().Find(ctx, params)
 }
 
-// CreateFromAPI creates a new todo from API request (without MCP)
-func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time) (*models.Todo, error) {
+// CreateFromAPI creates a new todo from API request
+func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, workspaceID *string, priority models.TodoPriorityType) (*models.Todo, error) {
+	if priority == "" {
+		priority = models.TodoPriorityNone
+	}
 	todo, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
@@ -85,6 +32,8 @@ func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, descri
 		Description: description,
 		Status:      models.TodoStatusPending,
 		PlannedDate: plannedDate,
+		WorkspaceID: workspaceID,
+		Priority:    priority,
 	})
 	if err != nil {
 		return nil, err
@@ -107,6 +56,8 @@ type UpdateParams struct {
 	Description *string
 	Status      *models.TodoStatusType
 	PlannedDate *time.Time
+	WorkspaceID *string
+	Priority    *models.TodoPriorityType
 }
 
 // Update performs a partial update on a todo
@@ -133,6 +84,14 @@ func (s *Service) Update(ctx context.Context, userID int64, id string, params Up
 	if params.PlannedDate != nil {
 		sets = append(sets, "planned_date = ?")
 		args = append(args, *params.PlannedDate)
+	}
+	if params.WorkspaceID != nil {
+		sets = append(sets, "workspace_id = ?")
+		args = append(args, *params.WorkspaceID)
+	}
+	if params.Priority != nil {
+		sets = append(sets, "priority = ?")
+		args = append(args, string(*params.Priority))
 	}
 
 	if len(sets) == 0 {

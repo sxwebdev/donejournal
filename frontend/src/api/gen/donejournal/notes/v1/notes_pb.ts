@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file donejournal/notes/v1/notes.proto.
  */
 export const file_donejournal_notes_v1_notes: GenFile = /*@__PURE__*/
-  fileDesc("CiBkb25lam91cm5hbC9ub3Rlcy92MS9ub3Rlcy5wcm90bxIUZG9uZWpvdXJuYWwubm90ZXMudjEijwEKBE5vdGUSCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSDAoEYm9keRgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJZChBMaXN0Tm90ZXNSZXF1ZXN0EhEKCXBhZ2Vfc2l6ZRgBIAEoBRISCgpwYWdlX3Rva2VuGAIgASgJEhMKBnNlYXJjaBgDIAEoCUgAiAEBQgkKB19zZWFyY2gibAoRTGlzdE5vdGVzUmVzcG9uc2USKQoFbm90ZXMYASADKAsyGi5kb25lam91cm5hbC5ub3Rlcy52MS5Ob3RlEhcKD25leHRfcGFnZV90b2tlbhgCIAEoCRITCgt0b3RhbF9jb3VudBgDIAEoBSIcCg5HZXROb3RlUmVxdWVzdBIKCgJpZBgBIAEoCSI7Cg9HZXROb3RlUmVzcG9uc2USKAoEbm90ZRgBIAEoCzIaLmRvbmVqb3VybmFsLm5vdGVzLnYxLk5vdGUiMAoRQ3JlYXRlTm90ZVJlcXVlc3QSDQoFdGl0bGUYASABKAkSDAoEYm9keRgCIAEoCSI+ChJDcmVhdGVOb3RlUmVzcG9uc2USKAoEbm90ZRgBIAEoCzIaLmRvbmVqb3VybmFsLm5vdGVzLnYxLk5vdGUiWQoRVXBkYXRlTm90ZVJlcXVlc3QSCgoCaWQYASABKAkSEgoFdGl0bGUYAiABKAlIAIgBARIRCgRib2R5GAMgASgJSAGIAQFCCAoGX3RpdGxlQgcKBV9ib2R5Ij4KElVwZGF0ZU5vdGVSZXNwb25zZRIoCgRub3RlGAEgASgLMhouZG9uZWpvdXJuYWwubm90ZXMudjEuTm90ZSIfChFEZWxldGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCSIXChVTdWJzY3JpYmVOb3Rlc1JlcXVlc3QiGAoWU3Vic2NyaWJlTm90ZXNSZXNwb25zZTLDBAoLTm90ZVNlcnZpY2USXAoJTGlzdE5vdGVzEiYuZG9uZWpvdXJuYWwubm90ZXMudjEuTGlzdE5vdGVzUmVxdWVzdBonLmRvbmVqb3VybmFsLm5vdGVzLnYxLkxpc3ROb3Rlc1Jlc3BvbnNlElYKB0dldE5vdGUSJC5kb25lam91cm5hbC5ub3Rlcy52MS5HZXROb3RlUmVxdWVzdBolLmRvbmVqb3VybmFsLm5vdGVzLnYxLkdldE5vdGVSZXNwb25zZRJfCgpDcmVhdGVOb3RlEicuZG9uZWpvdXJuYWwubm90ZXMudjEuQ3JlYXRlTm90ZVJlcXVlc3QaKC5kb25lam91cm5hbC5ub3Rlcy52MS5DcmVhdGVOb3RlUmVzcG9uc2USXwoKVXBkYXRlTm90ZRInLmRvbmVqb3VybmFsLm5vdGVzLnYxLlVwZGF0ZU5vdGVSZXF1ZXN0GiguZG9uZWpvdXJuYWwubm90ZXMudjEuVXBkYXRlTm90ZVJlc3BvbnNlEk0KCkRlbGV0ZU5vdGUSJy5kb25lam91cm5hbC5ub3Rlcy52MS5EZWxldGVOb3RlUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRJtCg5TdWJzY3JpYmVOb3RlcxIrLmRvbmVqb3VybmFsLm5vdGVzLnYxLlN1YnNjcmliZU5vdGVzUmVxdWVzdBosLmRvbmVqb3VybmFsLm5vdGVzLnYxLlN1YnNjcmliZU5vdGVzUmVzcG9uc2UwAULhAQoYY29tLmRvbmVqb3VybmFsLm5vdGVzLnYxQgpOb3Rlc1Byb3RvUAFaR2dpdGh1Yi5jb20vc3h3ZWJkZXYvZG9uZWpvdXJuYWwvYXBpL2dlbi9nby9kb25lam91cm5hbC9ub3Rlcy92MTtub3Rlc3YxogIDRE5YqgIURG9uZWpvdXJuYWwuTm90ZXMuVjHKAhREb25lam91cm5hbFxOb3Rlc1xWMeICIERvbmVqb3VybmFsXE5vdGVzXFYxXEdQQk1ldGFkYXRh6gIWRG9uZWpvdXJuYWw6Ok5vdGVzOjpWMWIGcHJvdG8z", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
+  fileDesc("CiBkb25lam91cm5hbC9ub3Rlcy92MS9ub3Rlcy5wcm90bxIUZG9uZWpvdXJuYWwubm90ZXMudjEizAEKBE5vdGUSCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSDAoEYm9keRgDIAEoCRIuCgpjcmVhdGVkX2F0GAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIZCgx3b3Jrc3BhY2VfaWQYBiABKAlIAIgBARIPCgd0YWdfaWRzGAcgAygJQg8KDV93b3Jrc3BhY2VfaWQilgEKEExpc3ROb3Rlc1JlcXVlc3QSEQoJcGFnZV9zaXplGAEgASgFEhIKCnBhZ2VfdG9rZW4YAiABKAkSEwoGc2VhcmNoGAMgASgJSACIAQESGQoMd29ya3NwYWNlX2lkGAQgASgJSAGIAQESDwoHdGFnX2lkcxgFIAMoCUIJCgdfc2VhcmNoQg8KDV93b3Jrc3BhY2VfaWQibAoRTGlzdE5vdGVzUmVzcG9uc2USKQoFbm90ZXMYASADKAsyGi5kb25lam91cm5hbC5ub3Rlcy52MS5Ob3RlEhcKD25leHRfcGFnZV90b2tlbhgCIAEoCRITCgt0b3RhbF9jb3VudBgDIAEoBSIcCg5HZXROb3RlUmVxdWVzdBIKCgJpZBgBIAEoCSI7Cg9HZXROb3RlUmVzcG9uc2USKAoEbm90ZRgBIAEoCzIaLmRvbmVqb3VybmFsLm5vdGVzLnYxLk5vdGUibQoRQ3JlYXRlTm90ZVJlcXVlc3QSDQoFdGl0bGUYASABKAkSDAoEYm9keRgCIAEoCRIZCgx3b3Jrc3BhY2VfaWQYAyABKAlIAIgBARIPCgd0YWdfaWRzGAQgAygJQg8KDV93b3Jrc3BhY2VfaWQiPgoSQ3JlYXRlTm90ZVJlc3BvbnNlEigKBG5vdGUYASABKAsyGi5kb25lam91cm5hbC5ub3Rlcy52MS5Ob3RlIpYBChFVcGRhdGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCRISCgV0aXRsZRgCIAEoCUgAiAEBEhEKBGJvZHkYAyABKAlIAYgBARIZCgx3b3Jrc3BhY2VfaWQYBCABKAlIAogBARIPCgd0YWdfaWRzGAUgAygJQggKBl90aXRsZUIHCgVfYm9keUIPCg1fd29ya3NwYWNlX2lkIj4KElVwZGF0ZU5vdGVSZXNwb25zZRIoCgRub3RlGAEgASgLMhouZG9uZWpvdXJuYWwubm90ZXMudjEuTm90ZSIfChFEZWxldGVOb3RlUmVxdWVzdBIKCgJpZBgBIAEoCSIXChVTdWJzY3JpYmVOb3Rlc1JlcXVlc3QiGAoWU3Vic2NyaWJlTm90ZXNSZXNwb25zZTLDBAoLTm90ZVNlcnZpY2USXAoJTGlzdE5vdGVzEiYuZG9uZWpvdXJuYWwubm90ZXMudjEuTGlzdE5vdGVzUmVxdWVzdBonLmRvbmVqb3VybmFsLm5vdGVzLnYxLkxpc3ROb3Rlc1Jlc3BvbnNlElYKB0dldE5vdGUSJC5kb25lam91cm5hbC5ub3Rlcy52MS5HZXROb3RlUmVxdWVzdBolLmRvbmVqb3VybmFsLm5vdGVzLnYxLkdldE5vdGVSZXNwb25zZRJfCgpDcmVhdGVOb3RlEicuZG9uZWpvdXJuYWwubm90ZXMudjEuQ3JlYXRlTm90ZVJlcXVlc3QaKC5kb25lam91cm5hbC5ub3Rlcy52MS5DcmVhdGVOb3RlUmVzcG9uc2USXwoKVXBkYXRlTm90ZRInLmRvbmVqb3VybmFsLm5vdGVzLnYxLlVwZGF0ZU5vdGVSZXF1ZXN0GiguZG9uZWpvdXJuYWwubm90ZXMudjEuVXBkYXRlTm90ZVJlc3BvbnNlEk0KCkRlbGV0ZU5vdGUSJy5kb25lam91cm5hbC5ub3Rlcy52MS5EZWxldGVOb3RlUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRJtCg5TdWJzY3JpYmVOb3RlcxIrLmRvbmVqb3VybmFsLm5vdGVzLnYxLlN1YnNjcmliZU5vdGVzUmVxdWVzdBosLmRvbmVqb3VybmFsLm5vdGVzLnYxLlN1YnNjcmliZU5vdGVzUmVzcG9uc2UwAULhAQoYY29tLmRvbmVqb3VybmFsLm5vdGVzLnYxQgpOb3Rlc1Byb3RvUAFaR2dpdGh1Yi5jb20vc3h3ZWJkZXYvZG9uZWpvdXJuYWwvYXBpL2dlbi9nby9kb25lam91cm5hbC9ub3Rlcy92MTtub3Rlc3YxogIDRE5YqgIURG9uZWpvdXJuYWwuTm90ZXMuVjHKAhREb25lam91cm5hbFxOb3Rlc1xWMeICIERvbmVqb3VybmFsXE5vdGVzXFYxXEdQQk1ldGFkYXRh6gIWRG9uZWpvdXJuYWw6Ok5vdGVzOjpWMWIGcHJvdG8z", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
 
 /**
  * Note represents a single note.
@@ -54,6 +54,20 @@ export type Note = Message<"donejournal.notes.v1.Note"> & {
    * @generated from field: google.protobuf.Timestamp updated_at = 5;
    */
   updatedAt?: Timestamp;
+
+  /**
+   * Optional workspace ID this note belongs to.
+   *
+   * @generated from field: optional string workspace_id = 6;
+   */
+  workspaceId?: string;
+
+  /**
+   * IDs of tags attached to this note.
+   *
+   * @generated from field: repeated string tag_ids = 7;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -89,6 +103,20 @@ export type ListNotesRequest = Message<"donejournal.notes.v1.ListNotesRequest"> 
    * @generated from field: optional string search = 3;
    */
   search?: string;
+
+  /**
+   * Filter by workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 4;
+   */
+  workspaceId?: string;
+
+  /**
+   * Filter by tag IDs. If not empty, only notes with any of these tags are returned.
+   *
+   * @generated from field: repeated string tag_ids = 5;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -194,6 +222,20 @@ export type CreateNoteRequest = Message<"donejournal.notes.v1.CreateNoteRequest"
    * @generated from field: string body = 2;
    */
   body: string;
+
+  /**
+   * Optional workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 3;
+   */
+  workspaceId?: string;
+
+  /**
+   * Optional tag IDs to attach to the note.
+   *
+   * @generated from field: repeated string tag_ids = 4;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -250,6 +292,20 @@ export type UpdateNoteRequest = Message<"donejournal.notes.v1.UpdateNoteRequest"
    * @generated from field: optional string body = 3;
    */
   body?: string;
+
+  /**
+   * Updated workspace ID. If not set, workspace_id is not changed.
+   *
+   * @generated from field: optional string workspace_id = 4;
+   */
+  workspaceId?: string;
+
+  /**
+   * Updated tag IDs. Replaces all existing tags.
+   *
+   * @generated from field: repeated string tag_ids = 5;
+   */
+  tagIds: string[];
 };
 
 /**

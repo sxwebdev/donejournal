@@ -35,7 +35,11 @@ type Note struct {
 	// Creation timestamp.
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Last update timestamp.
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Optional workspace ID this note belongs to.
+	WorkspaceId *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// IDs of tags attached to this note.
+	TagIds        []string `protobuf:"bytes,7,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +109,20 @@ func (x *Note) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Note) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *Note) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
+}
+
 // ListNotesRequest is the request to list notes with optional search.
 type ListNotesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -113,7 +131,11 @@ type ListNotesRequest struct {
 	// Token for fetching the next page.
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// Optional search query for partial matching on title and body.
-	Search        *string `protobuf:"bytes,3,opt,name=search,proto3,oneof" json:"search,omitempty"`
+	Search *string `protobuf:"bytes,3,opt,name=search,proto3,oneof" json:"search,omitempty"`
+	// Filter by workspace ID.
+	WorkspaceId *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Filter by tag IDs. If not empty, only notes with any of these tags are returned.
+	TagIds        []string `protobuf:"bytes,5,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -167,6 +189,20 @@ func (x *ListNotesRequest) GetSearch() string {
 		return *x.Search
 	}
 	return ""
+}
+
+func (x *ListNotesRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *ListNotesRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 // ListNotesResponse is the response containing a list of notes.
@@ -331,7 +367,11 @@ type CreateNoteRequest struct {
 	// Note title.
 	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	// Note body (markdown).
-	Body          string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	Body string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	// Optional workspace ID.
+	WorkspaceId *string `protobuf:"bytes,3,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Optional tag IDs to attach to the note.
+	TagIds        []string `protobuf:"bytes,4,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -378,6 +418,20 @@ func (x *CreateNoteRequest) GetBody() string {
 		return x.Body
 	}
 	return ""
+}
+
+func (x *CreateNoteRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *CreateNoteRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 // CreateNoteResponse is the response after creating a note.
@@ -434,7 +488,11 @@ type UpdateNoteRequest struct {
 	// Updated title. If not set, title is not changed.
 	Title *string `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Updated body. If not set, body is not changed.
-	Body          *string `protobuf:"bytes,3,opt,name=body,proto3,oneof" json:"body,omitempty"`
+	Body *string `protobuf:"bytes,3,opt,name=body,proto3,oneof" json:"body,omitempty"`
+	// Updated workspace ID. If not set, workspace_id is not changed.
+	WorkspaceId *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Updated tag IDs. Replaces all existing tags.
+	TagIds        []string `protobuf:"bytes,5,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -488,6 +546,20 @@ func (x *UpdateNoteRequest) GetBody() string {
 		return *x.Body
 	}
 	return ""
+}
+
+func (x *UpdateNoteRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
+	}
+	return ""
+}
+
+func (x *UpdateNoteRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 // UpdateNoteResponse is the response after updating a note.
@@ -660,7 +732,7 @@ var File_donejournal_notes_v1_notes_proto protoreflect.FileDescriptor
 
 const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb6\x01\n" +
+	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x02\n" +
 	"\x04Note\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -668,13 +740,19 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"v\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
+	"\fworkspace_id\x18\x06 \x01(\tH\x00R\vworkspaceId\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\a \x03(\tR\x06tagIdsB\x0f\n" +
+	"\r_workspace_id\"\xc8\x01\n" +
 	"\x10ListNotesRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x1b\n" +
-	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01B\t\n" +
-	"\a_search\"\x8e\x01\n" +
+	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01\x12&\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x01R\vworkspaceId\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\x05 \x03(\tR\x06tagIdsB\t\n" +
+	"\a_searchB\x0f\n" +
+	"\r_workspace_id\"\x8e\x01\n" +
 	"\x11ListNotesResponse\x120\n" +
 	"\x05notes\x18\x01 \x03(\v2\x1a.donejournal.notes.v1.NoteR\x05notes\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1f\n" +
@@ -683,18 +761,24 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\x0eGetNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"=\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"\x8f\x01\n" +
 	"\x11CreateNoteRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
-	"\x04body\x18\x02 \x01(\tR\x04body\"D\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\x12&\n" +
+	"\fworkspace_id\x18\x03 \x01(\tH\x00R\vworkspaceId\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\x04 \x03(\tR\x06tagIdsB\x0f\n" +
+	"\r_workspace_id\"D\n" +
 	"\x12CreateNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"j\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"\xbc\x01\n" +
 	"\x11UpdateNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x17\n" +
-	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01B\b\n" +
+	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01\x12&\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x02R\vworkspaceId\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\x05 \x03(\tR\x06tagIdsB\b\n" +
 	"\x06_titleB\a\n" +
-	"\x05_body\"D\n" +
+	"\x05_bodyB\x0f\n" +
+	"\r_workspace_id\"D\n" +
 	"\x12UpdateNoteResponse\x12.\n" +
 	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"#\n" +
 	"\x11DeleteNoteRequest\x12\x0e\n" +
@@ -774,7 +858,9 @@ func file_donejournal_notes_v1_notes_proto_init() {
 	if File_donejournal_notes_v1_notes_proto != nil {
 		return
 	}
+	file_donejournal_notes_v1_notes_proto_msgTypes[0].OneofWrappers = []any{}
 	file_donejournal_notes_v1_notes_proto_msgTypes[1].OneofWrappers = []any{}
+	file_donejournal_notes_v1_notes_proto_msgTypes[5].OneofWrappers = []any{}
 	file_donejournal_notes_v1_notes_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

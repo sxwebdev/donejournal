@@ -12,8 +12,8 @@ import (
 )
 
 type voiceWorkerArgs struct {
-	UserID int64
-	FileID string
+	UserID int64  `json:"user_id"`
+	FileID string `json:"file_id"`
 }
 
 func (voiceWorkerArgs) Kind() string { return "voice" }

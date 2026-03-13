@@ -19,7 +19,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { NoteDialog } from "./note-dialog"
 import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
 import { useQueryClient } from "@tanstack/react-query"
 import {
@@ -28,6 +27,7 @@ import {
 } from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
 import type { Note } from "@/api/gen/donejournal/notes/v1/notes_pb"
 import { toDate } from "@/lib/dates"
+import { NoteTagBadges } from "./note-tag-badges"
 
 type Props = {
   note: Note
@@ -44,7 +44,6 @@ function stripMarkdown(text: string): string {
 
 export function NoteCard({ note }: Props) {
   const navigate = useNavigate()
-  const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const qc = useQueryClient()
 
@@ -67,7 +66,9 @@ export function NoteCard({ note }: Props) {
     <>
       <div
         className="flex cursor-pointer items-start gap-3 rounded-lg border bg-card p-3 shadow-sm transition-colors hover:bg-accent/30"
-        onClick={() => navigate({ to: "/notes/$noteId", params: { noteId: note.id } })}
+        onClick={() =>
+          navigate({ to: "/notes/$noteId", params: { noteId: note.id } })
+        }
       >
         <div className="min-w-0 flex-1">
           <p className="text-sm leading-snug font-medium">{note.title}</p>
@@ -76,6 +77,7 @@ export function NoteCard({ note }: Props) {
               {bodyPreview}
             </p>
           )}
+          <NoteTagBadges tagIds={note.tagIds} />
           {updatedAt && (
             <p className="mt-1 text-xs text-muted-foreground">
               {formatDistanceToNow(updatedAt, { addSuffix: true })}
@@ -95,7 +97,10 @@ export function NoteCard({ note }: Props) {
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation()
-                  setEditOpen(true)
+                  navigate({
+                    to: "/notes/$noteId/edit",
+                    params: { noteId: note.id },
+                  })
                 }}
               >
                 <Pencil className="mr-2 h-3.5 w-3.5" />
@@ -116,13 +121,6 @@ export function NoteCard({ note }: Props) {
           </DropdownMenu>
         </div>
       </div>
-
-      <NoteDialog
-        mode="edit"
-        note={note}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>

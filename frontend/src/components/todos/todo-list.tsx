@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { useQuery } from "@connectrpc/connect-query"
 import { create } from "@bufbuild/protobuf"
 import { listTodos } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
@@ -13,12 +13,22 @@ import { TodoItem } from "./todo-item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CheckSquare } from "lucide-react"
 import { fromDateOnly, endOfDateOnly, toDate } from "@/lib/dates"
-import { isToday, isTomorrow, format, startOfDay, parseISO } from "date-fns"
+import {
+  isToday,
+  isTomorrow,
+  format,
+  startOfDay,
+  parseISO,
+  subDays,
+} from "date-fns"
 
 type Props = {
   statuses?: TodoStatus[]
   from?: string
   to?: string
+  workspaceId?: string
+  tagIds?: string[]
+  showOverdue?: boolean
 }
 
 type Group = {
@@ -60,13 +70,34 @@ function groupTodos(todos: Todo[]): Group[] {
   return result
 }
 
-export function TodoList({ statuses, from, to }: Props) {
+export function TodoList({
+  statuses,
+  from,
+  to,
+  workspaceId,
+  tagIds,
+  showOverdue,
+}: Props) {
   const query = useQuery(listTodos, {
     pageSize: 100,
     statuses: statuses ?? [],
     plannedDateFrom: from ? fromDateOnly(parseISO(from)) : undefined,
     plannedDateTo: to ? endOfDateOnly(parseISO(to)) : undefined,
+    workspaceId,
+    tagIds: tagIds ?? [],
   })
+
+  const yesterday = useMemo(() => subDays(new Date(), 1), [])
+  const overdueQuery = useQuery(
+    listTodos,
+    {
+      pageSize: 100,
+      statuses: [TodoStatus.PENDING, TodoStatus.IN_PROGRESS],
+      plannedDateTo: endOfDateOnly(yesterday),
+      workspaceId,
+    },
+    { enabled: !!showOverdue }
+  )
 
   const subRef = useRef<{ abort: () => void } | null>(null)
   const subscribe = useCallback(
@@ -76,7 +107,11 @@ export function TodoList({ statuses, from, to }: Props) {
       }),
     []
   )
-  useSubscriptionRefetch({ refetch: query.refetch, subscribe, ref: subRef })
+  const refetchAll = () => {
+    query.refetch()
+    if (showOverdue) overdueQuery.refetch()
+  }
+  useSubscriptionRefetch({ refetch: refetchAll, subscribe, ref: subRef })
 
   const { data, isLoading } = query
 
@@ -105,9 +140,22 @@ export function TodoList({ statuses, from, to }: Props) {
   }
 
   const groups = groupTodos(todos)
+  const overdueTodos = overdueQuery.data?.todos ?? []
 
   return (
     <div className="space-y-6">
+      {showOverdue && overdueTodos.length > 0 && (
+        <div>
+          <h3 className="mb-2 text-xs font-semibold tracking-wider text-red-500 uppercase">
+            Overdue
+          </h3>
+          <div className="space-y-2">
+            {overdueTodos.map((todo) => (
+              <TodoItem key={todo.id} todo={todo} isOverdue />
+            ))}
+          </div>
+        </div>
+      )}
       {groups.map((group) => (
         <div key={group.label}>
           <h3 className="mb-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">

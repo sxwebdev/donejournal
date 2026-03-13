@@ -1,7 +1,12 @@
 import { useCallback, useRef, useState } from "react"
-import { useQuery } from "@connectrpc/connect-query"
+import { useQuery, useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { create } from "@bufbuild/protobuf"
-import { getCalendarEntries } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
+import {
+  getCalendarEntries,
+  updateTodo,
+  listTodos,
+} from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { CalendarDay, Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import {
   TodoStatus,
@@ -10,9 +15,20 @@ import {
 import { todosClient } from "@/api/client"
 import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoDialog } from "@/components/todos/todo-dialog"
-import { fromDate, toDate, formatDateISO } from "@/lib/dates" // formatDateISO used for UTC-based dayMap keys
+import { fromDate, fromDateOnly, toDate, formatDateISO } from "@/lib/dates"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Link } from "@tanstack/react-router"
+import {
+  DndContext,
+  DragOverlay,
+  useDraggable,
+  useDroppable,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragStartEvent,
+  type DragEndEvent,
+} from "@dnd-kit/core"
 import {
   eachDayOfInterval,
   startOfWeek,
@@ -24,10 +40,13 @@ import {
   format,
 } from "date-fns"
 import { cn } from "@/lib/utils"
+import { ConnectError } from "@connectrpc/connect"
+import { toast } from "sonner"
 
 type Props = {
   currentMonth: Date
   onMonthChange: (month: Date) => void
+  workspaceId?: string
 }
 
 const WEEK_START = { weekStartsOn: 1 as const }
@@ -50,16 +69,33 @@ function chunk<T>(arr: T[], size: number): T[][] {
   return result
 }
 
-function TodoRow({ todo, onClick }: { todo: Todo; onClick: () => void }) {
+function TodoRow({
+  todo,
+  onClick,
+  dateStr,
+}: {
+  todo: Todo
+  onClick: () => void
+  dateStr: string
+}) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `todo-${todo.id}`,
+    data: { todo, sourceDate: dateStr },
+  })
+
   return (
     <button
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
       onClick={(e) => {
         e.stopPropagation()
         onClick()
       }}
       className={cn(
-        "w-full truncate rounded px-1 py-0.5 text-left text-xs",
-        statusStyle[todo.status] ?? "bg-muted text-muted-foreground"
+        "w-full truncate rounded px-1 py-0.5 text-left text-xs touch-none",
+        statusStyle[todo.status] ?? "bg-muted text-muted-foreground",
+        isDragging && "opacity-30"
       )}
     >
       {todo.title}
@@ -71,11 +107,17 @@ function DayCell({
   date,
   calDay,
   isCurrentMonth,
+  dateStr,
 }: {
   date: Date
   calDay: CalendarDay | undefined
   isCurrentMonth: boolean
+  dateStr: string
 }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `day-${dateStr}`,
+    data: { date, dateStr },
+  })
   const [editTodo, setEditTodo] = useState<Todo | null>(null)
   const [createOpen, setCreateOpen] = useState(false)
   // Use local date for URL (so user sees correct date), UTC-based key is handled in CalendarView
@@ -87,9 +129,11 @@ function DayCell({
   return (
     <>
       <div
+        ref={setNodeRef}
         className={cn(
-          "flex min-h-25 flex-col border-r border-b p-1",
-          !isCurrentMonth && "opacity-40"
+          "flex min-h-25 flex-col border-r border-b p-1 transition-colors",
+          !isCurrentMonth && "opacity-40",
+          isOver && "bg-primary/10 ring-2 ring-inset ring-primary/30"
         )}
         onClick={() => setCreateOpen(true)}
       >
@@ -108,6 +152,7 @@ function DayCell({
             <TodoRow
               key={todo.id}
               todo={todo}
+              dateStr={dateStr}
               onClick={() => setEditTodo(todo)}
             />
           ))}
@@ -148,13 +193,62 @@ function DayCell({
   )
 }
 
-export function CalendarView({ currentMonth, onMonthChange }: Props) {
+export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props) {
+  const qc = useQueryClient()
+  const [activeTodo, setActiveTodo] = useState<Todo | null>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
+  const invalidate = () =>
+    Promise.all([
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({ schema: listTodos, cardinality: "finite" }),
+      }),
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({ schema: getCalendarEntries, cardinality: "finite" }),
+      }),
+    ])
+
+  const moveMutation = useMutation(updateTodo, {
+    onSuccess: () => { invalidate() },
+    onError: (err) => {
+      toast.error("Failed to move todo", {
+        description: err instanceof ConnectError ? err.rawMessage : "Unknown error",
+      })
+      invalidate()
+    },
+  })
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveTodo(event.active.data.current?.todo ?? null)
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    setActiveTodo(null)
+    const { active, over } = event
+    if (!over) return
+
+    const todo = active.data.current?.todo as Todo | undefined
+    const sourceDate = active.data.current?.sourceDate as string | undefined
+    const targetDate = over.data.current?.dateStr as string | undefined
+
+    if (!todo || !sourceDate || !targetDate || sourceDate === targetDate) return
+
+    const [y, m, d] = targetDate.split("-").map(Number)
+    const newDate = new Date(y, m - 1, d)
+
+    moveMutation.mutate({ id: todo.id, plannedDate: fromDateOnly(newDate) })
+  }
+
   const start = startOfWeek(startOfMonth(currentMonth), WEEK_START)
   const end = endOfWeek(endOfMonth(currentMonth), WEEK_START)
 
   const query = useQuery(getCalendarEntries, {
     from: fromDate(start),
     to: fromDate(end),
+    workspaceId,
   })
 
   const subRef = useRef<{ abort: () => void } | null>(null)
@@ -190,76 +284,96 @@ export function CalendarView({ currentMonth, onMonthChange }: Props) {
   )
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <button
-          onClick={() => onMonthChange(prevMonth)}
-          className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
-          aria-label="Previous month"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <h2 className="text-base font-semibold">
-          {format(currentMonth, "MMMM yyyy")}
-        </h2>
-        <button
-          onClick={() => onMonthChange(nextMonth)}
-          className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
-          aria-label="Next month"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Weekday labels */}
-      <div className="grid grid-cols-7 border-b">
-        {WEEKDAYS.map((day) => (
-          <div
-            key={day}
-            className="border-r py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <button
+            onClick={() => onMonthChange(prevMonth)}
+            className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
+            aria-label="Previous month"
           >
-            {day}
-          </div>
-        ))}
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <h2 className="text-base font-semibold">
+            {format(currentMonth, "MMMM yyyy")}
+          </h2>
+          <button
+            onClick={() => onMonthChange(nextMonth)}
+            className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
+            aria-label="Next month"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Weekday labels */}
+        <div className="grid grid-cols-7 border-b">
+          {WEEKDAYS.map((day) => (
+            <div
+              key={day}
+              className="border-r py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
+            >
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="flex-1">
+          {weeks.map((week, wi) => (
+            <div key={wi} className="grid grid-cols-7">
+              {week.map((date, di) => {
+                const dateStr = formatDateISO(date)
+                return (
+                  <div key={di} className={cn(di === 6 && "border-r-0")}>
+                    <DayCell
+                      date={date}
+                      calDay={dayMap.get(dateStr)}
+                      isCurrentMonth={isSameMonth(date, currentMonth)}
+                      dateStr={dateStr}
+                    />
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-4 border-t px-4 py-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-blue-500" /> Pending
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-yellow-500" /> In Progress
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-green-500" /> Completed
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-muted-foreground" />{" "}
+            Cancelled
+          </span>
+        </div>
       </div>
 
-      {/* Calendar grid */}
-      <div className="flex-1">
-        {weeks.map((week, wi) => (
-          <div key={wi} className="grid grid-cols-7">
-            {week.map((date, di) => {
-              const dateStr = formatDateISO(date)
-              return (
-                <div key={di} className={cn(di === 6 && "border-r-0")}>
-                  <DayCell
-                    date={date}
-                    calDay={dayMap.get(dateStr)}
-                    isCurrentMonth={isSameMonth(date, currentMonth)}
-                  />
-                </div>
-              )
-            })}
+      <DragOverlay dropAnimation={null}>
+        {activeTodo ? (
+          <div
+            className={cn(
+              "w-32 truncate rounded px-1 py-0.5 text-xs shadow-lg",
+              statusStyle[activeTodo.status] ?? "bg-muted text-muted-foreground"
+            )}
+          >
+            {activeTodo.title}
           </div>
-        ))}
-      </div>
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-4 border-t px-4 py-3 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-blue-500" /> Pending
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-yellow-500" /> In Progress
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-green-500" /> Completed
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-muted-foreground" />{" "}
-          Cancelled
-        </span>
-      </div>
-    </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   )
 }

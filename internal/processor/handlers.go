@@ -13,10 +13,15 @@ import (
 )
 
 // HandleCommand handles bot commands like /start, /menu, etc.
-func (s *Processor) HandleCommand(ctx context.Context, chatID int64, command string) error {
+func (s *Processor) HandleCommand(ctx context.Context, chatID int64, userID int64, command string) error {
 	switch command {
 	case "/start", "/menu":
 		return s.showMainMenu(ctx, chatID)
+	case "/clear":
+		if err := s.agent.ClearConversation(ctx, userID); err != nil {
+			s.logger.Errorf("failed to clear conversation: %v", err)
+		}
+		return s.botService.SendMessage(ctx, chatID, "🗑 История диалога очищена")
 	default:
 		return nil
 	}

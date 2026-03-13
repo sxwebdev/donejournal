@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file donejournal/todos/v1/todos.proto.
  */
 export const file_donejournal_todos_v1_todos: GenFile = /*@__PURE__*/
-  fileDesc("CiBkb25lam91cm5hbC90b2Rvcy92MS90b2Rvcy5wcm90bxIUZG9uZWpvdXJuYWwudG9kb3MudjEiwgIKBFRvZG8SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSMAoGc3RhdHVzGAQgASgOMiAuZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kb1N0YXR1cxIwCgxwbGFubmVkX2RhdGUYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjUKDGNvbXBsZXRlZF9hdBgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARIuCgpjcmVhdGVkX2F0GAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIPCg1fY29tcGxldGVkX2F0Io0CChBMaXN0VG9kb3NSZXF1ZXN0EhEKCXBhZ2Vfc2l6ZRgBIAEoBRISCgpwYWdlX3Rva2VuGAIgASgJEjIKCHN0YXR1c2VzGAMgAygOMiAuZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kb1N0YXR1cxI6ChFwbGFubmVkX2RhdGVfZnJvbRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARI4Cg9wbGFubmVkX2RhdGVfdG8YBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAGIAQFCFAoSX3BsYW5uZWRfZGF0ZV9mcm9tQhIKEF9wbGFubmVkX2RhdGVfdG8ibAoRTGlzdFRvZG9zUmVzcG9uc2USKQoFdG9kb3MYASADKAsyGi5kb25lam91cm5hbC50b2Rvcy52MS5Ub2RvEhcKD25leHRfcGFnZV90b2tlbhgCIAEoCRITCgt0b3RhbF9jb3VudBgDIAEoBSIcCg5HZXRUb2RvUmVxdWVzdBIKCgJpZBgBIAEoCSI7Cg9HZXRUb2RvUmVzcG9uc2USKAoEdG9kbxgBIAEoCzIaLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG8iaQoRQ3JlYXRlVG9kb1JlcXVlc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSMAoMcGxhbm5lZF9kYXRlGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCI+ChJDcmVhdGVUb2RvUmVzcG9uc2USKAoEdG9kbxgBIAEoCzIaLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG8i8QEKEVVwZGF0ZVRvZG9SZXF1ZXN0EgoKAmlkGAEgASgJEhIKBXRpdGxlGAIgASgJSACIAQESGAoLZGVzY3JpcHRpb24YAyABKAlIAYgBARI1CgZzdGF0dXMYBCABKA4yIC5kb25lam91cm5hbC50b2Rvcy52MS5Ub2RvU3RhdHVzSAKIAQESNQoMcGxhbm5lZF9kYXRlGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEgDiAEBQggKBl90aXRsZUIOCgxfZGVzY3JpcHRpb25CCQoHX3N0YXR1c0IPCg1fcGxhbm5lZF9kYXRlIj4KElVwZGF0ZVRvZG9SZXNwb25zZRIoCgR0b2RvGAEgASgLMhouZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kbyIfChFEZWxldGVUb2RvUmVxdWVzdBIKCgJpZBgBIAEoCSIhChNDb21wbGV0ZVRvZG9SZXF1ZXN0EgoKAmlkGAEgASgJIkAKFENvbXBsZXRlVG9kb1Jlc3BvbnNlEigKBHRvZG8YASABKAsyGi5kb25lam91cm5hbC50b2Rvcy52MS5Ub2RvIm0KGUdldENhbGVuZGFyRW50cmllc1JlcXVlc3QSKAoEZnJvbRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJgoCdG8YAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wIpABCgtDYWxlbmRhckRheRIoCgRkYXRlGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIpCgV0b2RvcxgCIAMoCzIaLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG8SEwoLdG90YWxfY291bnQYAyABKAUSFwoPY29tcGxldGVkX2NvdW50GAQgASgFIk0KGkdldENhbGVuZGFyRW50cmllc1Jlc3BvbnNlEi8KBGRheXMYASADKAsyIS5kb25lam91cm5hbC50b2Rvcy52MS5DYWxlbmRhckRheSIXChVTdWJzY3JpYmVUb2Rvc1JlcXVlc3QiGAoWU3Vic2NyaWJlVG9kb3NSZXNwb25zZSqVAQoKVG9kb1N0YXR1cxIbChdUT0RPX1NUQVRVU19VTlNQRUNJRklFRBAAEhcKE1RPRE9fU1RBVFVTX1BFTkRJTkcQARIbChdUT0RPX1NUQVRVU19JTl9QUk9HUkVTUxACEhkKFVRPRE9fU1RBVFVTX0NPTVBMRVRFRBADEhkKFVRPRE9fU1RBVFVTX0NBTkNFTExFRBAEMqMGCgtUb2RvU2VydmljZRJcCglMaXN0VG9kb3MSJi5kb25lam91cm5hbC50b2Rvcy52MS5MaXN0VG9kb3NSZXF1ZXN0GicuZG9uZWpvdXJuYWwudG9kb3MudjEuTGlzdFRvZG9zUmVzcG9uc2USVgoHR2V0VG9kbxIkLmRvbmVqb3VybmFsLnRvZG9zLnYxLkdldFRvZG9SZXF1ZXN0GiUuZG9uZWpvdXJuYWwudG9kb3MudjEuR2V0VG9kb1Jlc3BvbnNlEl8KCkNyZWF0ZVRvZG8SJy5kb25lam91cm5hbC50b2Rvcy52MS5DcmVhdGVUb2RvUmVxdWVzdBooLmRvbmVqb3VybmFsLnRvZG9zLnYxLkNyZWF0ZVRvZG9SZXNwb25zZRJfCgpVcGRhdGVUb2RvEicuZG9uZWpvdXJuYWwudG9kb3MudjEuVXBkYXRlVG9kb1JlcXVlc3QaKC5kb25lam91cm5hbC50b2Rvcy52MS5VcGRhdGVUb2RvUmVzcG9uc2USTQoKRGVsZXRlVG9kbxInLmRvbmVqb3VybmFsLnRvZG9zLnYxLkRlbGV0ZVRvZG9SZXF1ZXN0GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5EmUKDENvbXBsZXRlVG9kbxIpLmRvbmVqb3VybmFsLnRvZG9zLnYxLkNvbXBsZXRlVG9kb1JlcXVlc3QaKi5kb25lam91cm5hbC50b2Rvcy52MS5Db21wbGV0ZVRvZG9SZXNwb25zZRJ3ChJHZXRDYWxlbmRhckVudHJpZXMSLy5kb25lam91cm5hbC50b2Rvcy52MS5HZXRDYWxlbmRhckVudHJpZXNSZXF1ZXN0GjAuZG9uZWpvdXJuYWwudG9kb3MudjEuR2V0Q2FsZW5kYXJFbnRyaWVzUmVzcG9uc2USbQoOU3Vic2NyaWJlVG9kb3MSKy5kb25lam91cm5hbC50b2Rvcy52MS5TdWJzY3JpYmVUb2Rvc1JlcXVlc3QaLC5kb25lam91cm5hbC50b2Rvcy52MS5TdWJzY3JpYmVUb2Rvc1Jlc3BvbnNlMAFC4QEKGGNvbS5kb25lam91cm5hbC50b2Rvcy52MUIKVG9kb3NQcm90b1ABWkdnaXRodWIuY29tL3N4d2ViZGV2L2RvbmVqb3VybmFsL2FwaS9nZW4vZ28vZG9uZWpvdXJuYWwvdG9kb3MvdjE7dG9kb3N2MaICA0RUWKoCFERvbmVqb3VybmFsLlRvZG9zLlYxygIURG9uZWpvdXJuYWxcVG9kb3NcVjHiAiBEb25lam91cm5hbFxUb2Rvc1xWMVxHUEJNZXRhZGF0YeoCFkRvbmVqb3VybmFsOjpUb2Rvczo6VjFiBnByb3RvMw", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
+  fileDesc("CiBkb25lam91cm5hbC90b2Rvcy92MS90b2Rvcy5wcm90bxIUZG9uZWpvdXJuYWwudG9kb3MudjEitQMKBFRvZG8SCgoCaWQYASABKAkSDQoFdGl0bGUYAiABKAkSEwoLZGVzY3JpcHRpb24YAyABKAkSMAoGc3RhdHVzGAQgASgOMiAuZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kb1N0YXR1cxIwCgxwbGFubmVkX2RhdGUYBSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEjUKDGNvbXBsZXRlZF9hdBgGIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARIuCgpjcmVhdGVkX2F0GAcgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIuCgp1cGRhdGVkX2F0GAggASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIZCgx3b3Jrc3BhY2VfaWQYCSABKAlIAYgBARI0Cghwcmlvcml0eRgKIAEoDjIiLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG9Qcmlvcml0eRIPCgd0YWdfaWRzGAsgAygJQg8KDV9jb21wbGV0ZWRfYXRCDwoNX3dvcmtzcGFjZV9pZCLKAgoQTGlzdFRvZG9zUmVxdWVzdBIRCglwYWdlX3NpemUYASABKAUSEgoKcGFnZV90b2tlbhgCIAEoCRIyCghzdGF0dXNlcxgDIAMoDjIgLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG9TdGF0dXMSOgoRcGxhbm5lZF9kYXRlX2Zyb20YBCABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSACIAQESOAoPcGxhbm5lZF9kYXRlX3RvGAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEgBiAEBEhkKDHdvcmtzcGFjZV9pZBgGIAEoCUgCiAEBEg8KB3RhZ19pZHMYByADKAlCFAoSX3BsYW5uZWRfZGF0ZV9mcm9tQhIKEF9wbGFubmVkX2RhdGVfdG9CDwoNX3dvcmtzcGFjZV9pZCJsChFMaXN0VG9kb3NSZXNwb25zZRIpCgV0b2RvcxgBIAMoCzIaLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG8SFwoPbmV4dF9wYWdlX3Rva2VuGAIgASgJEhMKC3RvdGFsX2NvdW50GAMgASgFIhwKDkdldFRvZG9SZXF1ZXN0EgoKAmlkGAEgASgJIjsKD0dldFRvZG9SZXNwb25zZRIoCgR0b2RvGAEgASgLMhouZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kbyLcAQoRQ3JlYXRlVG9kb1JlcXVlc3QSDQoFdGl0bGUYASABKAkSEwoLZGVzY3JpcHRpb24YAiABKAkSMAoMcGxhbm5lZF9kYXRlGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIZCgx3b3Jrc3BhY2VfaWQYBCABKAlIAIgBARI0Cghwcmlvcml0eRgFIAEoDjIiLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG9Qcmlvcml0eRIPCgd0YWdfaWRzGAYgAygJQg8KDV93b3Jrc3BhY2VfaWQiPgoSQ3JlYXRlVG9kb1Jlc3BvbnNlEigKBHRvZG8YASABKAsyGi5kb25lam91cm5hbC50b2Rvcy52MS5Ub2RvIvYCChFVcGRhdGVUb2RvUmVxdWVzdBIKCgJpZBgBIAEoCRISCgV0aXRsZRgCIAEoCUgAiAEBEhgKC2Rlc2NyaXB0aW9uGAMgASgJSAGIAQESNQoGc3RhdHVzGAQgASgOMiAuZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kb1N0YXR1c0gCiAEBEjUKDHBsYW5uZWRfZGF0ZRgFIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIA4gBARIZCgx3b3Jrc3BhY2VfaWQYBiABKAlIBIgBARI5Cghwcmlvcml0eRgHIAEoDjIiLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG9Qcmlvcml0eUgFiAEBEg8KB3RhZ19pZHMYCCADKAlCCAoGX3RpdGxlQg4KDF9kZXNjcmlwdGlvbkIJCgdfc3RhdHVzQg8KDV9wbGFubmVkX2RhdGVCDwoNX3dvcmtzcGFjZV9pZEILCglfcHJpb3JpdHkiPgoSVXBkYXRlVG9kb1Jlc3BvbnNlEigKBHRvZG8YASABKAsyGi5kb25lam91cm5hbC50b2Rvcy52MS5Ub2RvIh8KEURlbGV0ZVRvZG9SZXF1ZXN0EgoKAmlkGAEgASgJIiEKE0NvbXBsZXRlVG9kb1JlcXVlc3QSCgoCaWQYASABKAkiQAoUQ29tcGxldGVUb2RvUmVzcG9uc2USKAoEdG9kbxgBIAEoCzIaLmRvbmVqb3VybmFsLnRvZG9zLnYxLlRvZG8ikwIKEUNvdW50VG9kb3NSZXF1ZXN0EjIKCHN0YXR1c2VzGAEgAygOMiAuZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kb1N0YXR1cxI6ChFwbGFubmVkX2RhdGVfZnJvbRgCIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBIAIgBARI4Cg9wbGFubmVkX2RhdGVfdG8YAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wSAGIAQESGQoMd29ya3NwYWNlX2lkGAQgASgJSAKIAQFCFAoSX3BsYW5uZWRfZGF0ZV9mcm9tQhIKEF9wbGFubmVkX2RhdGVfdG9CDwoNX3dvcmtzcGFjZV9pZCIjChJDb3VudFRvZG9zUmVzcG9uc2USDQoFY291bnQYASABKA0imQEKGUdldENhbGVuZGFyRW50cmllc1JlcXVlc3QSKAoEZnJvbRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASJgoCdG8YAiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhkKDHdvcmtzcGFjZV9pZBgDIAEoCUgAiAEBQg8KDV93b3Jrc3BhY2VfaWQikAEKC0NhbGVuZGFyRGF5EigKBGRhdGUYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEikKBXRvZG9zGAIgAygLMhouZG9uZWpvdXJuYWwudG9kb3MudjEuVG9kbxITCgt0b3RhbF9jb3VudBgDIAEoBRIXCg9jb21wbGV0ZWRfY291bnQYBCABKAUiTQoaR2V0Q2FsZW5kYXJFbnRyaWVzUmVzcG9uc2USLwoEZGF5cxgBIAMoCzIhLmRvbmVqb3VybmFsLnRvZG9zLnYxLkNhbGVuZGFyRGF5IhcKFVN1YnNjcmliZVRvZG9zUmVxdWVzdCIYChZTdWJzY3JpYmVUb2Rvc1Jlc3BvbnNlKpUBCgpUb2RvU3RhdHVzEhsKF1RPRE9fU1RBVFVTX1VOU1BFQ0lGSUVEEAASFwoTVE9ET19TVEFUVVNfUEVORElORxABEhsKF1RPRE9fU1RBVFVTX0lOX1BST0dSRVNTEAISGQoVVE9ET19TVEFUVVNfQ09NUExFVEVEEAMSGQoVVE9ET19TVEFUVVNfQ0FOQ0VMTEVEEAQqqgEKDFRvZG9Qcmlvcml0eRIdChlUT0RPX1BSSU9SSVRZX1VOU1BFQ0lGSUVEEAASFgoSVE9ET19QUklPUklUWV9OT05FEAESFQoRVE9ET19QUklPUklUWV9MT1cQAhIYChRUT0RPX1BSSU9SSVRZX01FRElVTRADEhYKElRPRE9fUFJJT1JJVFlfSElHSBAEEhoKFlRPRE9fUFJJT1JJVFlfQ1JJVElDQUwQBTKEBwoLVG9kb1NlcnZpY2USXAoJTGlzdFRvZG9zEiYuZG9uZWpvdXJuYWwudG9kb3MudjEuTGlzdFRvZG9zUmVxdWVzdBonLmRvbmVqb3VybmFsLnRvZG9zLnYxLkxpc3RUb2Rvc1Jlc3BvbnNlElYKB0dldFRvZG8SJC5kb25lam91cm5hbC50b2Rvcy52MS5HZXRUb2RvUmVxdWVzdBolLmRvbmVqb3VybmFsLnRvZG9zLnYxLkdldFRvZG9SZXNwb25zZRJfCgpDcmVhdGVUb2RvEicuZG9uZWpvdXJuYWwudG9kb3MudjEuQ3JlYXRlVG9kb1JlcXVlc3QaKC5kb25lam91cm5hbC50b2Rvcy52MS5DcmVhdGVUb2RvUmVzcG9uc2USXwoKVXBkYXRlVG9kbxInLmRvbmVqb3VybmFsLnRvZG9zLnYxLlVwZGF0ZVRvZG9SZXF1ZXN0GiguZG9uZWpvdXJuYWwudG9kb3MudjEuVXBkYXRlVG9kb1Jlc3BvbnNlEk0KCkRlbGV0ZVRvZG8SJy5kb25lam91cm5hbC50b2Rvcy52MS5EZWxldGVUb2RvUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eRJlCgxDb21wbGV0ZVRvZG8SKS5kb25lam91cm5hbC50b2Rvcy52MS5Db21wbGV0ZVRvZG9SZXF1ZXN0GiouZG9uZWpvdXJuYWwudG9kb3MudjEuQ29tcGxldGVUb2RvUmVzcG9uc2USXwoKQ291bnRUb2RvcxInLmRvbmVqb3VybmFsLnRvZG9zLnYxLkNvdW50VG9kb3NSZXF1ZXN0GiguZG9uZWpvdXJuYWwudG9kb3MudjEuQ291bnRUb2Rvc1Jlc3BvbnNlEncKEkdldENhbGVuZGFyRW50cmllcxIvLmRvbmVqb3VybmFsLnRvZG9zLnYxLkdldENhbGVuZGFyRW50cmllc1JlcXVlc3QaMC5kb25lam91cm5hbC50b2Rvcy52MS5HZXRDYWxlbmRhckVudHJpZXNSZXNwb25zZRJtCg5TdWJzY3JpYmVUb2RvcxIrLmRvbmVqb3VybmFsLnRvZG9zLnYxLlN1YnNjcmliZVRvZG9zUmVxdWVzdBosLmRvbmVqb3VybmFsLnRvZG9zLnYxLlN1YnNjcmliZVRvZG9zUmVzcG9uc2UwAULhAQoYY29tLmRvbmVqb3VybmFsLnRvZG9zLnYxQgpUb2Rvc1Byb3RvUAFaR2dpdGh1Yi5jb20vc3h3ZWJkZXYvZG9uZWpvdXJuYWwvYXBpL2dlbi9nby9kb25lam91cm5hbC90b2Rvcy92MTt0b2Rvc3YxogIDRFRYqgIURG9uZWpvdXJuYWwuVG9kb3MuVjHKAhREb25lam91cm5hbFxUb2Rvc1xWMeICIERvbmVqb3VybmFsXFRvZG9zXFYxXEdQQk1ldGFkYXRh6gIWRG9uZWpvdXJuYWw6OlRvZG9zOjpWMWIGcHJvdG8z", [file_google_protobuf_empty, file_google_protobuf_timestamp]);
 
 /**
  * Todo represents a single todo item.
@@ -75,6 +75,27 @@ export type Todo = Message<"donejournal.todos.v1.Todo"> & {
    * @generated from field: google.protobuf.Timestamp updated_at = 8;
    */
   updatedAt?: Timestamp;
+
+  /**
+   * Optional workspace ID this todo belongs to.
+   *
+   * @generated from field: optional string workspace_id = 9;
+   */
+  workspaceId?: string;
+
+  /**
+   * Priority level.
+   *
+   * @generated from field: donejournal.todos.v1.TodoPriority priority = 10;
+   */
+  priority: TodoPriority;
+
+  /**
+   * IDs of tags attached to this todo.
+   *
+   * @generated from field: repeated string tag_ids = 11;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -124,6 +145,20 @@ export type ListTodosRequest = Message<"donejournal.todos.v1.ListTodosRequest"> 
    * @generated from field: optional google.protobuf.Timestamp planned_date_to = 5;
    */
   plannedDateTo?: Timestamp;
+
+  /**
+   * Filter by workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 6;
+   */
+  workspaceId?: string;
+
+  /**
+   * Filter by tag IDs. If not empty, only todos with any of these tags are returned.
+   *
+   * @generated from field: repeated string tag_ids = 7;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -236,6 +271,27 @@ export type CreateTodoRequest = Message<"donejournal.todos.v1.CreateTodoRequest"
    * @generated from field: google.protobuf.Timestamp planned_date = 3;
    */
   plannedDate?: Timestamp;
+
+  /**
+   * Optional workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 4;
+   */
+  workspaceId?: string;
+
+  /**
+   * Priority level.
+   *
+   * @generated from field: donejournal.todos.v1.TodoPriority priority = 5;
+   */
+  priority: TodoPriority;
+
+  /**
+   * Optional tag IDs to attach to the todo.
+   *
+   * @generated from field: repeated string tag_ids = 6;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -306,6 +362,27 @@ export type UpdateTodoRequest = Message<"donejournal.todos.v1.UpdateTodoRequest"
    * @generated from field: optional google.protobuf.Timestamp planned_date = 5;
    */
   plannedDate?: Timestamp;
+
+  /**
+   * Updated workspace ID. If not set, workspace_id is not changed.
+   *
+   * @generated from field: optional string workspace_id = 6;
+   */
+  workspaceId?: string;
+
+  /**
+   * Updated priority. If not set, priority is not changed.
+   *
+   * @generated from field: optional donejournal.todos.v1.TodoPriority priority = 7;
+   */
+  priority?: TodoPriority;
+
+  /**
+   * Updated tag IDs. Replaces all existing tags.
+   *
+   * @generated from field: repeated string tag_ids = 8;
+   */
+  tagIds: string[];
 };
 
 /**
@@ -400,6 +477,69 @@ export const CompleteTodoResponseSchema: GenMessage<CompleteTodoResponse> = /*@_
   messageDesc(file_donejournal_todos_v1_todos, 11);
 
 /**
+ * CountTodosRequest is the request to count todos matching the given filters.
+ *
+ * @generated from message donejournal.todos.v1.CountTodosRequest
+ */
+export type CountTodosRequest = Message<"donejournal.todos.v1.CountTodosRequest"> & {
+  /**
+   * Filter by status. If empty, all statuses are included.
+   *
+   * @generated from field: repeated donejournal.todos.v1.TodoStatus statuses = 1;
+   */
+  statuses: TodoStatus[];
+
+  /**
+   * Filter by planned_date range start (inclusive).
+   *
+   * @generated from field: optional google.protobuf.Timestamp planned_date_from = 2;
+   */
+  plannedDateFrom?: Timestamp;
+
+  /**
+   * Filter by planned_date range end (inclusive).
+   *
+   * @generated from field: optional google.protobuf.Timestamp planned_date_to = 3;
+   */
+  plannedDateTo?: Timestamp;
+
+  /**
+   * Filter by workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 4;
+   */
+  workspaceId?: string;
+};
+
+/**
+ * Describes the message donejournal.todos.v1.CountTodosRequest.
+ * Use `create(CountTodosRequestSchema)` to create a new message.
+ */
+export const CountTodosRequestSchema: GenMessage<CountTodosRequest> = /*@__PURE__*/
+  messageDesc(file_donejournal_todos_v1_todos, 12);
+
+/**
+ * CountTodosResponse is the response containing the count of matching todos.
+ *
+ * @generated from message donejournal.todos.v1.CountTodosResponse
+ */
+export type CountTodosResponse = Message<"donejournal.todos.v1.CountTodosResponse"> & {
+  /**
+   * The number of todos matching the filters.
+   *
+   * @generated from field: uint32 count = 1;
+   */
+  count: number;
+};
+
+/**
+ * Describes the message donejournal.todos.v1.CountTodosResponse.
+ * Use `create(CountTodosResponseSchema)` to create a new message.
+ */
+export const CountTodosResponseSchema: GenMessage<CountTodosResponse> = /*@__PURE__*/
+  messageDesc(file_donejournal_todos_v1_todos, 13);
+
+/**
  * GetCalendarEntriesRequest is the request to get todos grouped by date for a calendar view.
  *
  * @generated from message donejournal.todos.v1.GetCalendarEntriesRequest
@@ -418,6 +558,13 @@ export type GetCalendarEntriesRequest = Message<"donejournal.todos.v1.GetCalenda
    * @generated from field: google.protobuf.Timestamp to = 2;
    */
   to?: Timestamp;
+
+  /**
+   * Filter by workspace ID.
+   *
+   * @generated from field: optional string workspace_id = 3;
+   */
+  workspaceId?: string;
 };
 
 /**
@@ -425,7 +572,7 @@ export type GetCalendarEntriesRequest = Message<"donejournal.todos.v1.GetCalenda
  * Use `create(GetCalendarEntriesRequestSchema)` to create a new message.
  */
 export const GetCalendarEntriesRequestSchema: GenMessage<GetCalendarEntriesRequest> = /*@__PURE__*/
-  messageDesc(file_donejournal_todos_v1_todos, 12);
+  messageDesc(file_donejournal_todos_v1_todos, 14);
 
 /**
  * CalendarDay represents todos for a single day along with summary statistics.
@@ -467,7 +614,7 @@ export type CalendarDay = Message<"donejournal.todos.v1.CalendarDay"> & {
  * Use `create(CalendarDaySchema)` to create a new message.
  */
 export const CalendarDaySchema: GenMessage<CalendarDay> = /*@__PURE__*/
-  messageDesc(file_donejournal_todos_v1_todos, 13);
+  messageDesc(file_donejournal_todos_v1_todos, 15);
 
 /**
  * GetCalendarEntriesResponse is the response containing calendar data.
@@ -488,7 +635,7 @@ export type GetCalendarEntriesResponse = Message<"donejournal.todos.v1.GetCalend
  * Use `create(GetCalendarEntriesResponseSchema)` to create a new message.
  */
 export const GetCalendarEntriesResponseSchema: GenMessage<GetCalendarEntriesResponse> = /*@__PURE__*/
-  messageDesc(file_donejournal_todos_v1_todos, 14);
+  messageDesc(file_donejournal_todos_v1_todos, 16);
 
 /**
  * SubscribeTodosRequest is the request to subscribe to todo change events.
@@ -503,7 +650,7 @@ export type SubscribeTodosRequest = Message<"donejournal.todos.v1.SubscribeTodos
  * Use `create(SubscribeTodosRequestSchema)` to create a new message.
  */
 export const SubscribeTodosRequestSchema: GenMessage<SubscribeTodosRequest> = /*@__PURE__*/
-  messageDesc(file_donejournal_todos_v1_todos, 15);
+  messageDesc(file_donejournal_todos_v1_todos, 17);
 
 /**
  * SubscribeTodosResponse is sent whenever a todo is created, updated, or deleted.
@@ -518,7 +665,7 @@ export type SubscribeTodosResponse = Message<"donejournal.todos.v1.SubscribeTodo
  * Use `create(SubscribeTodosResponseSchema)` to create a new message.
  */
 export const SubscribeTodosResponseSchema: GenMessage<SubscribeTodosResponse> = /*@__PURE__*/
-  messageDesc(file_donejournal_todos_v1_todos, 16);
+  messageDesc(file_donejournal_todos_v1_todos, 18);
 
 /**
  * TodoStatus represents the status of a todo item.
@@ -567,6 +714,61 @@ export enum TodoStatus {
  */
 export const TodoStatusSchema: GenEnum<TodoStatus> = /*@__PURE__*/
   enumDesc(file_donejournal_todos_v1_todos, 0);
+
+/**
+ * TodoPriority represents the priority level of a todo item.
+ *
+ * @generated from enum donejournal.todos.v1.TodoPriority
+ */
+export enum TodoPriority {
+  /**
+   * Unspecified priority.
+   *
+   * @generated from enum value: TODO_PRIORITY_UNSPECIFIED = 0;
+   */
+  UNSPECIFIED = 0,
+
+  /**
+   * No priority set (default).
+   *
+   * @generated from enum value: TODO_PRIORITY_NONE = 1;
+   */
+  NONE = 1,
+
+  /**
+   * Low priority.
+   *
+   * @generated from enum value: TODO_PRIORITY_LOW = 2;
+   */
+  LOW = 2,
+
+  /**
+   * Medium priority.
+   *
+   * @generated from enum value: TODO_PRIORITY_MEDIUM = 3;
+   */
+  MEDIUM = 3,
+
+  /**
+   * High priority.
+   *
+   * @generated from enum value: TODO_PRIORITY_HIGH = 4;
+   */
+  HIGH = 4,
+
+  /**
+   * Critical priority.
+   *
+   * @generated from enum value: TODO_PRIORITY_CRITICAL = 5;
+   */
+  CRITICAL = 5,
+}
+
+/**
+ * Describes the enum donejournal.todos.v1.TodoPriority.
+ */
+export const TodoPrioritySchema: GenEnum<TodoPriority> = /*@__PURE__*/
+  enumDesc(file_donejournal_todos_v1_todos, 1);
 
 /**
  * TodoService manages todos — tasks with a planned date, status, and optional description.
@@ -633,6 +835,16 @@ export const TodoService: GenService<{
     methodKind: "unary";
     input: typeof CompleteTodoRequestSchema;
     output: typeof CompleteTodoResponseSchema;
+  },
+  /**
+   * CountTodos returns the count of todos matching the given filters (no pagination).
+   *
+   * @generated from rpc donejournal.todos.v1.TodoService.CountTodos
+   */
+  countTodos: {
+    methodKind: "unary";
+    input: typeof CountTodosRequestSchema;
+    output: typeof CountTodosResponseSchema;
   },
   /**
    * GetCalendarEntries returns todos grouped by date for a date range (calendar view).

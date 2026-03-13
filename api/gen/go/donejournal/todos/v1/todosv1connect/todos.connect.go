@@ -47,6 +47,8 @@ const (
 	// TodoServiceCompleteTodoProcedure is the fully-qualified name of the TodoService's CompleteTodo
 	// RPC.
 	TodoServiceCompleteTodoProcedure = "/donejournal.todos.v1.TodoService/CompleteTodo"
+	// TodoServiceCountTodosProcedure is the fully-qualified name of the TodoService's CountTodos RPC.
+	TodoServiceCountTodosProcedure = "/donejournal.todos.v1.TodoService/CountTodos"
 	// TodoServiceGetCalendarEntriesProcedure is the fully-qualified name of the TodoService's
 	// GetCalendarEntries RPC.
 	TodoServiceGetCalendarEntriesProcedure = "/donejournal.todos.v1.TodoService/GetCalendarEntries"
@@ -69,6 +71,8 @@ type TodoServiceClient interface {
 	DeleteTodo(context.Context, *connect.Request[v1.DeleteTodoRequest]) (*connect.Response[emptypb.Empty], error)
 	// CompleteTodo marks a todo as completed with the current timestamp.
 	CompleteTodo(context.Context, *connect.Request[v1.CompleteTodoRequest]) (*connect.Response[v1.CompleteTodoResponse], error)
+	// CountTodos returns the count of todos matching the given filters (no pagination).
+	CountTodos(context.Context, *connect.Request[v1.CountTodosRequest]) (*connect.Response[v1.CountTodosResponse], error)
 	// GetCalendarEntries returns todos grouped by date for a date range (calendar view).
 	GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error)
 	// SubscribeTodos opens a server-streaming subscription that sends an event whenever
@@ -123,6 +127,12 @@ func NewTodoServiceClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(todoServiceMethods.ByName("CompleteTodo")),
 			connect.WithClientOptions(opts...),
 		),
+		countTodos: connect.NewClient[v1.CountTodosRequest, v1.CountTodosResponse](
+			httpClient,
+			baseURL+TodoServiceCountTodosProcedure,
+			connect.WithSchema(todoServiceMethods.ByName("CountTodos")),
+			connect.WithClientOptions(opts...),
+		),
 		getCalendarEntries: connect.NewClient[v1.GetCalendarEntriesRequest, v1.GetCalendarEntriesResponse](
 			httpClient,
 			baseURL+TodoServiceGetCalendarEntriesProcedure,
@@ -146,6 +156,7 @@ type todoServiceClient struct {
 	updateTodo         *connect.Client[v1.UpdateTodoRequest, v1.UpdateTodoResponse]
 	deleteTodo         *connect.Client[v1.DeleteTodoRequest, emptypb.Empty]
 	completeTodo       *connect.Client[v1.CompleteTodoRequest, v1.CompleteTodoResponse]
+	countTodos         *connect.Client[v1.CountTodosRequest, v1.CountTodosResponse]
 	getCalendarEntries *connect.Client[v1.GetCalendarEntriesRequest, v1.GetCalendarEntriesResponse]
 	subscribeTodos     *connect.Client[v1.SubscribeTodosRequest, v1.SubscribeTodosResponse]
 }
@@ -180,6 +191,11 @@ func (c *todoServiceClient) CompleteTodo(ctx context.Context, req *connect.Reque
 	return c.completeTodo.CallUnary(ctx, req)
 }
 
+// CountTodos calls donejournal.todos.v1.TodoService.CountTodos.
+func (c *todoServiceClient) CountTodos(ctx context.Context, req *connect.Request[v1.CountTodosRequest]) (*connect.Response[v1.CountTodosResponse], error) {
+	return c.countTodos.CallUnary(ctx, req)
+}
+
 // GetCalendarEntries calls donejournal.todos.v1.TodoService.GetCalendarEntries.
 func (c *todoServiceClient) GetCalendarEntries(ctx context.Context, req *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error) {
 	return c.getCalendarEntries.CallUnary(ctx, req)
@@ -204,6 +220,8 @@ type TodoServiceHandler interface {
 	DeleteTodo(context.Context, *connect.Request[v1.DeleteTodoRequest]) (*connect.Response[emptypb.Empty], error)
 	// CompleteTodo marks a todo as completed with the current timestamp.
 	CompleteTodo(context.Context, *connect.Request[v1.CompleteTodoRequest]) (*connect.Response[v1.CompleteTodoResponse], error)
+	// CountTodos returns the count of todos matching the given filters (no pagination).
+	CountTodos(context.Context, *connect.Request[v1.CountTodosRequest]) (*connect.Response[v1.CountTodosResponse], error)
 	// GetCalendarEntries returns todos grouped by date for a date range (calendar view).
 	GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error)
 	// SubscribeTodos opens a server-streaming subscription that sends an event whenever
@@ -254,6 +272,12 @@ func NewTodoServiceHandler(svc TodoServiceHandler, opts ...connect.HandlerOption
 		connect.WithSchema(todoServiceMethods.ByName("CompleteTodo")),
 		connect.WithHandlerOptions(opts...),
 	)
+	todoServiceCountTodosHandler := connect.NewUnaryHandler(
+		TodoServiceCountTodosProcedure,
+		svc.CountTodos,
+		connect.WithSchema(todoServiceMethods.ByName("CountTodos")),
+		connect.WithHandlerOptions(opts...),
+	)
 	todoServiceGetCalendarEntriesHandler := connect.NewUnaryHandler(
 		TodoServiceGetCalendarEntriesProcedure,
 		svc.GetCalendarEntries,
@@ -280,6 +304,8 @@ func NewTodoServiceHandler(svc TodoServiceHandler, opts ...connect.HandlerOption
 			todoServiceDeleteTodoHandler.ServeHTTP(w, r)
 		case TodoServiceCompleteTodoProcedure:
 			todoServiceCompleteTodoHandler.ServeHTTP(w, r)
+		case TodoServiceCountTodosProcedure:
+			todoServiceCountTodosHandler.ServeHTTP(w, r)
 		case TodoServiceGetCalendarEntriesProcedure:
 			todoServiceGetCalendarEntriesHandler.ServeHTTP(w, r)
 		case TodoServiceSubscribeTodosProcedure:
@@ -315,6 +341,10 @@ func (UnimplementedTodoServiceHandler) DeleteTodo(context.Context, *connect.Requ
 
 func (UnimplementedTodoServiceHandler) CompleteTodo(context.Context, *connect.Request[v1.CompleteTodoRequest]) (*connect.Response[v1.CompleteTodoResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.todos.v1.TodoService.CompleteTodo is not implemented"))
+}
+
+func (UnimplementedTodoServiceHandler) CountTodos(context.Context, *connect.Request[v1.CountTodosRequest]) (*connect.Response[v1.CountTodosResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("donejournal.todos.v1.TodoService.CountTodos is not implemented"))
 }
 
 func (UnimplementedTodoServiceHandler) GetCalendarEntries(context.Context, *connect.Request[v1.GetCalendarEntriesRequest]) (*connect.Response[v1.GetCalendarEntriesResponse], error) {

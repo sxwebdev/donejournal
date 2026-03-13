@@ -39,6 +39,10 @@ message Note {
   google.protobuf.Timestamp created_at = 4;
   // Last update timestamp.
   google.protobuf.Timestamp updated_at = 5;
+  // Optional workspace ID this note belongs to.
+  optional string workspace_id = 6;
+  // IDs of tags attached to this note.
+  repeated string tag_ids = 7;
 }
 
 // ListNotesRequest is the request to list notes with optional search.
@@ -49,6 +53,10 @@ message ListNotesRequest {
   string page_token = 2;
   // Optional search query for partial matching on title and body.
   optional string search = 3;
+  // Filter by workspace ID.
+  optional string workspace_id = 4;
+  // Filter by tag IDs. If not empty, only notes with any of these tags are returned.
+  repeated string tag_ids = 5;
 }
 
 // ListNotesResponse is the response containing a list of notes.
@@ -79,6 +87,10 @@ message CreateNoteRequest {
   string title = 1;
   // Note body (markdown).
   string body = 2;
+  // Optional workspace ID.
+  optional string workspace_id = 3;
+  // Optional tag IDs to attach to the note.
+  repeated string tag_ids = 4;
 }
 
 // CreateNoteResponse is the response after creating a note.
@@ -95,6 +107,10 @@ message UpdateNoteRequest {
   optional string title = 2;
   // Updated body. If not set, body is not changed.
   optional string body = 3;
+  // Updated workspace ID. If not set, workspace_id is not changed.
+  optional string workspace_id = 4;
+  // Updated tag IDs. Replaces all existing tags.
+  repeated string tag_ids = 5;
 }
 
 // UpdateNoteResponse is the response after updating a note.

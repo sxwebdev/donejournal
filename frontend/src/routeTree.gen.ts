@@ -12,11 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedWorkspacesRouteImport } from './routes/_authenticated/workspaces'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
+import { Route as AuthenticatedTagsRouteImport } from './routes/_authenticated/tags'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
+import { Route as AuthenticatedNotesAddRouteImport } from './routes/_authenticated/notes_.add'
 import { Route as AuthenticatedNotesNoteIdRouteImport } from './routes/_authenticated/notes_.$noteId'
+import { Route as AuthenticatedNotesNoteIdEditRouteImport } from './routes/_authenticated/notes_.$noteId_.edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -32,9 +36,19 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkspacesRoute = AuthenticatedWorkspacesRouteImport.update({
+  id: '/workspaces',
+  path: '/workspaces',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTagsRoute = AuthenticatedTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
@@ -52,10 +66,21 @@ const AuthenticatedCalendarRoute = AuthenticatedCalendarRouteImport.update({
   path: '/calendar',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedNotesAddRoute = AuthenticatedNotesAddRouteImport.update({
+  id: '/notes_/add',
+  path: '/notes/add',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedNotesNoteIdRoute =
   AuthenticatedNotesNoteIdRouteImport.update({
     id: '/notes_/$noteId',
     path: '/notes/$noteId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedNotesNoteIdEditRoute =
+  AuthenticatedNotesNoteIdEditRouteImport.update({
+    id: '/notes_/$noteId_/edit',
+    path: '/notes/$noteId/edit',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -65,17 +90,25 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/tags': typeof AuthenticatedTagsRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/workspaces': typeof AuthenticatedWorkspacesRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
+  '/notes/add': typeof AuthenticatedNotesAddRoute
+  '/notes/$noteId/edit': typeof AuthenticatedNotesNoteIdEditRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/tags': typeof AuthenticatedTagsRoute
   '/todos': typeof AuthenticatedTodosRoute
+  '/workspaces': typeof AuthenticatedWorkspacesRoute
   '/': typeof AuthenticatedIndexRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
+  '/notes/add': typeof AuthenticatedNotesAddRoute
+  '/notes/$noteId/edit': typeof AuthenticatedNotesNoteIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -84,9 +117,13 @@ export interface FileRoutesById {
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/tags': typeof AuthenticatedTagsRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
+  '/_authenticated/workspaces': typeof AuthenticatedWorkspacesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/notes_/$noteId': typeof AuthenticatedNotesNoteIdRoute
+  '/_authenticated/notes_/add': typeof AuthenticatedNotesAddRoute
+  '/_authenticated/notes_/$noteId_/edit': typeof AuthenticatedNotesNoteIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,17 +133,25 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/tags'
     | '/todos'
+    | '/workspaces'
     | '/notes/$noteId'
+    | '/notes/add'
+    | '/notes/$noteId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/tags'
     | '/todos'
+    | '/workspaces'
     | '/'
     | '/notes/$noteId'
+    | '/notes/add'
+    | '/notes/$noteId/edit'
   id:
     | '__root__'
     | '/_authenticated'
@@ -114,9 +159,13 @@ export interface FileRouteTypes {
     | '/_authenticated/calendar'
     | '/_authenticated/inbox'
     | '/_authenticated/notes'
+    | '/_authenticated/tags'
     | '/_authenticated/todos'
+    | '/_authenticated/workspaces'
     | '/_authenticated/'
     | '/_authenticated/notes_/$noteId'
+    | '/_authenticated/notes_/add'
+    | '/_authenticated/notes_/$noteId_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -147,11 +196,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workspaces': {
+      id: '/_authenticated/workspaces'
+      path: '/workspaces'
+      fullPath: '/workspaces'
+      preLoaderRoute: typeof AuthenticatedWorkspacesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/todos': {
       id: '/_authenticated/todos'
       path: '/todos'
       fullPath: '/todos'
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tags': {
+      id: '/_authenticated/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof AuthenticatedTagsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/notes': {
@@ -175,11 +238,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCalendarRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/notes_/add': {
+      id: '/_authenticated/notes_/add'
+      path: '/notes/add'
+      fullPath: '/notes/add'
+      preLoaderRoute: typeof AuthenticatedNotesAddRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/notes_/$noteId': {
       id: '/_authenticated/notes_/$noteId'
       path: '/notes/$noteId'
       fullPath: '/notes/$noteId'
       preLoaderRoute: typeof AuthenticatedNotesNoteIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notes_/$noteId_/edit': {
+      id: '/_authenticated/notes_/$noteId_/edit'
+      path: '/notes/$noteId/edit'
+      fullPath: '/notes/$noteId/edit'
+      preLoaderRoute: typeof AuthenticatedNotesNoteIdEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }
@@ -189,18 +266,26 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedTagsRoute: typeof AuthenticatedTagsRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
+  AuthenticatedWorkspacesRoute: typeof AuthenticatedWorkspacesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedNotesNoteIdRoute: typeof AuthenticatedNotesNoteIdRoute
+  AuthenticatedNotesAddRoute: typeof AuthenticatedNotesAddRoute
+  AuthenticatedNotesNoteIdEditRoute: typeof AuthenticatedNotesNoteIdEditRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedTagsRoute: AuthenticatedTagsRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
+  AuthenticatedWorkspacesRoute: AuthenticatedWorkspacesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedNotesNoteIdRoute: AuthenticatedNotesNoteIdRoute,
+  AuthenticatedNotesAddRoute: AuthenticatedNotesAddRoute,
+  AuthenticatedNotesNoteIdEditRoute: AuthenticatedNotesNoteIdEditRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

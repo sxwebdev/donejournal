@@ -14,8 +14,8 @@ import (
 	"github.com/sxwebdev/donejournal/internal/api"
 	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/config"
-	"github.com/sxwebdev/donejournal/internal/mcp"
-	"github.com/sxwebdev/donejournal/internal/mcp/provider/groq"
+	"github.com/sxwebdev/donejournal/internal/agent"
+	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/stt"
@@ -188,9 +188,9 @@ func startCMD() *cli.Command {
 			// Initialize token manager with BadgerDB as token store
 			tokenMgr := tokenmanager.New[api.TokenData](badgerDB, authConfig.AccessTokenSecretKey, 30*24*time.Hour)
 
-			// Initialize MCP provider and service
-			provider := groq.NewClient(l, conf.MCP.Groq.APIKey, conf.MCP.Groq.Model)
-			mcpService := mcp.New(l, provider)
+			// Initialize agent with Groq provider
+			llmProvider := groq.NewClient(l, conf.Agent.Groq.APIKey, conf.Agent.Groq.Model)
+			agentService := agent.New(l, llmProvider, baseService, badgerDB)
 
 			// init bot service
 			botService, err := bot.New(l, conf.Telegram.BotToken)
@@ -199,7 +199,7 @@ func startCMD() *cli.Command {
 			}
 
 			// init processor service
-			processorService := processor.New(l, baseService, mcpService, botService)
+			processorService := processor.New(l, baseService, agentService, botService)
 
 			// init STT service (optional, only if enabled)
 			var sttService *stt.Service

@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+package donejournal.workspaces.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// WorkspaceService manages workspaces — organizational containers for grouping todos and notes.
+service WorkspaceService {
+  // ListWorkspaces returns a list of workspaces for the authenticated user.
+  rpc ListWorkspaces(ListWorkspacesRequest) returns (ListWorkspacesResponse);
+
+  // GetWorkspace returns a single workspace by ID.
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse);
+
+  // CreateWorkspace creates a new workspace.
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
+
+  // UpdateWorkspace updates an existing workspace's fields.
+  rpc UpdateWorkspace(UpdateWorkspaceRequest) returns (UpdateWorkspaceResponse);
+
+  // DeleteWorkspace deletes a workspace by ID. Associated todos and notes will have their workspace_id set to null.
+  rpc DeleteWorkspace(DeleteWorkspaceRequest) returns (google.protobuf.Empty);
+
+  // ArchiveWorkspace marks a workspace as archived.
+  rpc ArchiveWorkspace(ArchiveWorkspaceRequest) returns (ArchiveWorkspaceResponse);
+
+  // UnarchiveWorkspace marks a workspace as not archived.
+  rpc UnarchiveWorkspace(UnarchiveWorkspaceRequest) returns (UnarchiveWorkspaceResponse);
+
+  // GetWorkspaceStats returns a workspace with statistics about its todos and notes.
+  rpc GetWorkspaceStats(GetWorkspaceStatsRequest) returns (GetWorkspaceStatsResponse);
+
+  // SubscribeWorkspaces opens a server-streaming subscription that sends an event whenever
+  // any workspace belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeWorkspaces(SubscribeWorkspacesRequest) returns (stream SubscribeWorkspacesResponse);
+}
+
+// Workspace represents a single workspace.
+message Workspace {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Workspace name.
+  string name = 2;
+  // Workspace description.
+  string description = 3;
+  // Whether the workspace is archived.
+  bool archived = 4;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 5;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// WorkspaceStats contains a workspace with its associated statistics.
+message WorkspaceStats {
+  // The workspace.
+  Workspace workspace = 1;
+  // Total number of todos in this workspace.
+  int32 todo_count = 2;
+  // Total number of notes in this workspace.
+  int32 note_count = 3;
+  // Number of completed todos in this workspace.
+  int32 completed_todo_count = 4;
+}
+
+// ListWorkspacesRequest is the request to list workspaces.
+message ListWorkspacesRequest {
+  // Maximum number of items to return (default: 50, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page.
+  string page_token = 2;
+  // If true, include archived workspaces. Default is false (only active workspaces).
+  bool include_archived = 3;
+  // Optional search query for partial matching on name.
+  optional string search = 4;
+}
+
+// ListWorkspacesResponse is the response containing a list of workspaces.
+message ListWorkspacesResponse {
+  // The list of workspaces with stats.
+  repeated WorkspaceStats workspaces = 1;
+  // Token for the next page. Empty if no more results.
+  string next_page_token = 2;
+  // Total number of workspaces matching the filters.
+  int32 total_count = 3;
+}
+
+// GetWorkspaceRequest is the request to get a single workspace.
+message GetWorkspaceRequest {
+  // The ID of the workspace to retrieve.
+  string id = 1;
+}
+
+// GetWorkspaceResponse is the response containing a single workspace.
+message GetWorkspaceResponse {
+  // The workspace.
+  Workspace workspace = 1;
+}
+
+// CreateWorkspaceRequest is the request to create a new workspace.
+message CreateWorkspaceRequest {
+  // Workspace name.
+  string name = 1;
+  // Workspace description.
+  string description = 2;
+}
+
+// CreateWorkspaceResponse is the response after creating a workspace.
+message CreateWorkspaceResponse {
+  // The created workspace.
+  Workspace workspace = 1;
+}
+
+// UpdateWorkspaceRequest is the request to update a workspace.
+message UpdateWorkspaceRequest {
+  // The ID of the workspace to update.
+  string id = 1;
+  // Updated name. If not set, name is not changed.
+  optional string name = 2;
+  // Updated description. If not set, description is not changed.
+  optional string description = 3;
+}
+
+// UpdateWorkspaceResponse is the response after updating a workspace.
+message UpdateWorkspaceResponse {
+  // The updated workspace.
+  Workspace workspace = 1;
+}
+
+// DeleteWorkspaceRequest is the request to delete a workspace.
+message DeleteWorkspaceRequest {
+  // The ID of the workspace to delete.
+  string id = 1;
+}
+
+// ArchiveWorkspaceRequest is the request to archive a workspace.
+message ArchiveWorkspaceRequest {
+  // The ID of the workspace to archive.
+  string id = 1;
+}
+
+// ArchiveWorkspaceResponse is the response after archiving a workspace.
+message ArchiveWorkspaceResponse {
+  // The archived workspace.
+  Workspace workspace = 1;
+}
+
+// UnarchiveWorkspaceRequest is the request to unarchive a workspace.
+message UnarchiveWorkspaceRequest {
+  // The ID of the workspace to unarchive.
+  string id = 1;
+}
+
+// UnarchiveWorkspaceResponse is the response after unarchiving a workspace.
+message UnarchiveWorkspaceResponse {
+  // The unarchived workspace.
+  Workspace workspace = 1;
+}
+
+// GetWorkspaceStatsRequest is the request to get workspace statistics.
+message GetWorkspaceStatsRequest {
+  // The ID of the workspace.
+  string id = 1;
+}
+
+// GetWorkspaceStatsResponse is the response containing workspace statistics.
+message GetWorkspaceStatsResponse {
+  // The workspace statistics.
+  WorkspaceStats stats = 1;
+}
+
+// SubscribeWorkspacesRequest is the request to subscribe to workspace change events.
+message SubscribeWorkspacesRequest {}
+
+// SubscribeWorkspacesResponse is sent whenever a workspace is created, updated, or deleted.
+message SubscribeWorkspacesResponse {}

@@ -20,3 +20,23 @@ func (tst TodoStatusType) Validate() error {
 		return fmt.Errorf("invalid status: %s", tst)
 	}
 }
+
+type TodoPriorityType string
+
+const (
+	TodoPriorityNone     TodoPriorityType = "none"
+	TodoPriorityLow      TodoPriorityType = "low"
+	TodoPriorityMedium   TodoPriorityType = "medium"
+	TodoPriorityHigh     TodoPriorityType = "high"
+	TodoPriorityCritical TodoPriorityType = "critical"
+)
+
+// Validate validates the TodoPriorityType
+func (tpt TodoPriorityType) Validate() error {
+	switch tpt {
+	case TodoPriorityNone, TodoPriorityLow, TodoPriorityMedium, TodoPriorityHigh, TodoPriorityCritical:
+		return nil
+	default:
+		return fmt.Errorf("invalid priority: %s", tpt)
+	}
+}
