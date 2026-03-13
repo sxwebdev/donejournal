@@ -5,8 +5,7 @@ import { formatDistanceToNow } from "date-fns"
 import MDEditor from "@uiw/react-md-editor"
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
 import { getNote } from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
-import { NoteDialog } from "@/components/notes/note-dialog"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   AlertDialog,
@@ -37,7 +36,6 @@ function NoteDetailPage() {
   const navigate = useNavigate()
   const { theme } = useTheme()
   const qc = useQueryClient()
-  const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
   const { data, isLoading } = useQuery(getNote, { id: noteId })
@@ -104,10 +102,14 @@ function NoteDetailPage() {
           )}
         </div>
         <div className="flex shrink-0 gap-2">
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+          <Link
+            to="/notes/$noteId/edit"
+            params={{ noteId }}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
             <Pencil className="mr-1.5 h-3.5 w-3.5" />
             Edit
-          </Button>
+          </Link>
           <Button
             variant="outline"
             size="sm"
@@ -129,13 +131,6 @@ function NoteDetailPage() {
       ) : (
         <p className="text-sm text-muted-foreground italic">No content</p>
       )}
-
-      <NoteDialog
-        mode="edit"
-        note={note}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>

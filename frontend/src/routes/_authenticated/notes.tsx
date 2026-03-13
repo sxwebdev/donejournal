@@ -1,9 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { z } from "zod"
-import { useState, useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState } from "react"
 import { NoteList } from "@/components/notes/note-list"
-import { NoteDialog } from "@/components/notes/note-dialog"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
 import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
@@ -19,7 +18,6 @@ export const Route = createFileRoute("/_authenticated/notes")({
 })
 
 function NotesPage() {
-  const [createOpen, setCreateOpen] = useState(false)
   const search = Route.useSearch()
   const navigate = useNavigate({ from: "/notes" })
   const [searchInput, setSearchInput] = useState(search.search ?? "")
@@ -54,10 +52,10 @@ function NotesPage() {
             Your markdown notes
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Link to="/notes/add" className={buttonVariants()}>
           <Plus className="mr-2 h-4 w-4" />
           New Note
-        </Button>
+        </Link>
       </div>
 
       <div className="flex items-center gap-3">
@@ -84,12 +82,6 @@ function NotesPage() {
       </div>
 
       <NoteList search={search.search} workspaceId={search.workspaceId} />
-
-      <NoteDialog
-        mode="create"
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-      />
     </div>
   )
 }

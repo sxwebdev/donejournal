@@ -43,20 +43,19 @@ export function NoteForm({
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-1.5">
         <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          placeholder="Note title"
-          {...register("title")}
-        />
+        <Input id="title" placeholder="Note title" {...register("title")} />
         {errors.title && (
           <p className="text-xs text-destructive">{errors.title.message}</p>
         )}
       </div>
 
-      <div className="space-y-1.5" data-color-mode={theme === "dark" ? "dark" : "light"}>
+      <div
+        className="space-y-1.5"
+        data-color-mode={theme === "dark" ? "dark" : "light"}
+      >
         <Label>Body</Label>
         <Controller
           name="body"
