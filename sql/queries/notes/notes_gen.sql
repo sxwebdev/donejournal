@@ -1,6 +1,6 @@
 -- name: Create :one
-INSERT INTO notes (id, user_id, title, body)
-	VALUES (?, ?, ?, ?)
+INSERT INTO notes (id, user_id, title, body, project_id)
+	VALUES (?, ?, ?, ?, ?)
 	RETURNING *;
 
 -- name: Delete :exec

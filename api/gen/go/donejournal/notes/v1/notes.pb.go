@@ -35,7 +35,9 @@ type Note struct {
 	// Creation timestamp.
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Last update timestamp.
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Optional project ID this note belongs to.
+	ProjectId     *string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +107,13 @@ func (x *Note) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Note) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
+}
+
 // ListNotesRequest is the request to list notes with optional search.
 type ListNotesRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -113,7 +122,9 @@ type ListNotesRequest struct {
 	// Token for fetching the next page.
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// Optional search query for partial matching on title and body.
-	Search        *string `protobuf:"bytes,3,opt,name=search,proto3,oneof" json:"search,omitempty"`
+	Search *string `protobuf:"bytes,3,opt,name=search,proto3,oneof" json:"search,omitempty"`
+	// Filter by project ID.
+	ProjectId     *string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -165,6 +176,13 @@ func (x *ListNotesRequest) GetPageToken() string {
 func (x *ListNotesRequest) GetSearch() string {
 	if x != nil && x.Search != nil {
 		return *x.Search
+	}
+	return ""
+}
+
+func (x *ListNotesRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
 	}
 	return ""
 }
@@ -331,7 +349,9 @@ type CreateNoteRequest struct {
 	// Note title.
 	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	// Note body (markdown).
-	Body          string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	Body string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
+	// Optional project ID.
+	ProjectId     *string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -376,6 +396,13 @@ func (x *CreateNoteRequest) GetTitle() string {
 func (x *CreateNoteRequest) GetBody() string {
 	if x != nil {
 		return x.Body
+	}
+	return ""
+}
+
+func (x *CreateNoteRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
 	}
 	return ""
 }
@@ -434,7 +461,9 @@ type UpdateNoteRequest struct {
 	// Updated title. If not set, title is not changed.
 	Title *string `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Updated body. If not set, body is not changed.
-	Body          *string `protobuf:"bytes,3,opt,name=body,proto3,oneof" json:"body,omitempty"`
+	Body *string `protobuf:"bytes,3,opt,name=body,proto3,oneof" json:"body,omitempty"`
+	// Updated project ID. If not set, project_id is not changed.
+	ProjectId     *string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -486,6 +515,13 @@ func (x *UpdateNoteRequest) GetTitle() string {
 func (x *UpdateNoteRequest) GetBody() string {
 	if x != nil && x.Body != nil {
 		return *x.Body
+	}
+	return ""
+}
+
+func (x *UpdateNoteRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
 	}
 	return ""
 }
@@ -660,7 +696,7 @@ var File_donejournal_notes_v1_notes_proto protoreflect.FileDescriptor
 
 const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb6\x01\n" +
+	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe9\x01\n" +
 	"\x04Note\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -668,13 +704,19 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"v\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\"\n" +
+	"\n" +
+	"project_id\x18\x06 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
+	"\v_project_id\"\xa9\x01\n" +
 	"\x10ListNotesRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x1b\n" +
-	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01B\t\n" +
-	"\a_search\"\x8e\x01\n" +
+	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"project_id\x18\x04 \x01(\tH\x01R\tprojectId\x88\x01\x01B\t\n" +
+	"\a_searchB\r\n" +
+	"\v_project_id\"\x8e\x01\n" +
 	"\x11ListNotesResponse\x120\n" +
 	"\x05notes\x18\x01 \x03(\v2\x1a.donejournal.notes.v1.NoteR\x05notes\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1f\n" +
@@ -683,18 +725,24 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\x0eGetNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"=\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"p\n" +
 	"\x11CreateNoteRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
-	"\x04body\x18\x02 \x01(\tR\x04body\"D\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\x12\"\n" +
+	"\n" +
+	"project_id\x18\x03 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
+	"\v_project_id\"D\n" +
 	"\x12CreateNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"j\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"\x9d\x01\n" +
 	"\x11UpdateNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x17\n" +
-	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01B\b\n" +
+	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"project_id\x18\x04 \x01(\tH\x02R\tprojectId\x88\x01\x01B\b\n" +
 	"\x06_titleB\a\n" +
-	"\x05_body\"D\n" +
+	"\x05_bodyB\r\n" +
+	"\v_project_id\"D\n" +
 	"\x12UpdateNoteResponse\x12.\n" +
 	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"#\n" +
 	"\x11DeleteNoteRequest\x12\x0e\n" +
@@ -774,7 +822,9 @@ func file_donejournal_notes_v1_notes_proto_init() {
 	if File_donejournal_notes_v1_notes_proto != nil {
 		return
 	}
+	file_donejournal_notes_v1_notes_proto_msgTypes[0].OneofWrappers = []any{}
 	file_donejournal_notes_v1_notes_proto_msgTypes[1].OneofWrappers = []any{}
+	file_donejournal_notes_v1_notes_proto_msgTypes[5].OneofWrappers = []any{}
 	file_donejournal_notes_v1_notes_proto_msgTypes[7].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{

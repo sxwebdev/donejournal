@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils"
 type Props = {
   currentMonth: Date
   onMonthChange: (month: Date) => void
+  projectId?: string
 }
 
 const WEEK_START = { weekStartsOn: 1 as const }
@@ -148,13 +149,14 @@ function DayCell({
   )
 }
 
-export function CalendarView({ currentMonth, onMonthChange }: Props) {
+export function CalendarView({ currentMonth, onMonthChange, projectId }: Props) {
   const start = startOfWeek(startOfMonth(currentMonth), WEEK_START)
   const end = endOfWeek(endOfMonth(currentMonth), WEEK_START)
 
   const query = useQuery(getCalendarEntries, {
     from: fromDate(start),
     to: fromDate(end),
+    projectId,
   })
 
   const subRef = useRef<{ abort: () => void } | null>(null)

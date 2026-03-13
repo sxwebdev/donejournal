@@ -77,6 +77,7 @@ export function TodoDialog(props: Props) {
           plannedDate: values.plannedDate
             ? fromDateOnly(values.plannedDate)
             : undefined,
+          projectId: values.projectId,
         })
       } else {
         await updateMutation.mutateAsync({
@@ -87,6 +88,7 @@ export function TodoDialog(props: Props) {
             ? fromDateOnly(values.plannedDate)
             : undefined,
           status: values.status !== undefined ? values.status : undefined,
+          projectId: values.projectId,
         })
       }
     } catch (err) {
@@ -103,6 +105,7 @@ export function TodoDialog(props: Props) {
           description: props.todo.description || undefined,
           plannedDate: toDate(props.todo.plannedDate),
           status: props.todo.status as TodoStatus,
+          projectId: props.todo.projectId || undefined,
         }
       : props.initialDate
         ? { plannedDate: props.initialDate }

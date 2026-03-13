@@ -11,12 +11,14 @@ import { FileText } from "lucide-react"
 
 type Props = {
   search?: string
+  projectId?: string
 }
 
-export function NoteList({ search }: Props) {
+export function NoteList({ search, projectId }: Props) {
   const query = useQuery(listNotes, {
     pageSize: 100,
     search: search || undefined,
+    projectId,
   })
 
   const subRef = useRef<{ abort: () => void } | null>(null)

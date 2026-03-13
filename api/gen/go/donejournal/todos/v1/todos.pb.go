@@ -102,7 +102,9 @@ type Todo struct {
 	// Creation timestamp.
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Last update timestamp.
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Optional project ID this todo belongs to.
+	ProjectId     *string `protobuf:"bytes,9,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -193,6 +195,13 @@ func (x *Todo) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Todo) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
+}
+
 // ListTodosRequest is the request to list todos with optional filters.
 type ListTodosRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -206,6 +215,8 @@ type ListTodosRequest struct {
 	PlannedDateFrom *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=planned_date_from,json=plannedDateFrom,proto3,oneof" json:"planned_date_from,omitempty"`
 	// Filter by planned_date range end (inclusive).
 	PlannedDateTo *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=planned_date_to,json=plannedDateTo,proto3,oneof" json:"planned_date_to,omitempty"`
+	// Filter by project ID.
+	ProjectId     *string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -273,6 +284,13 @@ func (x *ListTodosRequest) GetPlannedDateTo() *timestamppb.Timestamp {
 		return x.PlannedDateTo
 	}
 	return nil
+}
+
+func (x *ListTodosRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
 }
 
 // ListTodosResponse is the response containing a list of todos.
@@ -439,7 +457,9 @@ type CreateTodoRequest struct {
 	// Todo description.
 	Description string `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	// Planned date for the todo.
-	PlannedDate   *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=planned_date,json=plannedDate,proto3" json:"planned_date,omitempty"`
+	PlannedDate *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=planned_date,json=plannedDate,proto3" json:"planned_date,omitempty"`
+	// Optional project ID.
+	ProjectId     *string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -493,6 +513,13 @@ func (x *CreateTodoRequest) GetPlannedDate() *timestamppb.Timestamp {
 		return x.PlannedDate
 	}
 	return nil
+}
+
+func (x *CreateTodoRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
 }
 
 // CreateTodoResponse is the response after creating a todo.
@@ -553,7 +580,9 @@ type UpdateTodoRequest struct {
 	// Updated status. If not set, status is not changed.
 	Status *TodoStatus `protobuf:"varint,4,opt,name=status,proto3,enum=donejournal.todos.v1.TodoStatus,oneof" json:"status,omitempty"`
 	// Updated planned date. If not set, planned_date is not changed.
-	PlannedDate   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=planned_date,json=plannedDate,proto3,oneof" json:"planned_date,omitempty"`
+	PlannedDate *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=planned_date,json=plannedDate,proto3,oneof" json:"planned_date,omitempty"`
+	// Updated project ID. If not set, project_id is not changed.
+	ProjectId     *string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -621,6 +650,13 @@ func (x *UpdateTodoRequest) GetPlannedDate() *timestamppb.Timestamp {
 		return x.PlannedDate
 	}
 	return nil
+}
+
+func (x *UpdateTodoRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
 }
 
 // UpdateTodoResponse is the response after updating a todo.
@@ -813,7 +849,9 @@ type GetCalendarEntriesRequest struct {
 	// Start of the date range (inclusive).
 	From *timestamppb.Timestamp `protobuf:"bytes,1,opt,name=from,proto3" json:"from,omitempty"`
 	// End of the date range (inclusive).
-	To            *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
+	To *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=to,proto3" json:"to,omitempty"`
+	// Filter by project ID.
+	ProjectId     *string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -860,6 +898,13 @@ func (x *GetCalendarEntriesRequest) GetTo() *timestamppb.Timestamp {
 		return x.To
 	}
 	return nil
+}
+
+func (x *GetCalendarEntriesRequest) GetProjectId() string {
+	if x != nil && x.ProjectId != nil {
+		return *x.ProjectId
+	}
+	return ""
 }
 
 // CalendarDay represents todos for a single day along with summary statistics.
@@ -1059,7 +1104,7 @@ var File_donejournal_todos_v1_todos_proto protoreflect.FileDescriptor
 
 const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x92\x03\n" +
+	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc5\x03\n" +
 	"\x04Todo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -1070,17 +1115,23 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAtB\x0f\n" +
-	"\r_completed_at\"\xcc\x02\n" +
+	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\"\n" +
+	"\n" +
+	"project_id\x18\t \x01(\tH\x01R\tprojectId\x88\x01\x01B\x0f\n" +
+	"\r_completed_atB\r\n" +
+	"\v_project_id\"\xff\x02\n" +
 	"\x10ListTodosRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x12<\n" +
 	"\bstatuses\x18\x03 \x03(\x0e2 .donejournal.todos.v1.TodoStatusR\bstatuses\x12K\n" +
 	"\x11planned_date_from\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x0fplannedDateFrom\x88\x01\x01\x12G\n" +
-	"\x0fplanned_date_to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\rplannedDateTo\x88\x01\x01B\x14\n" +
+	"\x0fplanned_date_to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\rplannedDateTo\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"project_id\x18\x06 \x01(\tH\x02R\tprojectId\x88\x01\x01B\x14\n" +
 	"\x12_planned_date_fromB\x12\n" +
-	"\x10_planned_date_to\"\x8e\x01\n" +
+	"\x10_planned_date_toB\r\n" +
+	"\v_project_id\"\x8e\x01\n" +
 	"\x11ListTodosResponse\x120\n" +
 	"\x05todos\x18\x01 \x03(\v2\x1a.donejournal.todos.v1.TodoR\x05todos\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1f\n" +
@@ -1089,23 +1140,29 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\x0eGetTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\x8a\x01\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xbd\x01\n" +
 	"\x11CreateTodoRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12=\n" +
-	"\fplanned_date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vplannedDate\"D\n" +
+	"\fplanned_date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vplannedDate\x12\"\n" +
+	"\n" +
+	"project_id\x18\x04 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
+	"\v_project_id\"D\n" +
 	"\x12CreateTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\x9e\x02\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xd1\x02\n" +
 	"\x11UpdateTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12=\n" +
 	"\x06status\x18\x04 \x01(\x0e2 .donejournal.todos.v1.TodoStatusH\x02R\x06status\x88\x01\x01\x12B\n" +
-	"\fplanned_date\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x03R\vplannedDate\x88\x01\x01B\b\n" +
+	"\fplanned_date\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x03R\vplannedDate\x88\x01\x01\x12\"\n" +
+	"\n" +
+	"project_id\x18\x06 \x01(\tH\x04R\tprojectId\x88\x01\x01B\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\t\n" +
 	"\a_statusB\x0f\n" +
-	"\r_planned_date\"D\n" +
+	"\r_planned_dateB\r\n" +
+	"\v_project_id\"D\n" +
 	"\x12UpdateTodoResponse\x12.\n" +
 	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"#\n" +
 	"\x11DeleteTodoRequest\x12\x0e\n" +
@@ -1113,10 +1170,13 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\x13CompleteTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
 	"\x14CompleteTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"w\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xaa\x01\n" +
 	"\x19GetCalendarEntriesRequest\x12.\n" +
 	"\x04from\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04from\x12*\n" +
-	"\x02to\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\"\xb9\x01\n" +
+	"\x02to\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\x02to\x12\"\n" +
+	"\n" +
+	"project_id\x18\x03 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
+	"\v_project_id\"\xb9\x01\n" +
 	"\vCalendarDay\x12.\n" +
 	"\x04date\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04date\x120\n" +
 	"\x05todos\x18\x02 \x03(\v2\x1a.donejournal.todos.v1.TodoR\x05todos\x12\x1f\n" +
@@ -1237,7 +1297,9 @@ func file_donejournal_todos_v1_todos_proto_init() {
 	}
 	file_donejournal_todos_v1_todos_proto_msgTypes[0].OneofWrappers = []any{}
 	file_donejournal_todos_v1_todos_proto_msgTypes[1].OneofWrappers = []any{}
+	file_donejournal_todos_v1_todos_proto_msgTypes[5].OneofWrappers = []any{}
 	file_donejournal_todos_v1_todos_proto_msgTypes[7].OneofWrappers = []any{}
+	file_donejournal_todos_v1_todos_proto_msgTypes[12].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

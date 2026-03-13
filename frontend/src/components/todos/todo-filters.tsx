@@ -10,6 +10,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { ProjectSelector } from "@/components/projects/project-selector"
 
 const STATUS_OPTIONS = [
   { value: TodoStatus.PENDING, label: "Pending" },
@@ -24,6 +25,7 @@ export function TodoFilters() {
     statuses = [],
     from,
     to,
+    projectId,
   } = useSearch({ from: "/_authenticated/todos" })
 
   const fromDate = from ? new Date(from) : undefined
@@ -60,7 +62,13 @@ export function TodoFilters() {
     navigate({ search: {} })
   }
 
-  const hasFilters = statuses.length > 0 || !!from || !!to
+  const setProjectId = (id: string | undefined) => {
+    navigate({
+      search: (prev) => ({ ...prev, projectId: id }),
+    })
+  }
+
+  const hasFilters = statuses.length > 0 || !!from || !!to || !!projectId
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -109,6 +117,13 @@ export function TodoFilters() {
           <Calendar mode="single" selected={toDate} onSelect={setTo} />
         </PopoverContent>
       </Popover>
+
+      <ProjectSelector
+        value={projectId}
+        onChange={setProjectId}
+        placeholder="All projects"
+        className="h-7 w-auto min-w-35 text-xs"
+      />
 
       {hasFilters && (
         <Button

@@ -33,11 +33,13 @@ import {
   getCalendarEntries,
 } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import { fromDate } from "@/lib/dates"
+import { ProjectSelector } from "@/components/projects/project-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
+  projectId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -101,6 +103,7 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
       title: values.title,
       description: values.description ?? "",
       plannedDate: fromDate(values.plannedDate),
+      projectId: values.projectId,
     })
   }
 
@@ -157,6 +160,14 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
                 {errors.plannedDate.message}
               </p>
             )}
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Project</Label>
+            <ProjectSelector
+              value={watch("projectId")}
+              onChange={(v) => setValue("projectId", v)}
+            />
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>

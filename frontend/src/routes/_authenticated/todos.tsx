@@ -13,6 +13,7 @@ const todosSearchSchema = z.object({
   statuses: z.array(z.nativeEnum(TodoStatus)).optional(),
   from: z.string().optional(),
   to: z.string().optional(),
+  projectId: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/todos")({
@@ -53,7 +54,7 @@ function TodosPage() {
 
       <TodoFilters />
 
-      <TodoList statuses={search.statuses} from={search.from} to={search.to} />
+      <TodoList statuses={search.statuses} from={search.from} to={search.to} projectId={search.projectId} />
 
       <TodoDialog
         mode="create"

@@ -16,12 +16,13 @@ import (
 )
 
 // Create a new todo from a parsed MCP entry
-func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mcp.ParsedEntry) (*models.Todo, error) {
+func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mcp.ParsedEntry, projectID *string) (*models.Todo, error) {
 	req := repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
 		Title:       entry.Title,
 		Description: entry.Description,
+		ProjectID:   projectID,
 	}
 
 	date := carbon.Parse(entry.Date).StdTime()
@@ -50,15 +51,19 @@ func (s *Service) Create(ctx context.Context, tx *sql.Tx, userID int64, entry mc
 	return todo, nil
 }
 
-// BatchCreate creates todos in batch
-func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse *mcp.ParsedResponse) error {
+// BatchCreate creates todos in batch. projectIDs maps project name to resolved project ID.
+func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse *mcp.ParsedResponse, projectIDs map[string]*string) error {
 	if len(parsedResponse.Entries) == 0 {
 		return nil
 	}
 
 	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		for _, entry := range parsedResponse.Entries {
-			if _, err := s.Create(ctx, tx, userID, entry); err != nil {
+			var projectID *string
+			if entry.Project != "" {
+				projectID = projectIDs[entry.Project]
+			}
+			if _, err := s.Create(ctx, tx, userID, entry, projectID); err != nil {
 				return fmt.Errorf("create todo for entry '%s': %w", entry.Title, err)
 			}
 		}
@@ -77,7 +82,7 @@ func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*stor
 }
 
 // CreateFromAPI creates a new todo from API request (without MCP)
-func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time) (*models.Todo, error) {
+func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, projectID *string) (*models.Todo, error) {
 	todo, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
@@ -85,6 +90,7 @@ func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, descri
 		Description: description,
 		Status:      models.TodoStatusPending,
 		PlannedDate: plannedDate,
+		ProjectID:   projectID,
 	})
 	if err != nil {
 		return nil, err
@@ -107,6 +113,7 @@ type UpdateParams struct {
 	Description *string
 	Status      *models.TodoStatusType
 	PlannedDate *time.Time
+	ProjectID   *string
 }
 
 // Update performs a partial update on a todo
@@ -133,6 +140,10 @@ func (s *Service) Update(ctx context.Context, userID int64, id string, params Up
 	if params.PlannedDate != nil {
 		sets = append(sets, "planned_date = ?")
 		args = append(args, *params.PlannedDate)
+	}
+	if params.ProjectID != nil {
+		sets = append(sets, "project_id = ?")
+		args = append(args, *params.ProjectID)
 	}
 
 	if len(sets) == 0 {

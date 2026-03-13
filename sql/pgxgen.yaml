@@ -57,6 +57,20 @@ sqlc:
             get:
               name: GetByID
 
+        # projects
+        projects:
+          output_dir: queries/projects
+          primary_column: id
+          methods:
+            create:
+              skip_columns:
+                - created_at
+                - updated_at
+              returning: "*"
+            delete:
+            get:
+              name: GetByID
+
     constants:
       tables:
         inbox:
@@ -67,4 +81,7 @@ sqlc:
           include_column_names: true
         notes:
           output_dir: ../internal/store/repos/repo_notes
+          include_column_names: true
+        projects:
+          output_dir: ../internal/store/repos/repo_projects
           include_column_names: true

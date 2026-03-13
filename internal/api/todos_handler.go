@@ -72,6 +72,10 @@ func (h *TodosHandler) ListTodos(ctx context.Context, req *connect.Request[todos
 		}
 	}
 
+	if req.Msg.ProjectId != nil {
+		params.ProjectID = req.Msg.ProjectId
+	}
+
 	result, err := h.baseService.Todos().Find(ctx, params)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -129,7 +133,7 @@ func (h *TodosHandler) CreateTodo(ctx context.Context, req *connect.Request[todo
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("planned_date is required"))
 	}
 
-	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate)
+	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate, req.Msg.ProjectId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -168,6 +172,9 @@ func (h *TodosHandler) UpdateTodo(ctx context.Context, req *connect.Request[todo
 	if req.Msg.PlannedDate != nil {
 		t := req.Msg.GetPlannedDate().AsTime()
 		params.PlannedDate = &t
+	}
+	if req.Msg.ProjectId != nil {
+		params.ProjectID = req.Msg.ProjectId
 	}
 
 	todo, err := h.baseService.Todos().Update(ctx, userID, req.Msg.GetId(), params)
@@ -243,13 +250,17 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 	// Fetch all todos in the date range (no pagination limit for calendar)
 	pageSize := uint32(100)
 	page := uint32(1)
-	result, err := h.baseService.Todos().Find(ctx, repo_todos.FindParams{
+	findParams := repo_todos.FindParams{
 		UserID:   userID,
 		DateFrom: &from,
 		DateTo:   &to,
 		Page:     &page,
 		PageSize: &pageSize,
-	})
+	}
+	if req.Msg.ProjectId != nil {
+		findParams.ProjectID = req.Msg.ProjectId
+	}
+	result, err := h.baseService.Todos().Find(ctx, findParams)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}

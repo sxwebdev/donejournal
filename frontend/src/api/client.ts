@@ -4,6 +4,7 @@ import { getToken } from "@/lib/auth"
 import { TodoService } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { InboxService } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
 import { NoteService } from "@/api/gen/donejournal/notes/v1/notes_pb"
+import { ProjectService } from "@/api/gen/donejournal/projects/v1/projects_pb"
 
 export const transport = createConnectTransport({
   baseUrl: "/api/v1",
@@ -21,3 +22,4 @@ export const transport = createConnectTransport({
 export const todosClient = createClient(TodoService, transport)
 export const inboxClient = createClient(InboxService, transport)
 export const notesClient = createClient(NoteService, transport)
+export const projectsClient = createClient(ProjectService, transport)

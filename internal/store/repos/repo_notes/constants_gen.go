@@ -45,6 +45,7 @@ const (
 	ColumnNameNotesBody      ColumnName = "body"
 	ColumnNameNotesCreatedAt ColumnName = "created_at"
 	ColumnNameNotesUpdatedAt ColumnName = "updated_at"
+	ColumnNameNotesProjectId ColumnName = "project_id"
 )
 
 func NotesColumnNames() ColumnNames {
@@ -55,5 +56,6 @@ func NotesColumnNames() ColumnNames {
 		ColumnNameNotesBody,
 		ColumnNameNotesCreatedAt,
 		ColumnNameNotesUpdatedAt,
+		ColumnNameNotesProjectId,
 	}
 }

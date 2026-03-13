@@ -1,0 +1,177 @@
+syntax = "proto3";
+
+package donejournal.projects.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// ProjectService manages projects — organizational containers for grouping todos and notes.
+service ProjectService {
+  // ListProjects returns a list of projects for the authenticated user.
+  rpc ListProjects(ListProjectsRequest) returns (ListProjectsResponse);
+
+  // GetProject returns a single project by ID.
+  rpc GetProject(GetProjectRequest) returns (GetProjectResponse);
+
+  // CreateProject creates a new project.
+  rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+
+  // UpdateProject updates an existing project's fields.
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+
+  // DeleteProject deletes a project by ID. Associated todos and notes will have their project_id set to null.
+  rpc DeleteProject(DeleteProjectRequest) returns (google.protobuf.Empty);
+
+  // ArchiveProject marks a project as archived.
+  rpc ArchiveProject(ArchiveProjectRequest) returns (ArchiveProjectResponse);
+
+  // UnarchiveProject marks a project as not archived.
+  rpc UnarchiveProject(UnarchiveProjectRequest) returns (UnarchiveProjectResponse);
+
+  // GetProjectStats returns a project with statistics about its todos and notes.
+  rpc GetProjectStats(GetProjectStatsRequest) returns (GetProjectStatsResponse);
+
+  // SubscribeProjects opens a server-streaming subscription that sends an event whenever
+  // any project belonging to the authenticated user is created, updated, or deleted.
+  rpc SubscribeProjects(SubscribeProjectsRequest) returns (stream SubscribeProjectsResponse);
+}
+
+// Project represents a single project.
+message Project {
+  // Unique identifier (ULID).
+  string id = 1;
+  // Project name.
+  string name = 2;
+  // Project description.
+  string description = 3;
+  // Whether the project is archived.
+  bool archived = 4;
+  // Creation timestamp.
+  google.protobuf.Timestamp created_at = 5;
+  // Last update timestamp.
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// ProjectStats contains a project with its associated statistics.
+message ProjectStats {
+  // The project.
+  Project project = 1;
+  // Total number of todos in this project.
+  int32 todo_count = 2;
+  // Total number of notes in this project.
+  int32 note_count = 3;
+  // Number of completed todos in this project.
+  int32 completed_todo_count = 4;
+}
+
+// ListProjectsRequest is the request to list projects.
+message ListProjectsRequest {
+  // Maximum number of items to return (default: 50, max: 100).
+  int32 page_size = 1;
+  // Token for fetching the next page.
+  string page_token = 2;
+  // If true, include archived projects. Default is false (only active projects).
+  bool include_archived = 3;
+  // Optional search query for partial matching on name.
+  optional string search = 4;
+}
+
+// ListProjectsResponse is the response containing a list of projects.
+message ListProjectsResponse {
+  // The list of projects with stats.
+  repeated ProjectStats projects = 1;
+  // Token for the next page. Empty if no more results.
+  string next_page_token = 2;
+  // Total number of projects matching the filters.
+  int32 total_count = 3;
+}
+
+// GetProjectRequest is the request to get a single project.
+message GetProjectRequest {
+  // The ID of the project to retrieve.
+  string id = 1;
+}
+
+// GetProjectResponse is the response containing a single project.
+message GetProjectResponse {
+  // The project.
+  Project project = 1;
+}
+
+// CreateProjectRequest is the request to create a new project.
+message CreateProjectRequest {
+  // Project name.
+  string name = 1;
+  // Project description.
+  string description = 2;
+}
+
+// CreateProjectResponse is the response after creating a project.
+message CreateProjectResponse {
+  // The created project.
+  Project project = 1;
+}
+
+// UpdateProjectRequest is the request to update a project.
+message UpdateProjectRequest {
+  // The ID of the project to update.
+  string id = 1;
+  // Updated name. If not set, name is not changed.
+  optional string name = 2;
+  // Updated description. If not set, description is not changed.
+  optional string description = 3;
+}
+
+// UpdateProjectResponse is the response after updating a project.
+message UpdateProjectResponse {
+  // The updated project.
+  Project project = 1;
+}
+
+// DeleteProjectRequest is the request to delete a project.
+message DeleteProjectRequest {
+  // The ID of the project to delete.
+  string id = 1;
+}
+
+// ArchiveProjectRequest is the request to archive a project.
+message ArchiveProjectRequest {
+  // The ID of the project to archive.
+  string id = 1;
+}
+
+// ArchiveProjectResponse is the response after archiving a project.
+message ArchiveProjectResponse {
+  // The archived project.
+  Project project = 1;
+}
+
+// UnarchiveProjectRequest is the request to unarchive a project.
+message UnarchiveProjectRequest {
+  // The ID of the project to unarchive.
+  string id = 1;
+}
+
+// UnarchiveProjectResponse is the response after unarchiving a project.
+message UnarchiveProjectResponse {
+  // The unarchived project.
+  Project project = 1;
+}
+
+// GetProjectStatsRequest is the request to get project statistics.
+message GetProjectStatsRequest {
+  // The ID of the project.
+  string id = 1;
+}
+
+// GetProjectStatsResponse is the response containing project statistics.
+message GetProjectStatsResponse {
+  // The project statistics.
+  ProjectStats stats = 1;
+}
+
+// SubscribeProjectsRequest is the request to subscribe to project change events.
+message SubscribeProjectsRequest {}
+
+// SubscribeProjectsResponse is sent whenever a project is created, updated, or deleted.
+message SubscribeProjectsResponse {}

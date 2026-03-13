@@ -97,7 +97,7 @@ func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 }
 
 // ConvertToTodo converts an inbox item to a todo and deletes the inbox item
-func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID int64, title, description string, plannedDate time.Time) (string, error) {
+func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID int64, title, description string, plannedDate time.Time, projectID *string) (string, error) {
 	if inboxItemID == "" {
 		return "", storecmn.ErrEmptyID
 	}
@@ -121,6 +121,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 			Description: description,
 			Status:      models.TodoStatusPending,
 			PlannedDate: plannedDate,
+			ProjectID:   projectID,
 		})
 		if err != nil {
 			return fmt.Errorf("create todo: %w", err)
@@ -141,7 +142,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 }
 
 // ConvertToNote converts an inbox item to a note and deletes the inbox item
-func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID int64, title, body string) (string, error) {
+func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID int64, title, body string, projectID *string) (string, error) {
 	if inboxItemID == "" {
 		return "", storecmn.ErrEmptyID
 	}
@@ -159,10 +160,11 @@ func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID 
 
 	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		_, err := s.store.Notes(repos.WithTx(tx)).Create(ctx, repo_notes.CreateParams{
-			ID:     noteID,
-			UserID: userID,
-			Title:  title,
-			Body:   body,
+			ID:        noteID,
+			UserID:    userID,
+			Title:     title,
+			Body:      body,
+			ProjectID: projectID,
 		})
 		if err != nil {
 			return fmt.Errorf("create note: %w", err)

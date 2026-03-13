@@ -13,6 +13,7 @@ import (
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1/authv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1/inboxv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/notes/v1/notesv1connect"
+	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/projects/v1/projectsv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1/todosv1connect"
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
@@ -65,12 +66,19 @@ func New(
 		interceptors,
 	)
 
+	// Projects service
+	projectsPath, projectsHandler := projectsv1connect.NewProjectServiceHandler(
+		NewProjectsHandler(l, baseService, st),
+		interceptors,
+	)
+
 	// Mount Connect-RPC handlers under /api/v1
 	const apiPrefix = "/api/v1"
 	mux.Handle(apiPrefix+authPath, http.StripPrefix(apiPrefix, authHandler))
 	mux.Handle(apiPrefix+inboxPath, http.StripPrefix(apiPrefix, inboxHandler))
 	mux.Handle(apiPrefix+todosPath, http.StripPrefix(apiPrefix, todosHandler))
 	mux.Handle(apiPrefix+notesPath, http.StripPrefix(apiPrefix, notesHandler))
+	mux.Handle(apiPrefix+projectsPath, http.StripPrefix(apiPrefix, projectsHandler))
 
 	// Serve frontend SPA from embedded filesystem
 	frontendFS, err := fs.Sub(donejournal.FrontendFS, "frontend/dist")

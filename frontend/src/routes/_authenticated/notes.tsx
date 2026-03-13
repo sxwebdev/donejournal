@@ -6,9 +6,11 @@ import { NoteDialog } from "@/components/notes/note-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
+import { ProjectSelector } from "@/components/projects/project-selector"
 
 const notesSearchSchema = z.object({
   search: z.string().optional(),
+  projectId: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/notes")({
@@ -58,17 +60,30 @@ function NotesPage() {
         </Button>
       </div>
 
-      <div className="relative">
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search notes..."
-          value={searchInput}
-          onChange={handleSearchChange}
-          className="pl-9"
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search notes..."
+            value={searchInput}
+            onChange={handleSearchChange}
+            className="pl-9"
+          />
+        </div>
+        <ProjectSelector
+          value={search.projectId}
+          onChange={(v) =>
+            navigate({
+              search: (prev) => ({ ...prev, projectId: v }),
+              replace: true,
+            })
+          }
+          placeholder="All projects"
+          className="w-auto min-w-35"
         />
       </div>
 
-      <NoteList search={search.search} />
+      <NoteList search={search.search} projectId={search.projectId} />
 
       <NoteDialog
         mode="create"

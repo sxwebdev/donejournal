@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
+import { Route as AuthenticatedProjectsRouteImport } from './routes/_authenticated/projects'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
@@ -35,6 +36,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProjectsRoute = AuthenticatedProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/projects': typeof AuthenticatedProjectsRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
 }
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/projects': typeof AuthenticatedProjectsRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/': typeof AuthenticatedIndexRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/projects': typeof AuthenticatedProjectsRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/notes_/$noteId': typeof AuthenticatedNotesNoteIdRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/projects'
     | '/todos'
     | '/notes/$noteId'
   fileRoutesByTo: FileRoutesByTo
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/projects'
     | '/todos'
     | '/'
     | '/notes/$noteId'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/_authenticated/calendar'
     | '/_authenticated/inbox'
     | '/_authenticated/notes'
+    | '/_authenticated/projects'
     | '/_authenticated/todos'
     | '/_authenticated/'
     | '/_authenticated/notes_/$noteId'
@@ -154,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/projects': {
+      id: '/_authenticated/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthenticatedProjectsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/notes': {
       id: '/_authenticated/notes'
       path: '/notes'
@@ -189,6 +208,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedProjectsRoute: typeof AuthenticatedProjectsRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedNotesNoteIdRoute: typeof AuthenticatedNotesNoteIdRoute
@@ -198,6 +218,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedProjectsRoute: AuthenticatedProjectsRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedNotesNoteIdRoute: AuthenticatedNotesNoteIdRoute,

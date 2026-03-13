@@ -26,6 +26,7 @@ type ParsedEntry struct {
 	Date        string    `json:"date"`        // YYYY-MM-DD
 	Description string    `json:"description"` // cleaned text
 	Body        string    `json:"body"`        // full text (for notes)
+	Project     string    `json:"project"`     // optional project name
 	Language    string    `json:"language"`     // "ru" | "en" | "unknown"
 	Confidence  float64   `json:"confidence"`  // 0..1
 }
@@ -108,6 +109,8 @@ Task type:
 
 For notes: "title" is a short title, "body" is the full text content (markdown). Date is not used for notes.
 
+Project: if user mentions a project name (e.g., "для проекта X", "project X", "в проект X", "проект: X"), extract the project name into "project" field. If no project mentioned, leave "project" as empty string.
+
 IMPORTANT: Keep original language in title, description, and body
 
 Format: {"entries":[...]} where each entry is a separate task or note`,
@@ -137,6 +140,9 @@ Format: {"entries":[...]} where each entry is a separate task or note`,
 		// Example 5: Note creation
 		{Role: "user", Content: "заметка: идеи для нового проекта\nИспользовать Go + React\nДобавить авторизацию через Telegram"},
 		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"note","title":"идеи для нового проекта","date":"%s","description":"","body":"Использовать Go + React\nДобавить авторизацию через Telegram","language":"ru","confidence":0.95}]}`, today)},
+		// Example 6: Task with project
+		{Role: "user", Content: "для проекта DoneJournal: добавь задачу на завтра - сделать фильтр по проектам"},
+		{Role: "assistant", Content: fmt.Sprintf(`{"entries":[{"kind":"todo","title":"сделать фильтр по проектам","date":"%s","description":"сделать фильтр по проектам","project":"DoneJournal","language":"ru","confidence":0.95}]}`, addDaysToDate(1))},
 		// Actual user input
 		{Role: "user", Content: text},
 	}

@@ -21,10 +21,12 @@ import {
 import { listNotes } from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
 import type { InboxItem } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
 import { useTheme } from "@/components/theme-provider"
+import { ProjectSelector } from "@/components/projects/project-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
   body: z.string().optional(),
+  projectId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -43,6 +45,8 @@ export function ConvertToNoteDialog({ item, open, onOpenChange }: Props) {
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     reset,
     formState: { errors },
   } = useForm<FormValues>({
@@ -79,6 +83,7 @@ export function ConvertToNoteDialog({ item, open, onOpenChange }: Props) {
       inboxItemId: item.id,
       title: values.title,
       body: values.body ?? "",
+      projectId: values.projectId,
     })
   }
 
@@ -112,6 +117,14 @@ export function ConvertToNoteDialog({ item, open, onOpenChange }: Props) {
                   preview="edit"
                 />
               )}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Project</Label>
+            <ProjectSelector
+              value={watch("projectId")}
+              onChange={(v) => setValue("projectId", v)}
             />
           </div>
 

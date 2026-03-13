@@ -65,6 +65,8 @@ message Todo {
   google.protobuf.Timestamp created_at = 7;
   // Last update timestamp.
   google.protobuf.Timestamp updated_at = 8;
+  // Optional project ID this todo belongs to.
+  optional string project_id = 9;
 }
 
 // ListTodosRequest is the request to list todos with optional filters.
@@ -79,6 +81,8 @@ message ListTodosRequest {
   optional google.protobuf.Timestamp planned_date_from = 4;
   // Filter by planned_date range end (inclusive).
   optional google.protobuf.Timestamp planned_date_to = 5;
+  // Filter by project ID.
+  optional string project_id = 6;
 }
 
 // ListTodosResponse is the response containing a list of todos.
@@ -111,6 +115,8 @@ message CreateTodoRequest {
   string description = 2;
   // Planned date for the todo.
   google.protobuf.Timestamp planned_date = 3;
+  // Optional project ID.
+  optional string project_id = 4;
 }
 
 // CreateTodoResponse is the response after creating a todo.
@@ -131,6 +137,8 @@ message UpdateTodoRequest {
   optional TodoStatus status = 4;
   // Updated planned date. If not set, planned_date is not changed.
   optional google.protobuf.Timestamp planned_date = 5;
+  // Updated project ID. If not set, project_id is not changed.
+  optional string project_id = 6;
 }
 
 // UpdateTodoResponse is the response after updating a todo.
@@ -163,6 +171,8 @@ message GetCalendarEntriesRequest {
   google.protobuf.Timestamp from = 1;
   // End of the date range (inclusive).
   google.protobuf.Timestamp to = 2;
+  // Filter by project ID.
+  optional string project_id = 3;
 }
 
 // CalendarDay represents todos for a single day along with summary statistics.

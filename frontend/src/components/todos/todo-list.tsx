@@ -19,6 +19,7 @@ type Props = {
   statuses?: TodoStatus[]
   from?: string
   to?: string
+  projectId?: string
 }
 
 type Group = {
@@ -60,12 +61,13 @@ function groupTodos(todos: Todo[]): Group[] {
   return result
 }
 
-export function TodoList({ statuses, from, to }: Props) {
+export function TodoList({ statuses, from, to, projectId }: Props) {
   const query = useQuery(listTodos, {
     pageSize: 100,
     statuses: statuses ?? [],
     plannedDateFrom: from ? fromDateOnly(parseISO(from)) : undefined,
     plannedDateTo: to ? endOfDateOnly(parseISO(to)) : undefined,
+    projectId,
   })
 
   const subRef = useRef<{ abort: () => void } | null>(null)

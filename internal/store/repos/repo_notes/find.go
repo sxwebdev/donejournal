@@ -11,11 +11,12 @@ import (
 )
 
 type FindParams struct {
-	UserID   int64
-	Search   *string
-	OrderBy  string
-	Page     *uint32
-	PageSize *uint32
+	UserID    int64
+	Search    *string
+	ProjectID *string
+	OrderBy   string
+	Page      *uint32
+	PageSize  *uint32
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -29,6 +30,10 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		titleExpr := "unicode_lower(" + ColumnNameNotesTitle.String() + ") LIKE " + sb.Var(pattern)
 		bodyExpr := "unicode_lower(" + ColumnNameNotesBody.String() + ") LIKE " + sb.Var(pattern)
 		sb.Where(sb.Or(titleExpr, bodyExpr))
+	}
+
+	if params.ProjectID != nil {
+		sb.Where(sb.Equal(ColumnNameNotesProjectId.String(), *params.ProjectID))
 	}
 
 	return sb

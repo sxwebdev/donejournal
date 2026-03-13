@@ -22,12 +22,14 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import { ProjectSelector } from "@/components/projects/project-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
   status: z.nativeEnum(TodoStatus).optional(),
+  projectId: z.string().optional(),
 })
 
 export type TodoFormValues = z.infer<typeof schema>
@@ -126,6 +128,14 @@ export function TodoForm({
             {errors.plannedDate.message}
           </p>
         )}
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Project</Label>
+        <ProjectSelector
+          value={watch("projectId")}
+          onChange={(v) => setValue("projectId", v)}
+        />
       </div>
 
       {showStatus && (

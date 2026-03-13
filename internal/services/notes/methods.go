@@ -10,12 +10,13 @@ import (
 )
 
 // Create a new note
-func (s *Service) Create(ctx context.Context, userID int64, title, body string) (*models.Note, error) {
+func (s *Service) Create(ctx context.Context, userID int64, title, body string, projectID *string) (*models.Note, error) {
 	note, err := s.store.Notes().Create(ctx, repo_notes.CreateParams{
-		ID:     utils.GenerateULID(),
-		UserID: userID,
-		Title:  title,
-		Body:   body,
+		ID:        utils.GenerateULID(),
+		UserID:    userID,
+		Title:     title,
+		Body:      body,
+		ProjectID: projectID,
 	})
 	if err != nil {
 		return nil, err
@@ -39,8 +40,9 @@ func (s *Service) GetByID(ctx context.Context, id string) (*models.Note, error) 
 
 // UpdateParams contains optional fields for partial update
 type UpdateParams struct {
-	Title *string
-	Body  *string
+	Title     *string
+	Body      *string
+	ProjectID *string
 }
 
 // Update performs a partial update on a note
@@ -59,6 +61,10 @@ func (s *Service) Update(ctx context.Context, userID int64, id string, params Up
 	if params.Body != nil {
 		sets = append(sets, "body = ?")
 		args = append(args, *params.Body)
+	}
+	if params.ProjectID != nil {
+		sets = append(sets, "project_id = ?")
+		args = append(args, *params.ProjectID)
 	}
 
 	if len(sets) == 0 {

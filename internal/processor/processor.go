@@ -71,6 +71,23 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		return "Saved to inbox 📥", nil
 	}
 
+	// Resolve project IDs from project names
+	projectIDs := make(map[string]*string) // projectName -> projectID
+	for _, entry := range resp.Entries {
+		if entry.Project == "" {
+			continue
+		}
+		if _, ok := projectIDs[entry.Project]; ok {
+			continue
+		}
+		project, err := s.baseService.Projects().FindOrCreateByName(ctx, userID, entry.Project)
+		if err != nil {
+			s.logger.Warnw("failed to resolve project, ignoring", "project", entry.Project, "error", err)
+			continue
+		}
+		projectIDs[entry.Project] = &project.ID
+	}
+
 	// Separate note entries from todo/done entries
 	var todoEntries []mcp.ParsedEntry
 	var noteEntries []mcp.ParsedEntry
@@ -85,7 +102,7 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 	// Create todos
 	if len(todoEntries) > 0 {
 		todoResp := &mcp.ParsedResponse{Entries: todoEntries}
-		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp); err != nil {
+		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp, projectIDs); err != nil {
 			return "", fmt.Errorf("failed to batch create todos: %w", err)
 		}
 	}
@@ -96,7 +113,11 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		if body == "" {
 			body = entry.Description
 		}
-		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body); err != nil {
+		var projectID *string
+		if entry.Project != "" {
+			projectID = projectIDs[entry.Project]
+		}
+		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body, projectID); err != nil {
 			return "", fmt.Errorf("failed to create note '%s': %w", entry.Title, err)
 		}
 	}

@@ -11,13 +11,14 @@ import (
 )
 
 type FindParams struct {
-	Statuses []models.TodoStatusType
-	UserID   int64
-	DateFrom *time.Time
-	DateTo   *time.Time
-	OrderBy  string
-	Page     *uint32
-	PageSize *uint32
+	Statuses  []models.TodoStatusType
+	UserID    int64
+	DateFrom  *time.Time
+	DateTo    *time.Time
+	ProjectID *string
+	OrderBy   string
+	Page      *uint32
+	PageSize  *uint32
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -50,6 +51,10 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		if params.DateTo != nil {
 			sb.Where(sb.LessEqualThan(ColumnNameTodosPlannedDate.String(), *params.DateTo))
 		}
+	}
+
+	if params.ProjectID != nil {
+		sb.Where(sb.Equal(ColumnNameTodosProjectId.String(), *params.ProjectID))
 	}
 
 	return sb
