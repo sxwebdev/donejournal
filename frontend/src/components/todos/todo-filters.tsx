@@ -113,7 +113,7 @@ export function TodoFilters() {
         </PopoverTrigger>
         <PopoverContent className="w-48 p-2" align="start">
           <div className="flex flex-col gap-1">
-            {STATUS_OPTIONS.map(({ value, label }) => (
+            {STATUS_OPTIONS.map(({ value }) => (
               <button
                 key={value}
                 onClick={() => toggleStatus(value)}
