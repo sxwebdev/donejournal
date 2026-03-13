@@ -21,24 +21,24 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Task title",
 						},
 						"description": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Optional longer description",
 						},
 						"planned_date": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Date in YYYY-MM-DD format. Defaults to today if not specified.",
 						},
 						"status": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"enum":        []string{"pending", "completed"},
 							"description": "pending = planned task, completed = already done. Defaults to pending.",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Optional workspace/project name. Will be auto-created if doesn't exist.",
 						},
 						"priority": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"enum":        []string{"none", "low", "medium", "high", "critical"},
 							"description": "Task priority level. Default: none.",
 						},
@@ -65,11 +65,11 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Note title",
 						},
 						"body": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Full note content, supports markdown",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Optional workspace/project name",
 						},
 						"tags": map[string]any{
@@ -96,15 +96,15 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Filter by status. If not specified, returns pending and inprogress.",
 						},
 						"date_from": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Start date filter in YYYY-MM-DD format",
 						},
 						"date_to": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "End date filter in YYYY-MM-DD format",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Filter by workspace name",
 						},
 					},
@@ -120,11 +120,11 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"search": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Text to search in note title and body",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Filter by workspace name",
 						},
 					},
@@ -161,28 +161,28 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Todo ID to update",
 						},
 						"title": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New title",
 						},
 						"description": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New description",
 						},
 						"planned_date": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New date in YYYY-MM-DD format",
 						},
 						"status": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"enum":        []string{"pending", "inprogress", "completed", "cancelled"},
 							"description": "New status",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New workspace name",
 						},
 						"priority": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"enum":        []string{"none", "low", "medium", "high", "critical"},
 							"description": "New priority level",
 						},
@@ -266,15 +266,15 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Note ID to update",
 						},
 						"title": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New title",
 						},
 						"body": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New body content (markdown)",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "New workspace name",
 						},
 					},
@@ -291,15 +291,15 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"date_from": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Start date in YYYY-MM-DD format",
 						},
 						"date_to": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "End date in YYYY-MM-DD format",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Filter by workspace name",
 						},
 					},
@@ -335,15 +335,15 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Convert to todo or note",
 						},
 						"title": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Title for the new todo/note. If empty, uses inbox item text.",
 						},
 						"planned_date": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Date in YYYY-MM-DD (only for todo conversion). Defaults to today.",
 						},
 						"workspace": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Optional workspace name",
 						},
 					},
@@ -365,15 +365,15 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Action to perform",
 						},
 						"name": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Tag name (required for create)",
 						},
 						"color": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Tag color as hex (e.g. #ef4444). Defaults to #6366f1",
 						},
 						"id": map[string]any{
-							"type":        "string",
+							"type":        []string{"string", "null"},
 							"description": "Tag ID (required for delete)",
 						},
 					},
