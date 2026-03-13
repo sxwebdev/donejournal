@@ -231,7 +231,86 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 ---
 
-## 4. Приоритетная таблица
+## 4. Улучшения карточек Todo (`todo-item.tsx`)
+
+Текущая карточка: статус-иконка, title, description (2 строки), planned date, status badge, menu. Не отображается workspace (хотя `workspaceId` есть в модели), `createdAt`, `completedAt`. Нужна подготовка к будущим тегам и приоритетам.
+
+### 4.1 Workspace badge
+
+**Effort**: Small | **Impact**: High
+
+- Маленький badge с именем workspace рядом с датой
+- Resolve `workspaceId` → имя через кэш `listWorkspaces` query
+- Стиль: `text-xs bg-muted px-1.5 py-0.5 rounded`
+- Если workspace не задан — не показывать
+
+### 4.2 Metadata row (рефакторинг нижней строки)
+
+**Effort**: Small | **Impact**: Medium
+
+Объединить дату, workspace и будущие метаданные в единую расширяемую строку:
+
+```text
+📅 14 мар · 🏷 Work · #frontend #urgent
+```
+
+Формат: `flex items-center gap-1.5 text-xs text-muted-foreground`. Это фундамент для будущих тегов и приоритетов — новые элементы просто добавляются в строку.
+
+### 4.3 Relative dates + иконки
+
+**Effort**: Small | **Impact**: Small-Medium
+
+- "Сегодня", "Завтра", "Вчера" вместо полных дат
+- Иконка `Calendar` перед датой
+- Overdue: `AlertTriangle` + красный текст (частично есть)
+
+### 4.4 Priority indicator (left border)
+
+**Effort**: Small | **Impact**: High | **Зависимость**: после 3.1 Приоритеты задач
+
+- Цветная полоска `border-l-4` слева от карточки
+- Urgent: `border-red-500`, High: `border-orange-500`, Medium: `border-yellow-500`, Low/None: без индикатора
+- Самый компактный вариант — не добавляет элементов в layout
+
+### 4.5 Теги как chips
+
+**Effort**: Medium | **Impact**: Medium | **Зависимость**: после 3.4 Теги/Метки
+
+- Цветные chips в metadata row: `text-[10px] px-1 py-0 rounded-sm`
+- Максимум 3 видимых + "+N" badge
+- Клик по тегу → фильтрация списка
+
+### 4.6 Completion info
+
+**Effort**: Small | **Impact**: Small
+
+- Для завершённых: "Выполнено 14 мар в 15:30" вместо planned date
+- Приглушённая карточка: `opacity-60` или `bg-muted/30`
+- Tooltip на иконке: "Completed 2 hours ago"
+
+### 4.7 Quick actions на hover
+
+**Effort**: Medium | **Impact**: Medium
+
+- При hover показать иконки: Calendar (перенести), Check (завершить), Trash (удалить)
+- Убирает необходимость открывать dropdown для частых действий
+- На мобильном — swipe gestures
+
+### Порядок реализации карточек
+
+| #   | Улучшение       | Effort | Зависимости                     |
+| --- | --------------- | ------ | ------------------------------- |
+| 1   | Workspace badge | Small  | Нет — можно сделать сейчас      |
+| 2   | Metadata row    | Small  | Нет — основа для всего          |
+| 3   | Relative dates  | Small  | После metadata row              |
+| 4   | Priority border | Small  | После реализации priority (3.1) |
+| 5   | Теги chips      | Medium | После реализации тегов (3.4)    |
+| 6   | Completion info | Small  | Нет                             |
+| 7   | Quick actions   | Medium | Нет                             |
+
+---
+
+## 5. Приоритетная таблица
 
 | #   | Фича                              | Effort       | Impact    | Категория |
 | --- | --------------------------------- | ------------ | --------- | --------- |
