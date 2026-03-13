@@ -6,6 +6,7 @@ import (
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_inbox"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_notes"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_tags"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 )
 
@@ -14,6 +15,7 @@ type Repos struct {
 	todos      *repo_todos.CustomQueries
 	notes      *repo_notes.CustomQueries
 	workspaces *repo_workspaces.CustomQueries
+	tags       *repo_tags.CustomQueries
 }
 
 func New(sqlite *sql.DB) *Repos {
@@ -22,6 +24,7 @@ func New(sqlite *sql.DB) *Repos {
 		todos:      repo_todos.NewCustom(sqlite),
 		notes:      repo_notes.NewCustom(sqlite),
 		workspaces: repo_workspaces.NewCustom(sqlite),
+		tags:       repo_tags.NewCustom(sqlite),
 	}
 }
 
@@ -67,4 +70,15 @@ func (s *Repos) Workspaces(opts ...Option) repo_workspaces.ICustomQuerier {
 	}
 
 	return s.workspaces
+}
+
+// Tags returns repo for tags
+func (s *Repos) Tags(opts ...Option) repo_tags.ICustomQuerier {
+	options := parseOptions(opts...)
+
+	if options.Tx != nil {
+		return s.tags.WithTx(options.Tx)
+	}
+
+	return s.tags
 }

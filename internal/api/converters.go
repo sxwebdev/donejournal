@@ -6,6 +6,7 @@ import (
 	authv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1"
 	inboxv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1"
 	notesv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/notes/v1"
+	tagsv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/tags/v1"
 	todosv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1"
 	workspacesv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/workspaces/v1"
 	"github.com/sxwebdev/donejournal/internal/models"
@@ -19,6 +20,7 @@ func todoToProto(t *models.Todo) *todosv1.Todo {
 		Title:       t.Title,
 		Description: t.Description,
 		Status:      todoStatusToProto(t.Status),
+		Priority:    todoPriorityToProto(t.Priority),
 		PlannedDate: timestamppb.New(t.PlannedDate),
 		CreatedAt:   timestamppb.New(t.CreatedAt),
 		UpdatedAt:   timestamppb.New(t.UpdatedAt),
@@ -57,6 +59,40 @@ func todoStatusFromProto(s todosv1.TodoStatus) models.TodoStatusType {
 		return models.TodoStatusCancelled
 	default:
 		return models.TodoStatusPending
+	}
+}
+
+func todoPriorityToProto(p models.TodoPriorityType) todosv1.TodoPriority {
+	switch p {
+	case models.TodoPriorityNone:
+		return todosv1.TodoPriority_TODO_PRIORITY_NONE
+	case models.TodoPriorityLow:
+		return todosv1.TodoPriority_TODO_PRIORITY_LOW
+	case models.TodoPriorityMedium:
+		return todosv1.TodoPriority_TODO_PRIORITY_MEDIUM
+	case models.TodoPriorityHigh:
+		return todosv1.TodoPriority_TODO_PRIORITY_HIGH
+	case models.TodoPriorityCritical:
+		return todosv1.TodoPriority_TODO_PRIORITY_CRITICAL
+	default:
+		return todosv1.TodoPriority_TODO_PRIORITY_UNSPECIFIED
+	}
+}
+
+func todoPriorityFromProto(p todosv1.TodoPriority) models.TodoPriorityType {
+	switch p {
+	case todosv1.TodoPriority_TODO_PRIORITY_NONE:
+		return models.TodoPriorityNone
+	case todosv1.TodoPriority_TODO_PRIORITY_LOW:
+		return models.TodoPriorityLow
+	case todosv1.TodoPriority_TODO_PRIORITY_MEDIUM:
+		return models.TodoPriorityMedium
+	case todosv1.TodoPriority_TODO_PRIORITY_HIGH:
+		return models.TodoPriorityHigh
+	case todosv1.TodoPriority_TODO_PRIORITY_CRITICAL:
+		return models.TodoPriorityCritical
+	default:
+		return models.TodoPriorityNone
 	}
 }
 
@@ -108,6 +144,16 @@ func tokenDataToUserProto(data TokenData) *authv1.User {
 		LastName:  data.LastName,
 		Username:  data.Username,
 		PhotoUrl:  data.PhotoURL,
+	}
+}
+
+func tagToProto(t *models.Tag) *tagsv1.Tag {
+	return &tagsv1.Tag{
+		Id:        t.ID,
+		Name:      t.Name,
+		Color:     t.Color,
+		CreatedAt: timestamppb.New(t.CreatedAt),
+		UpdatedAt: timestamppb.New(t.UpdatedAt),
 	}
 }
 

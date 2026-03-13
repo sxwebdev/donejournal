@@ -27,6 +27,7 @@ type Props = {
   from?: string
   to?: string
   workspaceId?: string
+  tagIds?: string[]
   showOverdue?: boolean
 }
 
@@ -74,6 +75,7 @@ export function TodoList({
   from,
   to,
   workspaceId,
+  tagIds,
   showOverdue,
 }: Props) {
   const query = useQuery(listTodos, {
@@ -82,6 +84,7 @@ export function TodoList({
     plannedDateFrom: from ? fromDateOnly(parseISO(from)) : undefined,
     plannedDateTo: to ? endOfDateOnly(parseISO(to)) : undefined,
     workspaceId,
+    tagIds: tagIds ?? [],
   })
 
   const yesterday = useMemo(() => subDays(new Date(), 1), [])

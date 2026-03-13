@@ -27,6 +27,7 @@ import {
 } from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
 import type { Note } from "@/api/gen/donejournal/notes/v1/notes_pb"
 import { toDate } from "@/lib/dates"
+import { NoteTagBadges } from "./note-tag-badges"
 
 type Props = {
   note: Note
@@ -76,6 +77,7 @@ export function NoteCard({ note }: Props) {
               {bodyPreview}
             </p>
           )}
+          <NoteTagBadges tagIds={note.tagIds} />
           {updatedAt && (
             <p className="mt-1 text-xs text-muted-foreground">
               {formatDistanceToNow(updatedAt, { addSuffix: true })}

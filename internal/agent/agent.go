@@ -10,6 +10,7 @@ import (
 	"github.com/sxwebdev/donejournal/internal/agent/provider"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store/badgerdb"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_tags"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 	"github.com/tkcrm/mx/logger"
 )
@@ -69,11 +70,22 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 		}
 	}
 
+	// Load user's tags for context
+	var tagNames []string
+	if tagResult, err := a.services.Tags().Find(ctx, repo_tags.FindParams{
+		UserID:   userID,
+		PageSize: &pageSize,
+	}); err == nil {
+		for _, t := range tagResult.Items {
+			tagNames = append(tagNames, t.Name)
+		}
+	}
+
 	// Build messages: system prompt + history + new user message
 	messages := make([]provider.ChatMessage, 0, len(history)+2)
 	messages = append(messages, provider.ChatMessage{
 		Role:    "system",
-		Content: buildSystemPrompt(workspaceNames),
+		Content: buildSystemPrompt(workspaceNames, tagNames),
 	})
 	messages = append(messages, history...)
 	messages = append(messages, provider.ChatMessage{
@@ -157,7 +169,7 @@ func (a *Agent) ClearConversation(ctx context.Context, userID int64) error {
 	return a.conversation.Clear(ctx, userID)
 }
 
-func buildSystemPrompt(workspaceNames []string) string {
+func buildSystemPrompt(workspaceNames []string, tagNames []string) string {
 	today := carbon.Now()
 	weekStart := carbon.Now().StartOfWeek()
 
@@ -166,10 +178,16 @@ func buildSystemPrompt(workspaceNames []string) string {
 		workspacesInfo = fmt.Sprintf("User's existing workspaces: %s. Use exact names when matching.", strings.Join(workspaceNames, ", "))
 	}
 
+	tagsInfo := "User has no tags yet."
+	if len(tagNames) > 0 {
+		tagsInfo = fmt.Sprintf("User's existing tags: %s. Use exact names when matching.", strings.Join(tagNames, ", "))
+	}
+
 	return fmt.Sprintf(`You are DoneJournal assistant. You help users manage their tasks (todos) and notes.
 
 Today: %s (%s)
 This week: Mon %s – Sun %s
+%s
 %s
 
 Rules:
@@ -192,11 +210,17 @@ Rules:
 - If the user's intent is unclear, ask a clarifying question instead of guessing
 - When user asks to modify a task but doesn't specify which one, first use find_todos to find candidates, then ask user to clarify
 - NEVER delete tasks or notes without explicit user confirmation. When user asks to delete, first show what will be deleted and ask "Are you sure?"
-- When creating multiple items, respond with a compact numbered list of what was created`,
+- When creating multiple items, respond with a compact numbered list of what was created
+- Priority keywords: "critical"/"срочно"/"asap"/"критично" → priority=critical, "important"/"важно" → priority=high, "medium priority"/"средний приоритет" → priority=medium, "low priority"/"неважно"/"когда-нибудь" → priority=low
+- Default priority is none unless user explicitly mentions importance or urgency
+- If user mentions #hashtags (e.g. "#urgent купить молоко"), extract them as tag names and pass in the tags parameter
+- When user mentions tags, match to existing ones if possible (case-insensitive). New tags are auto-created.
+- Use manage_tags to list/create/delete tags, tag_entity to add tags to existing items, find_by_tag to search by tags`,
 		today.ToDateString(),
 		today.ToWeekString(),
 		weekStart.ToDateString(),
 		weekStart.AddDays(6).ToDateString(),
 		workspacesInfo,
+		tagsInfo,
 	)
 }

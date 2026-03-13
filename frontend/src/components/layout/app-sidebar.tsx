@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Inbox, CheckSquare, Calendar, FileText, FolderOpen, LogOut, Sun, Moon, Monitor } from "lucide-react"
+import { Inbox, CheckSquare, Calendar, FileText, FolderOpen, Tag, LogOut, Sun, Moon, Monitor } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +47,7 @@ const navItems = [
   { to: "/notes", label: "Notes", icon: FileText },
   { to: "/calendar", label: "Calendar", icon: Calendar },
   { to: "/workspaces", label: "Workspaces", icon: FolderOpen },
+  { to: "/tags", label: "Tags", icon: Tag },
 ] as const
 
 export function AppSidebar() {

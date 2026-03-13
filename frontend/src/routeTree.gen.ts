@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedWorkspacesRouteImport } from './routes/_authenticated/workspaces'
 import { Route as AuthenticatedTodosRouteImport } from './routes/_authenticated/todos'
+import { Route as AuthenticatedTagsRouteImport } from './routes/_authenticated/tags'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedInboxRouteImport } from './routes/_authenticated/inbox'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
@@ -43,6 +44,11 @@ const AuthenticatedWorkspacesRoute = AuthenticatedWorkspacesRouteImport.update({
 const AuthenticatedTodosRoute = AuthenticatedTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTagsRoute = AuthenticatedTagsRouteImport.update({
+  id: '/tags',
+  path: '/tags',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/tags': typeof AuthenticatedTagsRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/workspaces': typeof AuthenticatedWorkspacesRoute
   '/notes/$noteId': typeof AuthenticatedNotesNoteIdRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof AuthenticatedCalendarRoute
   '/inbox': typeof AuthenticatedInboxRoute
   '/notes': typeof AuthenticatedNotesRoute
+  '/tags': typeof AuthenticatedTagsRoute
   '/todos': typeof AuthenticatedTodosRoute
   '/workspaces': typeof AuthenticatedWorkspacesRoute
   '/': typeof AuthenticatedIndexRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
   '/_authenticated/inbox': typeof AuthenticatedInboxRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
+  '/_authenticated/tags': typeof AuthenticatedTagsRoute
   '/_authenticated/todos': typeof AuthenticatedTodosRoute
   '/_authenticated/workspaces': typeof AuthenticatedWorkspacesRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/tags'
     | '/todos'
     | '/workspaces'
     | '/notes/$noteId'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/calendar'
     | '/inbox'
     | '/notes'
+    | '/tags'
     | '/todos'
     | '/workspaces'
     | '/'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/_authenticated/calendar'
     | '/_authenticated/inbox'
     | '/_authenticated/notes'
+    | '/_authenticated/tags'
     | '/_authenticated/todos'
     | '/_authenticated/workspaces'
     | '/_authenticated/'
@@ -196,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/todos'
       fullPath: '/todos'
       preLoaderRoute: typeof AuthenticatedTodosRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tags': {
+      id: '/_authenticated/tags'
+      path: '/tags'
+      fullPath: '/tags'
+      preLoaderRoute: typeof AuthenticatedTagsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/notes': {
@@ -247,6 +266,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
   AuthenticatedInboxRoute: typeof AuthenticatedInboxRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
+  AuthenticatedTagsRoute: typeof AuthenticatedTagsRoute
   AuthenticatedTodosRoute: typeof AuthenticatedTodosRoute
   AuthenticatedWorkspacesRoute: typeof AuthenticatedWorkspacesRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -259,6 +279,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
   AuthenticatedInboxRoute: AuthenticatedInboxRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
+  AuthenticatedTagsRoute: AuthenticatedTagsRoute,
   AuthenticatedTodosRoute: AuthenticatedTodosRoute,
   AuthenticatedWorkspacesRoute: AuthenticatedWorkspacesRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

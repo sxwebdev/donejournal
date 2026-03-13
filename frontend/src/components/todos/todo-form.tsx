@@ -21,15 +21,21 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import {
+  TodoStatus,
+  TodoPriority,
+} from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
+import { TagSelector } from "@/components/tags/tag-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
   status: z.nativeEnum(TodoStatus).optional(),
+  priority: z.nativeEnum(TodoPriority).optional(),
   workspaceId: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
 })
 
 export type TodoFormValues = z.infer<typeof schema>
@@ -39,6 +45,14 @@ const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
   { value: TodoStatus.IN_PROGRESS, label: "In Progress" },
   { value: TodoStatus.COMPLETED, label: "Completed" },
   { value: TodoStatus.CANCELLED, label: "Cancelled" },
+]
+
+const PRIORITY_OPTIONS: { value: TodoPriority; label: string }[] = [
+  { value: TodoPriority.NONE, label: "None" },
+  { value: TodoPriority.LOW, label: "Low" },
+  { value: TodoPriority.MEDIUM, label: "Medium" },
+  { value: TodoPriority.HIGH, label: "High" },
+  { value: TodoPriority.CRITICAL, label: "Critical" },
 ]
 
 type Props = {
@@ -69,6 +83,7 @@ export function TodoForm({
 
   const plannedDate = watch("plannedDate")
   const status = watch("status")
+  const priority = watch("priority")
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -136,6 +151,37 @@ export function TodoForm({
           value={watch("workspaceId")}
           onChange={(v) => setValue("workspaceId", v)}
         />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Tags</Label>
+        <TagSelector
+          value={watch("tagIds") ?? []}
+          onChange={(v) => setValue("tagIds", v)}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Priority</Label>
+        <Select
+          value={priority !== undefined ? String(priority) : String(TodoPriority.NONE)}
+          onValueChange={(v) =>
+            setValue("priority", Number(v) as TodoPriority)
+          }
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {PRIORITY_OPTIONS.find((o) => o.value === (priority ?? TodoPriority.NONE))?.label ?? "None"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {PRIORITY_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={String(opt.value)}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {showStatus && (

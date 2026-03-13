@@ -13,8 +13,9 @@ import (
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1/authv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1/inboxv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/notes/v1/notesv1connect"
-	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/workspaces/v1/workspacesv1connect"
+	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/tags/v1/tagsv1connect"
 	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1/todosv1connect"
+	"github.com/sxwebdev/donejournal/api/gen/go/donejournal/workspaces/v1/workspacesv1connect"
 	"github.com/sxwebdev/donejournal/internal/config"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/store"
@@ -72,6 +73,12 @@ func New(
 		interceptors,
 	)
 
+	// Tags service
+	tagsPath, tagsHandler := tagsv1connect.NewTagServiceHandler(
+		NewTagsHandler(l, baseService, st),
+		interceptors,
+	)
+
 	// Mount Connect-RPC handlers under /api/v1
 	const apiPrefix = "/api/v1"
 	mux.Handle(apiPrefix+authPath, http.StripPrefix(apiPrefix, authHandler))
@@ -79,6 +86,7 @@ func New(
 	mux.Handle(apiPrefix+todosPath, http.StripPrefix(apiPrefix, todosHandler))
 	mux.Handle(apiPrefix+notesPath, http.StripPrefix(apiPrefix, notesHandler))
 	mux.Handle(apiPrefix+workspacesPath, http.StripPrefix(apiPrefix, workspacesHandler))
+	mux.Handle(apiPrefix+tagsPath, http.StripPrefix(apiPrefix, tagsHandler))
 
 	// Serve frontend SPA from embedded filesystem
 	frontendFS, err := fs.Sub(donejournal.FrontendFS, "frontend/dist")

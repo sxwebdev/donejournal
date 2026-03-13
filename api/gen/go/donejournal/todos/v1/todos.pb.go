@@ -84,6 +84,71 @@ func (TodoStatus) EnumDescriptor() ([]byte, []int) {
 	return file_donejournal_todos_v1_todos_proto_rawDescGZIP(), []int{0}
 }
 
+// TodoPriority represents the priority level of a todo item.
+type TodoPriority int32
+
+const (
+	// Unspecified priority.
+	TodoPriority_TODO_PRIORITY_UNSPECIFIED TodoPriority = 0
+	// No priority set (default).
+	TodoPriority_TODO_PRIORITY_NONE TodoPriority = 1
+	// Low priority.
+	TodoPriority_TODO_PRIORITY_LOW TodoPriority = 2
+	// Medium priority.
+	TodoPriority_TODO_PRIORITY_MEDIUM TodoPriority = 3
+	// High priority.
+	TodoPriority_TODO_PRIORITY_HIGH TodoPriority = 4
+	// Critical priority.
+	TodoPriority_TODO_PRIORITY_CRITICAL TodoPriority = 5
+)
+
+// Enum value maps for TodoPriority.
+var (
+	TodoPriority_name = map[int32]string{
+		0: "TODO_PRIORITY_UNSPECIFIED",
+		1: "TODO_PRIORITY_NONE",
+		2: "TODO_PRIORITY_LOW",
+		3: "TODO_PRIORITY_MEDIUM",
+		4: "TODO_PRIORITY_HIGH",
+		5: "TODO_PRIORITY_CRITICAL",
+	}
+	TodoPriority_value = map[string]int32{
+		"TODO_PRIORITY_UNSPECIFIED": 0,
+		"TODO_PRIORITY_NONE":        1,
+		"TODO_PRIORITY_LOW":         2,
+		"TODO_PRIORITY_MEDIUM":      3,
+		"TODO_PRIORITY_HIGH":        4,
+		"TODO_PRIORITY_CRITICAL":    5,
+	}
+)
+
+func (x TodoPriority) Enum() *TodoPriority {
+	p := new(TodoPriority)
+	*p = x
+	return p
+}
+
+func (x TodoPriority) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TodoPriority) Descriptor() protoreflect.EnumDescriptor {
+	return file_donejournal_todos_v1_todos_proto_enumTypes[1].Descriptor()
+}
+
+func (TodoPriority) Type() protoreflect.EnumType {
+	return &file_donejournal_todos_v1_todos_proto_enumTypes[1]
+}
+
+func (x TodoPriority) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TodoPriority.Descriptor instead.
+func (TodoPriority) EnumDescriptor() ([]byte, []int) {
+	return file_donejournal_todos_v1_todos_proto_rawDescGZIP(), []int{1}
+}
+
 // Todo represents a single todo item.
 type Todo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -104,7 +169,11 @@ type Todo struct {
 	// Last update timestamp.
 	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	// Optional workspace ID this todo belongs to.
-	WorkspaceId   *string `protobuf:"bytes,9,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	WorkspaceId *string `protobuf:"bytes,9,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Priority level.
+	Priority TodoPriority `protobuf:"varint,10,opt,name=priority,proto3,enum=donejournal.todos.v1.TodoPriority" json:"priority,omitempty"`
+	// IDs of tags attached to this todo.
+	TagIds        []string `protobuf:"bytes,11,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -202,6 +271,20 @@ func (x *Todo) GetWorkspaceId() string {
 	return ""
 }
 
+func (x *Todo) GetPriority() TodoPriority {
+	if x != nil {
+		return x.Priority
+	}
+	return TodoPriority_TODO_PRIORITY_UNSPECIFIED
+}
+
+func (x *Todo) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
+}
+
 // ListTodosRequest is the request to list todos with optional filters.
 type ListTodosRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -216,7 +299,9 @@ type ListTodosRequest struct {
 	// Filter by planned_date range end (inclusive).
 	PlannedDateTo *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=planned_date_to,json=plannedDateTo,proto3,oneof" json:"planned_date_to,omitempty"`
 	// Filter by workspace ID.
-	WorkspaceId   *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	WorkspaceId *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Filter by tag IDs. If not empty, only todos with any of these tags are returned.
+	TagIds        []string `protobuf:"bytes,7,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -291,6 +376,13 @@ func (x *ListTodosRequest) GetWorkspaceId() string {
 		return *x.WorkspaceId
 	}
 	return ""
+}
+
+func (x *ListTodosRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 // ListTodosResponse is the response containing a list of todos.
@@ -459,7 +551,11 @@ type CreateTodoRequest struct {
 	// Planned date for the todo.
 	PlannedDate *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=planned_date,json=plannedDate,proto3" json:"planned_date,omitempty"`
 	// Optional workspace ID.
-	WorkspaceId   *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	WorkspaceId *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Priority level.
+	Priority TodoPriority `protobuf:"varint,5,opt,name=priority,proto3,enum=donejournal.todos.v1.TodoPriority" json:"priority,omitempty"`
+	// Optional tag IDs to attach to the todo.
+	TagIds        []string `protobuf:"bytes,6,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -522,6 +618,20 @@ func (x *CreateTodoRequest) GetWorkspaceId() string {
 	return ""
 }
 
+func (x *CreateTodoRequest) GetPriority() TodoPriority {
+	if x != nil {
+		return x.Priority
+	}
+	return TodoPriority_TODO_PRIORITY_UNSPECIFIED
+}
+
+func (x *CreateTodoRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
+}
+
 // CreateTodoResponse is the response after creating a todo.
 type CreateTodoResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -582,7 +692,11 @@ type UpdateTodoRequest struct {
 	// Updated planned date. If not set, planned_date is not changed.
 	PlannedDate *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=planned_date,json=plannedDate,proto3,oneof" json:"planned_date,omitempty"`
 	// Updated workspace ID. If not set, workspace_id is not changed.
-	WorkspaceId   *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	WorkspaceId *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
+	// Updated priority. If not set, priority is not changed.
+	Priority *TodoPriority `protobuf:"varint,7,opt,name=priority,proto3,enum=donejournal.todos.v1.TodoPriority,oneof" json:"priority,omitempty"`
+	// Updated tag IDs. Replaces all existing tags.
+	TagIds        []string `protobuf:"bytes,8,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -657,6 +771,20 @@ func (x *UpdateTodoRequest) GetWorkspaceId() string {
 		return *x.WorkspaceId
 	}
 	return ""
+}
+
+func (x *UpdateTodoRequest) GetPriority() TodoPriority {
+	if x != nil && x.Priority != nil {
+		return *x.Priority
+	}
+	return TodoPriority_TODO_PRIORITY_UNSPECIFIED
+}
+
+func (x *UpdateTodoRequest) GetTagIds() []string {
+	if x != nil {
+		return x.TagIds
+	}
+	return nil
 }
 
 // UpdateTodoResponse is the response after updating a todo.
@@ -1223,7 +1351,7 @@ var File_donejournal_todos_v1_todos_proto protoreflect.FileDescriptor
 
 const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xcb\x03\n" +
+	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa4\x04\n" +
 	"\x04Todo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -1235,9 +1363,12 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
-	"\fworkspace_id\x18\t \x01(\tH\x01R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\fworkspace_id\x18\t \x01(\tH\x01R\vworkspaceId\x88\x01\x01\x12>\n" +
+	"\bpriority\x18\n" +
+	" \x01(\x0e2\".donejournal.todos.v1.TodoPriorityR\bpriority\x12\x17\n" +
+	"\atag_ids\x18\v \x03(\tR\x06tagIdsB\x0f\n" +
 	"\r_completed_atB\x0f\n" +
-	"\r_workspace_id\"\x85\x03\n" +
+	"\r_workspace_id\"\x9e\x03\n" +
 	"\x10ListTodosRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
@@ -1245,7 +1376,8 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\bstatuses\x18\x03 \x03(\x0e2 .donejournal.todos.v1.TodoStatusR\bstatuses\x12K\n" +
 	"\x11planned_date_from\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x0fplannedDateFrom\x88\x01\x01\x12G\n" +
 	"\x0fplanned_date_to\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x01R\rplannedDateTo\x88\x01\x01\x12&\n" +
-	"\fworkspace_id\x18\x06 \x01(\tH\x02R\vworkspaceId\x88\x01\x01B\x14\n" +
+	"\fworkspace_id\x18\x06 \x01(\tH\x02R\vworkspaceId\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\a \x03(\tR\x06tagIdsB\x14\n" +
 	"\x12_planned_date_fromB\x12\n" +
 	"\x10_planned_date_toB\x0f\n" +
 	"\r_workspace_id\"\x8e\x01\n" +
@@ -1257,27 +1389,32 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\x0eGetTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xc3\x01\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\x9c\x02\n" +
 	"\x11CreateTodoRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12=\n" +
 	"\fplanned_date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vplannedDate\x12&\n" +
-	"\fworkspace_id\x18\x04 \x01(\tH\x00R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x00R\vworkspaceId\x88\x01\x01\x12>\n" +
+	"\bpriority\x18\x05 \x01(\x0e2\".donejournal.todos.v1.TodoPriorityR\bpriority\x12\x17\n" +
+	"\atag_ids\x18\x06 \x03(\tR\x06tagIdsB\x0f\n" +
 	"\r_workspace_id\"D\n" +
 	"\x12CreateTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xd7\x02\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xc2\x03\n" +
 	"\x11UpdateTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01\x12=\n" +
 	"\x06status\x18\x04 \x01(\x0e2 .donejournal.todos.v1.TodoStatusH\x02R\x06status\x88\x01\x01\x12B\n" +
 	"\fplanned_date\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampH\x03R\vplannedDate\x88\x01\x01\x12&\n" +
-	"\fworkspace_id\x18\x06 \x01(\tH\x04R\vworkspaceId\x88\x01\x01B\b\n" +
+	"\fworkspace_id\x18\x06 \x01(\tH\x04R\vworkspaceId\x88\x01\x01\x12C\n" +
+	"\bpriority\x18\a \x01(\x0e2\".donejournal.todos.v1.TodoPriorityH\x05R\bpriority\x88\x01\x01\x12\x17\n" +
+	"\atag_ids\x18\b \x03(\tR\x06tagIdsB\b\n" +
 	"\x06_titleB\x0e\n" +
 	"\f_descriptionB\t\n" +
 	"\a_statusB\x0f\n" +
 	"\r_planned_dateB\x0f\n" +
-	"\r_workspace_id\"D\n" +
+	"\r_workspace_idB\v\n" +
+	"\t_priority\"D\n" +
 	"\x12UpdateTodoResponse\x12.\n" +
 	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"#\n" +
 	"\x11DeleteTodoRequest\x12\x0e\n" +
@@ -1317,7 +1454,14 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\x13TODO_STATUS_PENDING\x10\x01\x12\x1b\n" +
 	"\x17TODO_STATUS_IN_PROGRESS\x10\x02\x12\x19\n" +
 	"\x15TODO_STATUS_COMPLETED\x10\x03\x12\x19\n" +
-	"\x15TODO_STATUS_CANCELLED\x10\x042\x84\a\n" +
+	"\x15TODO_STATUS_CANCELLED\x10\x04*\xaa\x01\n" +
+	"\fTodoPriority\x12\x1d\n" +
+	"\x19TODO_PRIORITY_UNSPECIFIED\x10\x00\x12\x16\n" +
+	"\x12TODO_PRIORITY_NONE\x10\x01\x12\x15\n" +
+	"\x11TODO_PRIORITY_LOW\x10\x02\x12\x18\n" +
+	"\x14TODO_PRIORITY_MEDIUM\x10\x03\x12\x16\n" +
+	"\x12TODO_PRIORITY_HIGH\x10\x04\x12\x1a\n" +
+	"\x16TODO_PRIORITY_CRITICAL\x10\x052\x84\a\n" +
 	"\vTodoService\x12\\\n" +
 	"\tListTodos\x12&.donejournal.todos.v1.ListTodosRequest\x1a'.donejournal.todos.v1.ListTodosResponse\x12V\n" +
 	"\aGetTodo\x12$.donejournal.todos.v1.GetTodoRequest\x1a%.donejournal.todos.v1.GetTodoResponse\x12_\n" +
@@ -1347,80 +1491,84 @@ func file_donejournal_todos_v1_todos_proto_rawDescGZIP() []byte {
 	return file_donejournal_todos_v1_todos_proto_rawDescData
 }
 
-var file_donejournal_todos_v1_todos_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_donejournal_todos_v1_todos_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_donejournal_todos_v1_todos_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_donejournal_todos_v1_todos_proto_goTypes = []any{
 	(TodoStatus)(0),                    // 0: donejournal.todos.v1.TodoStatus
-	(*Todo)(nil),                       // 1: donejournal.todos.v1.Todo
-	(*ListTodosRequest)(nil),           // 2: donejournal.todos.v1.ListTodosRequest
-	(*ListTodosResponse)(nil),          // 3: donejournal.todos.v1.ListTodosResponse
-	(*GetTodoRequest)(nil),             // 4: donejournal.todos.v1.GetTodoRequest
-	(*GetTodoResponse)(nil),            // 5: donejournal.todos.v1.GetTodoResponse
-	(*CreateTodoRequest)(nil),          // 6: donejournal.todos.v1.CreateTodoRequest
-	(*CreateTodoResponse)(nil),         // 7: donejournal.todos.v1.CreateTodoResponse
-	(*UpdateTodoRequest)(nil),          // 8: donejournal.todos.v1.UpdateTodoRequest
-	(*UpdateTodoResponse)(nil),         // 9: donejournal.todos.v1.UpdateTodoResponse
-	(*DeleteTodoRequest)(nil),          // 10: donejournal.todos.v1.DeleteTodoRequest
-	(*CompleteTodoRequest)(nil),        // 11: donejournal.todos.v1.CompleteTodoRequest
-	(*CompleteTodoResponse)(nil),       // 12: donejournal.todos.v1.CompleteTodoResponse
-	(*CountTodosRequest)(nil),          // 13: donejournal.todos.v1.CountTodosRequest
-	(*CountTodosResponse)(nil),         // 14: donejournal.todos.v1.CountTodosResponse
-	(*GetCalendarEntriesRequest)(nil),  // 15: donejournal.todos.v1.GetCalendarEntriesRequest
-	(*CalendarDay)(nil),                // 16: donejournal.todos.v1.CalendarDay
-	(*GetCalendarEntriesResponse)(nil), // 17: donejournal.todos.v1.GetCalendarEntriesResponse
-	(*SubscribeTodosRequest)(nil),      // 18: donejournal.todos.v1.SubscribeTodosRequest
-	(*SubscribeTodosResponse)(nil),     // 19: donejournal.todos.v1.SubscribeTodosResponse
-	(*timestamppb.Timestamp)(nil),      // 20: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),              // 21: google.protobuf.Empty
+	(TodoPriority)(0),                  // 1: donejournal.todos.v1.TodoPriority
+	(*Todo)(nil),                       // 2: donejournal.todos.v1.Todo
+	(*ListTodosRequest)(nil),           // 3: donejournal.todos.v1.ListTodosRequest
+	(*ListTodosResponse)(nil),          // 4: donejournal.todos.v1.ListTodosResponse
+	(*GetTodoRequest)(nil),             // 5: donejournal.todos.v1.GetTodoRequest
+	(*GetTodoResponse)(nil),            // 6: donejournal.todos.v1.GetTodoResponse
+	(*CreateTodoRequest)(nil),          // 7: donejournal.todos.v1.CreateTodoRequest
+	(*CreateTodoResponse)(nil),         // 8: donejournal.todos.v1.CreateTodoResponse
+	(*UpdateTodoRequest)(nil),          // 9: donejournal.todos.v1.UpdateTodoRequest
+	(*UpdateTodoResponse)(nil),         // 10: donejournal.todos.v1.UpdateTodoResponse
+	(*DeleteTodoRequest)(nil),          // 11: donejournal.todos.v1.DeleteTodoRequest
+	(*CompleteTodoRequest)(nil),        // 12: donejournal.todos.v1.CompleteTodoRequest
+	(*CompleteTodoResponse)(nil),       // 13: donejournal.todos.v1.CompleteTodoResponse
+	(*CountTodosRequest)(nil),          // 14: donejournal.todos.v1.CountTodosRequest
+	(*CountTodosResponse)(nil),         // 15: donejournal.todos.v1.CountTodosResponse
+	(*GetCalendarEntriesRequest)(nil),  // 16: donejournal.todos.v1.GetCalendarEntriesRequest
+	(*CalendarDay)(nil),                // 17: donejournal.todos.v1.CalendarDay
+	(*GetCalendarEntriesResponse)(nil), // 18: donejournal.todos.v1.GetCalendarEntriesResponse
+	(*SubscribeTodosRequest)(nil),      // 19: donejournal.todos.v1.SubscribeTodosRequest
+	(*SubscribeTodosResponse)(nil),     // 20: donejournal.todos.v1.SubscribeTodosResponse
+	(*timestamppb.Timestamp)(nil),      // 21: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),              // 22: google.protobuf.Empty
 }
 var file_donejournal_todos_v1_todos_proto_depIdxs = []int32{
 	0,  // 0: donejournal.todos.v1.Todo.status:type_name -> donejournal.todos.v1.TodoStatus
-	20, // 1: donejournal.todos.v1.Todo.planned_date:type_name -> google.protobuf.Timestamp
-	20, // 2: donejournal.todos.v1.Todo.completed_at:type_name -> google.protobuf.Timestamp
-	20, // 3: donejournal.todos.v1.Todo.created_at:type_name -> google.protobuf.Timestamp
-	20, // 4: donejournal.todos.v1.Todo.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 5: donejournal.todos.v1.ListTodosRequest.statuses:type_name -> donejournal.todos.v1.TodoStatus
-	20, // 6: donejournal.todos.v1.ListTodosRequest.planned_date_from:type_name -> google.protobuf.Timestamp
-	20, // 7: donejournal.todos.v1.ListTodosRequest.planned_date_to:type_name -> google.protobuf.Timestamp
-	1,  // 8: donejournal.todos.v1.ListTodosResponse.todos:type_name -> donejournal.todos.v1.Todo
-	1,  // 9: donejournal.todos.v1.GetTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
-	20, // 10: donejournal.todos.v1.CreateTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
-	1,  // 11: donejournal.todos.v1.CreateTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
-	0,  // 12: donejournal.todos.v1.UpdateTodoRequest.status:type_name -> donejournal.todos.v1.TodoStatus
-	20, // 13: donejournal.todos.v1.UpdateTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
-	1,  // 14: donejournal.todos.v1.UpdateTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
-	1,  // 15: donejournal.todos.v1.CompleteTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
-	0,  // 16: donejournal.todos.v1.CountTodosRequest.statuses:type_name -> donejournal.todos.v1.TodoStatus
-	20, // 17: donejournal.todos.v1.CountTodosRequest.planned_date_from:type_name -> google.protobuf.Timestamp
-	20, // 18: donejournal.todos.v1.CountTodosRequest.planned_date_to:type_name -> google.protobuf.Timestamp
-	20, // 19: donejournal.todos.v1.GetCalendarEntriesRequest.from:type_name -> google.protobuf.Timestamp
-	20, // 20: donejournal.todos.v1.GetCalendarEntriesRequest.to:type_name -> google.protobuf.Timestamp
-	20, // 21: donejournal.todos.v1.CalendarDay.date:type_name -> google.protobuf.Timestamp
-	1,  // 22: donejournal.todos.v1.CalendarDay.todos:type_name -> donejournal.todos.v1.Todo
-	16, // 23: donejournal.todos.v1.GetCalendarEntriesResponse.days:type_name -> donejournal.todos.v1.CalendarDay
-	2,  // 24: donejournal.todos.v1.TodoService.ListTodos:input_type -> donejournal.todos.v1.ListTodosRequest
-	4,  // 25: donejournal.todos.v1.TodoService.GetTodo:input_type -> donejournal.todos.v1.GetTodoRequest
-	6,  // 26: donejournal.todos.v1.TodoService.CreateTodo:input_type -> donejournal.todos.v1.CreateTodoRequest
-	8,  // 27: donejournal.todos.v1.TodoService.UpdateTodo:input_type -> donejournal.todos.v1.UpdateTodoRequest
-	10, // 28: donejournal.todos.v1.TodoService.DeleteTodo:input_type -> donejournal.todos.v1.DeleteTodoRequest
-	11, // 29: donejournal.todos.v1.TodoService.CompleteTodo:input_type -> donejournal.todos.v1.CompleteTodoRequest
-	13, // 30: donejournal.todos.v1.TodoService.CountTodos:input_type -> donejournal.todos.v1.CountTodosRequest
-	15, // 31: donejournal.todos.v1.TodoService.GetCalendarEntries:input_type -> donejournal.todos.v1.GetCalendarEntriesRequest
-	18, // 32: donejournal.todos.v1.TodoService.SubscribeTodos:input_type -> donejournal.todos.v1.SubscribeTodosRequest
-	3,  // 33: donejournal.todos.v1.TodoService.ListTodos:output_type -> donejournal.todos.v1.ListTodosResponse
-	5,  // 34: donejournal.todos.v1.TodoService.GetTodo:output_type -> donejournal.todos.v1.GetTodoResponse
-	7,  // 35: donejournal.todos.v1.TodoService.CreateTodo:output_type -> donejournal.todos.v1.CreateTodoResponse
-	9,  // 36: donejournal.todos.v1.TodoService.UpdateTodo:output_type -> donejournal.todos.v1.UpdateTodoResponse
-	21, // 37: donejournal.todos.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
-	12, // 38: donejournal.todos.v1.TodoService.CompleteTodo:output_type -> donejournal.todos.v1.CompleteTodoResponse
-	14, // 39: donejournal.todos.v1.TodoService.CountTodos:output_type -> donejournal.todos.v1.CountTodosResponse
-	17, // 40: donejournal.todos.v1.TodoService.GetCalendarEntries:output_type -> donejournal.todos.v1.GetCalendarEntriesResponse
-	19, // 41: donejournal.todos.v1.TodoService.SubscribeTodos:output_type -> donejournal.todos.v1.SubscribeTodosResponse
-	33, // [33:42] is the sub-list for method output_type
-	24, // [24:33] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	21, // 1: donejournal.todos.v1.Todo.planned_date:type_name -> google.protobuf.Timestamp
+	21, // 2: donejournal.todos.v1.Todo.completed_at:type_name -> google.protobuf.Timestamp
+	21, // 3: donejournal.todos.v1.Todo.created_at:type_name -> google.protobuf.Timestamp
+	21, // 4: donejournal.todos.v1.Todo.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 5: donejournal.todos.v1.Todo.priority:type_name -> donejournal.todos.v1.TodoPriority
+	0,  // 6: donejournal.todos.v1.ListTodosRequest.statuses:type_name -> donejournal.todos.v1.TodoStatus
+	21, // 7: donejournal.todos.v1.ListTodosRequest.planned_date_from:type_name -> google.protobuf.Timestamp
+	21, // 8: donejournal.todos.v1.ListTodosRequest.planned_date_to:type_name -> google.protobuf.Timestamp
+	2,  // 9: donejournal.todos.v1.ListTodosResponse.todos:type_name -> donejournal.todos.v1.Todo
+	2,  // 10: donejournal.todos.v1.GetTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
+	21, // 11: donejournal.todos.v1.CreateTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
+	1,  // 12: donejournal.todos.v1.CreateTodoRequest.priority:type_name -> donejournal.todos.v1.TodoPriority
+	2,  // 13: donejournal.todos.v1.CreateTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
+	0,  // 14: donejournal.todos.v1.UpdateTodoRequest.status:type_name -> donejournal.todos.v1.TodoStatus
+	21, // 15: donejournal.todos.v1.UpdateTodoRequest.planned_date:type_name -> google.protobuf.Timestamp
+	1,  // 16: donejournal.todos.v1.UpdateTodoRequest.priority:type_name -> donejournal.todos.v1.TodoPriority
+	2,  // 17: donejournal.todos.v1.UpdateTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
+	2,  // 18: donejournal.todos.v1.CompleteTodoResponse.todo:type_name -> donejournal.todos.v1.Todo
+	0,  // 19: donejournal.todos.v1.CountTodosRequest.statuses:type_name -> donejournal.todos.v1.TodoStatus
+	21, // 20: donejournal.todos.v1.CountTodosRequest.planned_date_from:type_name -> google.protobuf.Timestamp
+	21, // 21: donejournal.todos.v1.CountTodosRequest.planned_date_to:type_name -> google.protobuf.Timestamp
+	21, // 22: donejournal.todos.v1.GetCalendarEntriesRequest.from:type_name -> google.protobuf.Timestamp
+	21, // 23: donejournal.todos.v1.GetCalendarEntriesRequest.to:type_name -> google.protobuf.Timestamp
+	21, // 24: donejournal.todos.v1.CalendarDay.date:type_name -> google.protobuf.Timestamp
+	2,  // 25: donejournal.todos.v1.CalendarDay.todos:type_name -> donejournal.todos.v1.Todo
+	17, // 26: donejournal.todos.v1.GetCalendarEntriesResponse.days:type_name -> donejournal.todos.v1.CalendarDay
+	3,  // 27: donejournal.todos.v1.TodoService.ListTodos:input_type -> donejournal.todos.v1.ListTodosRequest
+	5,  // 28: donejournal.todos.v1.TodoService.GetTodo:input_type -> donejournal.todos.v1.GetTodoRequest
+	7,  // 29: donejournal.todos.v1.TodoService.CreateTodo:input_type -> donejournal.todos.v1.CreateTodoRequest
+	9,  // 30: donejournal.todos.v1.TodoService.UpdateTodo:input_type -> donejournal.todos.v1.UpdateTodoRequest
+	11, // 31: donejournal.todos.v1.TodoService.DeleteTodo:input_type -> donejournal.todos.v1.DeleteTodoRequest
+	12, // 32: donejournal.todos.v1.TodoService.CompleteTodo:input_type -> donejournal.todos.v1.CompleteTodoRequest
+	14, // 33: donejournal.todos.v1.TodoService.CountTodos:input_type -> donejournal.todos.v1.CountTodosRequest
+	16, // 34: donejournal.todos.v1.TodoService.GetCalendarEntries:input_type -> donejournal.todos.v1.GetCalendarEntriesRequest
+	19, // 35: donejournal.todos.v1.TodoService.SubscribeTodos:input_type -> donejournal.todos.v1.SubscribeTodosRequest
+	4,  // 36: donejournal.todos.v1.TodoService.ListTodos:output_type -> donejournal.todos.v1.ListTodosResponse
+	6,  // 37: donejournal.todos.v1.TodoService.GetTodo:output_type -> donejournal.todos.v1.GetTodoResponse
+	8,  // 38: donejournal.todos.v1.TodoService.CreateTodo:output_type -> donejournal.todos.v1.CreateTodoResponse
+	10, // 39: donejournal.todos.v1.TodoService.UpdateTodo:output_type -> donejournal.todos.v1.UpdateTodoResponse
+	22, // 40: donejournal.todos.v1.TodoService.DeleteTodo:output_type -> google.protobuf.Empty
+	13, // 41: donejournal.todos.v1.TodoService.CompleteTodo:output_type -> donejournal.todos.v1.CompleteTodoResponse
+	15, // 42: donejournal.todos.v1.TodoService.CountTodos:output_type -> donejournal.todos.v1.CountTodosResponse
+	18, // 43: donejournal.todos.v1.TodoService.GetCalendarEntries:output_type -> donejournal.todos.v1.GetCalendarEntriesResponse
+	20, // 44: donejournal.todos.v1.TodoService.SubscribeTodos:output_type -> donejournal.todos.v1.SubscribeTodosResponse
+	36, // [36:45] is the sub-list for method output_type
+	27, // [27:36] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_donejournal_todos_v1_todos_proto_init() }
@@ -1439,7 +1587,7 @@ func file_donejournal_todos_v1_todos_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_donejournal_todos_v1_todos_proto_rawDesc), len(file_donejournal_todos_v1_todos_proto_rawDesc)),
-			NumEnums:      1,
+			NumEnums:      2,
 			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,

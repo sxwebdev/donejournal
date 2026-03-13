@@ -183,9 +183,9 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 ## 3. Улучшения текущей реализации
 
-### 3.1 Приоритеты задач
+### 3.1 Приоритеты задач ~~DONE~~
 
-**Effort**: Small | **Impact**: High
+**Effort**: Small | **Impact**: High | **Status**: Done
 
 Новое поле `priority` (NONE/LOW/MEDIUM/HIGH/URGENT):
 
@@ -211,11 +211,11 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 У notes уже есть `search`. Расширить на todos и inbox. Единая страница поиска или интеграция в Command Palette. Агент уже умеет искать через `find_todos` и `find_notes`.
 
-### 3.4 Теги / Метки
+### 3.4 Теги / Метки ✅
 
-**Effort**: Medium | **Impact**: Medium
+**Effort**: Medium | **Impact**: Medium | **Status**: Done
 
-Таблицы `tags`, `todo_tags`, `note_tags`. Цветные теги, фильтрация. Новые tools в агенте: `add_tag`, `find_by_tag`. LLM извлекает хештеги из сообщений.
+Таблицы `tags`, `todo_tags`, `note_tags`. Цветные теги, фильтрация. Новые tools в агенте: `manage_tags`, `tag_entity`, `find_by_tag`. LLM извлекает хештеги из сообщений. Реализовано: миграция, repo, service, proto, API handlers, AI agent tools (3 новых + tags param в create_todo/create_note), фронтенд (TagBadge, TagSelector, TagFilter, TagManager, интеграция в формы и списки todos/notes, страница /tags в sidebar).
 
 ### 3.5 Пакетное перенесение просроченных задач
 
@@ -231,22 +231,22 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 ---
 
-## 4. Улучшения карточек Todo (`todo-item.tsx`)
+## 4. Улучшения карточек Todo (`todo-item.tsx`) ~~DONE~~
 
 Текущая карточка: статус-иконка, title, description (2 строки), planned date, status badge, menu. Не отображается workspace (хотя `workspaceId` есть в модели), `createdAt`, `completedAt`. Нужна подготовка к будущим тегам и приоритетам.
 
-### 4.1 Workspace badge
+### 4.1 Workspace badge ~~DONE~~
 
-**Effort**: Small | **Impact**: High
+**Effort**: Small | **Impact**: High | **Status**: Done
 
 - Маленький badge с именем workspace рядом с датой
 - Resolve `workspaceId` → имя через кэш `listWorkspaces` query
 - Стиль: `text-xs bg-muted px-1.5 py-0.5 rounded`
 - Если workspace не задан — не показывать
 
-### 4.2 Metadata row (рефакторинг нижней строки)
+### 4.2 Metadata row (рефакторинг нижней строки) ~~DONE~~
 
-**Effort**: Small | **Impact**: Medium
+**Effort**: Small | **Impact**: Medium | **Status**: Done
 
 Объединить дату, workspace и будущие метаданные в единую расширяемую строку:
 
@@ -256,41 +256,41 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 Формат: `flex items-center gap-1.5 text-xs text-muted-foreground`. Это фундамент для будущих тегов и приоритетов — новые элементы просто добавляются в строку.
 
-### 4.3 Relative dates + иконки
+### 4.3 Relative dates + иконки ~~DONE~~
 
-**Effort**: Small | **Impact**: Small-Medium
+**Effort**: Small | **Impact**: Small-Medium | **Status**: Done
 
 - "Сегодня", "Завтра", "Вчера" вместо полных дат
 - Иконка `Calendar` перед датой
 - Overdue: `AlertTriangle` + красный текст (частично есть)
 
-### 4.4 Priority indicator (left border)
+### 4.4 Priority indicator (left border) ~~DONE~~
 
-**Effort**: Small | **Impact**: High | **Зависимость**: после 3.1 Приоритеты задач
+**Effort**: Small | **Impact**: High | **Зависимость**: после 3.1 Приоритеты задач | **Status**: Done
 
 - Цветная полоска `border-l-4` слева от карточки
 - Urgent: `border-red-500`, High: `border-orange-500`, Medium: `border-yellow-500`, Low/None: без индикатора
 - Самый компактный вариант — не добавляет элементов в layout
 
-### 4.5 Теги как chips
+### 4.5 Теги как chips ~~DONE~~
 
-**Effort**: Medium | **Impact**: Medium | **Зависимость**: после 3.4 Теги/Метки
+**Effort**: Medium | **Impact**: Medium | **Зависимость**: после 3.4 Теги/Метки | **Status**: Done
 
 - Цветные chips в metadata row: `text-[10px] px-1 py-0 rounded-sm`
 - Максимум 3 видимых + "+N" badge
 - Клик по тегу → фильтрация списка
 
-### 4.6 Completion info
+### 4.6 Completion info ~~DONE~~
 
-**Effort**: Small | **Impact**: Small
+**Effort**: Small | **Impact**: Small | **Status**: Done
 
 - Для завершённых: "Выполнено 14 мар в 15:30" вместо planned date
 - Приглушённая карточка: `opacity-60` или `bg-muted/30`
 - Tooltip на иконке: "Completed 2 hours ago"
 
-### 4.7 Quick actions на hover
+### 4.7 Quick actions на hover ~~DONE~~
 
-**Effort**: Medium | **Impact**: Medium
+**Effort**: Medium | **Impact**: Medium | **Status**: Done
 
 - При hover показать иконки: Calendar (перенести), Check (завершить), Trash (удалить)
 - Убирает необходимость открывать dropdown для частых действий
@@ -331,7 +331,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 | 15  | Недельный вид календаря           | Medium       | Medium    | UI        |
 | 16  | Empty States                      | Small        | Medium    | UI        |
 | 17  | Повторяющиеся задачи              | Large        | High      | Impl      |
-| 18  | Теги / Метки                      | Medium       | Medium    | Impl      |
+| 18  | ✅ Теги / Метки                   | Medium       | Medium    | Impl      |
 | 19  | Markdown preview                  | Small        | Medium    | Impl      |
 | 20  | Overdue reschedule                | Small        | Medium    | Impl      |
 | 21  | Mobile-оптимизация                | Medium       | Medium    | UI        |

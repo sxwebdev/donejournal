@@ -15,6 +15,7 @@ const todosSearchSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
   workspaceId: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/todos")({
@@ -64,6 +65,7 @@ function TodosPage() {
         from={search.from}
         to={search.to}
         workspaceId={search.workspaceId}
+        tagIds={search.tagIds}
         showOverdue={showOverdue}
       />
       <TodoDialog

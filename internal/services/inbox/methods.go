@@ -121,7 +121,8 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 			Description: description,
 			Status:      models.TodoStatusPending,
 			PlannedDate: plannedDate,
-			WorkspaceID:   workspaceID,
+			WorkspaceID: workspaceID,
+			Priority:    models.TodoPriorityNone,
 		})
 		if err != nil {
 			return fmt.Errorf("create todo: %w", err)

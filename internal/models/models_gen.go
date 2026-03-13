@@ -29,17 +29,37 @@ type Note struct {
 	WorkspaceID *string   `db:"workspace_id" json:"workspace_id"`
 }
 
+type NoteTag struct {
+	NoteID string `db:"note_id" json:"note_id"`
+	TagID  string `db:"tag_id" json:"tag_id"`
+}
+
+type Tag struct {
+	ID        string    `db:"id" json:"id" validate:"required"`
+	UserID    int64     `db:"user_id" json:"user_id" validate:"required"`
+	Name      string    `db:"name" json:"name" validate:"required"`
+	Color     string    `db:"color" json:"color"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+}
+
 type Todo struct {
-	ID          string         `db:"id" json:"id" validate:"required"`
-	UserID      int64          `db:"user_id" json:"user_id" validate:"required"`
-	Title       string         `db:"title" json:"title" validate:"required"`
-	Description string         `db:"description" json:"description"`
-	Status      TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
-	PlannedDate time.Time      `db:"planned_date" json:"planned_date"`
-	CompletedAt *time.Time     `db:"completed_at" json:"completed_at"`
-	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
-	WorkspaceID *string        `db:"workspace_id" json:"workspace_id"`
+	ID          string           `db:"id" json:"id" validate:"required"`
+	UserID      int64            `db:"user_id" json:"user_id" validate:"required"`
+	Title       string           `db:"title" json:"title" validate:"required"`
+	Description string           `db:"description" json:"description"`
+	Status      TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
+	PlannedDate time.Time        `db:"planned_date" json:"planned_date"`
+	CompletedAt *time.Time       `db:"completed_at" json:"completed_at"`
+	CreatedAt   time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time        `db:"updated_at" json:"updated_at"`
+	WorkspaceID *string          `db:"workspace_id" json:"workspace_id"`
+	Priority    TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
+}
+
+type TodoTag struct {
+	TodoID string `db:"todo_id" json:"todo_id"`
+	TagID  string `db:"tag_id" json:"tag_id"`
 }
 
 type Workspace struct {

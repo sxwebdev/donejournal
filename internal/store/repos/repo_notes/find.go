@@ -11,12 +11,13 @@ import (
 )
 
 type FindParams struct {
-	UserID    int64
-	Search    *string
+	UserID      int64
+	Search      *string
 	WorkspaceID *string
-	OrderBy   string
-	Page      *uint32
-	PageSize  *uint32
+	TagIDs      []string
+	OrderBy     string
+	Page        *uint32
+	PageSize    *uint32
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -34,6 +35,16 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 
 	if params.WorkspaceID != nil {
 		sb.Where(sb.Equal(ColumnNameNotesWorkspaceId.String(), *params.WorkspaceID))
+	}
+
+	if len(params.TagIDs) > 0 {
+		tagVals := make([]interface{}, len(params.TagIDs))
+		for i, id := range params.TagIDs {
+			tagVals[i] = id
+		}
+		sub := sqlbuilder.NewSelectBuilder()
+		sub.Select("note_id").From("note_tags").Where(sub.In("tag_id", tagVals...))
+		sb.Where(sb.In("id", sub))
 	}
 
 	return sb

@@ -14,7 +14,10 @@ import {
   getCalendarEntries,
 } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
+import {
+  TodoStatus,
+  TodoPriority,
+} from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { fromDateOnly, toDate } from "@/lib/dates"
 import { ConnectError } from "@connectrpc/connect"
 import { toast } from "sonner"
@@ -78,6 +81,8 @@ export function TodoDialog(props: Props) {
             ? fromDateOnly(values.plannedDate)
             : undefined,
           workspaceId: values.workspaceId,
+          priority: values.priority,
+          tagIds: values.tagIds ?? [],
         })
       } else {
         await updateMutation.mutateAsync({
@@ -89,6 +94,8 @@ export function TodoDialog(props: Props) {
             : undefined,
           status: values.status !== undefined ? values.status : undefined,
           workspaceId: values.workspaceId,
+          priority: values.priority,
+          tagIds: values.tagIds ?? [],
         })
       }
     } catch (err) {
@@ -105,7 +112,9 @@ export function TodoDialog(props: Props) {
           description: props.todo.description || undefined,
           plannedDate: toDate(props.todo.plannedDate),
           status: props.todo.status as TodoStatus,
+          priority: props.todo.priority as TodoPriority,
           workspaceId: props.todo.workspaceId || undefined,
+          tagIds: props.todo.tagIds.length > 0 ? [...props.todo.tagIds] : undefined,
         }
       : props.initialDate
         ? { plannedDate: props.initialDate }

@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
 import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
+import { TagSelector } from "@/components/tags/tag-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   body: z.string().optional(),
   workspaceId: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
 })
 
 export type NoteFormValues = z.infer<typeof schema>
@@ -76,6 +78,14 @@ export function NoteForm({
         <WorkspaceSelector
           value={watch("workspaceId")}
           onChange={(v) => setValue("workspaceId", v)}
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Tags</Label>
+        <TagSelector
+          value={watch("tagIds") ?? []}
+          onChange={(v) => setValue("tagIds", v)}
         />
       </div>
 

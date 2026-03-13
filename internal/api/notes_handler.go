@@ -62,14 +62,30 @@ func (h *NotesHandler) ListNotes(ctx context.Context, req *connect.Request[notes
 		params.WorkspaceID = req.Msg.WorkspaceId
 	}
 
+	if len(req.Msg.GetTagIds()) > 0 {
+		params.TagIDs = req.Msg.GetTagIds()
+	}
+
 	result, err := h.baseService.Notes().Find(ctx, params)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	// Batch load tag IDs for all notes
+	noteIDs := make([]string, len(result.Items))
+	for i, n := range result.Items {
+		noteIDs[i] = n.ID
+	}
+	tagIDsMap, err := h.baseService.Tags().FindTagIDsByNoteIDs(ctx, noteIDs)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
 	pbNotes := make([]*notesv1.Note, len(result.Items))
 	for i, n := range result.Items {
-		pbNotes[i] = noteToProto(n)
+		pb := noteToProto(n)
+		pb.TagIds = tagIDsMap[n.ID]
+		pbNotes[i] = pb
 	}
 
 	var nextPageToken string
@@ -99,8 +115,16 @@ func (h *NotesHandler) GetNote(ctx context.Context, req *connect.Request[notesv1
 		return nil, connect.NewError(connect.CodeNotFound, fmt.Errorf("note not found"))
 	}
 
+	pb := noteToProto(note)
+	noteTags, err := h.baseService.Tags().FindByNoteID(ctx, note.ID)
+	if err == nil {
+		for _, t := range noteTags {
+			pb.TagIds = append(pb.TagIds, t.ID)
+		}
+	}
+
 	return connect.NewResponse(&notesv1.GetNoteResponse{
-		Note: noteToProto(note),
+		Note: pb,
 	}), nil
 }
 
@@ -119,8 +143,16 @@ func (h *NotesHandler) CreateNote(ctx context.Context, req *connect.Request[note
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	pb := noteToProto(note)
+	if len(req.Msg.GetTagIds()) > 0 {
+		if err := h.baseService.Tags().SetNoteTags(ctx, userID, note.ID, req.Msg.GetTagIds()); err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+		pb.TagIds = req.Msg.GetTagIds()
+	}
+
 	return connect.NewResponse(&notesv1.CreateNoteResponse{
-		Note: noteToProto(note),
+		Note: pb,
 	}), nil
 }
 
@@ -155,8 +187,16 @@ func (h *NotesHandler) UpdateNote(ctx context.Context, req *connect.Request[note
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	pb := noteToProto(note)
+	if len(req.Msg.GetTagIds()) > 0 {
+		if err := h.baseService.Tags().SetNoteTags(ctx, userID, note.ID, req.Msg.GetTagIds()); err != nil {
+			return nil, connect.NewError(connect.CodeInternal, err)
+		}
+		pb.TagIds = req.Msg.GetTagIds()
+	}
+
 	return connect.NewResponse(&notesv1.UpdateNoteResponse{
-		Note: noteToProto(note),
+		Note: pb,
 	}), nil
 }
 

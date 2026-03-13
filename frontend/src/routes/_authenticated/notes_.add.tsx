@@ -36,6 +36,7 @@ function AddNotePage() {
         title: values.title,
         body: values.body ?? "",
         workspaceId: values.workspaceId,
+        tagIds: values.tagIds ?? [],
       })
     } catch (err) {
       const message =

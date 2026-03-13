@@ -51,6 +51,7 @@ function EditNotePage() {
         title: values.title,
         body: values.body ?? "",
         workspaceId: values.workspaceId,
+        tagIds: values.tagIds ?? [],
       })
     } catch (err) {
       const message =
@@ -102,6 +103,7 @@ function EditNotePage() {
           title: note.title,
           body: note.body || undefined,
           workspaceId: note.workspaceId || undefined,
+          tagIds: note.tagIds.length > 0 ? [...note.tagIds] : undefined,
         }}
         onSubmit={handleSubmit}
         submitLabel="Save changes"

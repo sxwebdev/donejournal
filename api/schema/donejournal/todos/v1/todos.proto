@@ -50,6 +50,22 @@ enum TodoStatus {
   TODO_STATUS_CANCELLED = 4;
 }
 
+// TodoPriority represents the priority level of a todo item.
+enum TodoPriority {
+  // Unspecified priority.
+  TODO_PRIORITY_UNSPECIFIED = 0;
+  // No priority set (default).
+  TODO_PRIORITY_NONE = 1;
+  // Low priority.
+  TODO_PRIORITY_LOW = 2;
+  // Medium priority.
+  TODO_PRIORITY_MEDIUM = 3;
+  // High priority.
+  TODO_PRIORITY_HIGH = 4;
+  // Critical priority.
+  TODO_PRIORITY_CRITICAL = 5;
+}
+
 // Todo represents a single todo item.
 message Todo {
   // Unique identifier (ULID).
@@ -70,6 +86,10 @@ message Todo {
   google.protobuf.Timestamp updated_at = 8;
   // Optional workspace ID this todo belongs to.
   optional string workspace_id = 9;
+  // Priority level.
+  TodoPriority priority = 10;
+  // IDs of tags attached to this todo.
+  repeated string tag_ids = 11;
 }
 
 // ListTodosRequest is the request to list todos with optional filters.
@@ -86,6 +106,8 @@ message ListTodosRequest {
   optional google.protobuf.Timestamp planned_date_to = 5;
   // Filter by workspace ID.
   optional string workspace_id = 6;
+  // Filter by tag IDs. If not empty, only todos with any of these tags are returned.
+  repeated string tag_ids = 7;
 }
 
 // ListTodosResponse is the response containing a list of todos.
@@ -120,6 +142,10 @@ message CreateTodoRequest {
   google.protobuf.Timestamp planned_date = 3;
   // Optional workspace ID.
   optional string workspace_id = 4;
+  // Priority level.
+  TodoPriority priority = 5;
+  // Optional tag IDs to attach to the todo.
+  repeated string tag_ids = 6;
 }
 
 // CreateTodoResponse is the response after creating a todo.
@@ -142,6 +168,10 @@ message UpdateTodoRequest {
   optional google.protobuf.Timestamp planned_date = 5;
   // Updated workspace ID. If not set, workspace_id is not changed.
   optional string workspace_id = 6;
+  // Updated priority. If not set, priority is not changed.
+  optional TodoPriority priority = 7;
+  // Updated tag IDs. Replaces all existing tags.
+  repeated string tag_ids = 8;
 }
 
 // UpdateTodoResponse is the response after updating a todo.

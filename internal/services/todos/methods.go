@@ -21,7 +21,10 @@ func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*stor
 }
 
 // CreateFromAPI creates a new todo from API request
-func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, workspaceID *string) (*models.Todo, error) {
+func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, workspaceID *string, priority models.TodoPriorityType) (*models.Todo, error) {
+	if priority == "" {
+		priority = models.TodoPriorityNone
+	}
 	todo, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
 		ID:          utils.GenerateULID(),
 		UserID:      userID,
@@ -30,6 +33,7 @@ func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, descri
 		Status:      models.TodoStatusPending,
 		PlannedDate: plannedDate,
 		WorkspaceID: workspaceID,
+		Priority:    priority,
 	})
 	if err != nil {
 		return nil, err
@@ -53,6 +57,7 @@ type UpdateParams struct {
 	Status      *models.TodoStatusType
 	PlannedDate *time.Time
 	WorkspaceID *string
+	Priority    *models.TodoPriorityType
 }
 
 // Update performs a partial update on a todo
@@ -83,6 +88,10 @@ func (s *Service) Update(ctx context.Context, userID int64, id string, params Up
 	if params.WorkspaceID != nil {
 		sets = append(sets, "workspace_id = ?")
 		args = append(args, *params.WorkspaceID)
+	}
+	if params.Priority != nil {
+		sets = append(sets, "priority = ?")
+		args = append(args, string(*params.Priority))
 	}
 
 	if len(sets) == 0 {

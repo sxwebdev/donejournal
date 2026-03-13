@@ -49,6 +49,7 @@ const (
 	ColumnNameTodosCreatedAt   ColumnName = "created_at"
 	ColumnNameTodosUpdatedAt   ColumnName = "updated_at"
 	ColumnNameTodosWorkspaceId ColumnName = "workspace_id"
+	ColumnNameTodosPriority    ColumnName = "priority"
 )
 
 func TodosColumnNames() ColumnNames {
@@ -63,5 +64,6 @@ func TodosColumnNames() ColumnNames {
 		ColumnNameTodosCreatedAt,
 		ColumnNameTodosUpdatedAt,
 		ColumnNameTodosWorkspaceId,
+		ColumnNameTodosPriority,
 	}
 }

@@ -12,8 +12,10 @@ import (
 	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/services/notes"
+	"github.com/sxwebdev/donejournal/internal/services/tags"
 	"github.com/sxwebdev/donejournal/internal/services/todos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_notes"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_tags"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 )
@@ -59,6 +61,12 @@ func (e *Executor) Execute(ctx context.Context, userID int64, call provider.Tool
 		return e.listInbox(ctx, userID)
 	case "convert_inbox":
 		return e.convertInbox(ctx, userID, call.Function.Arguments)
+	case "manage_tags":
+		return e.manageTags(ctx, userID, call.Function.Arguments)
+	case "tag_entity":
+		return e.tagEntity(ctx, userID, call.Function.Arguments)
+	case "find_by_tag":
+		return e.findByTag(ctx, userID, call.Function.Arguments)
 	default:
 		return "", fmt.Errorf("unknown tool: %s", call.Function.Name)
 	}
@@ -67,11 +75,13 @@ func (e *Executor) Execute(ctx context.Context, userID int64, call provider.Tool
 // --- Tool implementations ---
 
 type createTodoArgs struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	PlannedDate string `json:"planned_date"`
-	Status      string `json:"status"`
-	Workspace   string `json:"workspace"`
+	Title       string   `json:"title"`
+	Description string   `json:"description"`
+	PlannedDate string   `json:"planned_date"`
+	Status      string   `json:"status"`
+	Workspace   string   `json:"workspace"`
+	Priority    string   `json:"priority"`
+	Tags        []string `json:"tags"`
 }
 
 func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -97,7 +107,12 @@ func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string
 		workspaceID = &ws.ID
 	}
 
-	todo, err := e.services.Todos().CreateFromAPI(ctx, userID, args.Title, args.Description, plannedDate, workspaceID)
+	priority := models.TodoPriorityNone
+	if args.Priority != "" {
+		priority = models.TodoPriorityType(args.Priority)
+	}
+
+	todo, err := e.services.Todos().CreateFromAPI(ctx, userID, args.Title, args.Description, plannedDate, workspaceID, priority)
 	if err != nil {
 		return "", fmt.Errorf("create todo: %w", err)
 	}
@@ -110,18 +125,41 @@ func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string
 		}
 	}
 
-	return toJSON(map[string]any{
+	// Attach tags if specified
+	var tagNames []string
+	if len(args.Tags) > 0 {
+		var tagIDs []string
+		for _, name := range args.Tags {
+			tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+			if err != nil {
+				continue
+			}
+			tagIDs = append(tagIDs, tag.ID)
+			tagNames = append(tagNames, tag.Name)
+		}
+		if len(tagIDs) > 0 {
+			_ = e.services.Tags().SetTodoTags(ctx, userID, todo.ID, tagIDs)
+		}
+	}
+
+	result := map[string]any{
 		"id":           todo.ID,
 		"title":        todo.Title,
 		"status":       todo.Status,
+		"priority":     todo.Priority,
 		"planned_date": todo.PlannedDate.Format("2006-01-02"),
-	})
+	}
+	if len(tagNames) > 0 {
+		result["tags"] = tagNames
+	}
+	return toJSON(result)
 }
 
 type createNoteArgs struct {
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	Workspace string `json:"workspace"`
+	Title     string   `json:"title"`
+	Body      string   `json:"body"`
+	Workspace string   `json:"workspace"`
+	Tags      []string `json:"tags"`
 }
 
 func (e *Executor) createNote(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -144,10 +182,31 @@ func (e *Executor) createNote(ctx context.Context, userID int64, argsJSON string
 		return "", fmt.Errorf("create note: %w", err)
 	}
 
-	return toJSON(map[string]any{
+	// Attach tags if specified
+	var tagNames []string
+	if len(args.Tags) > 0 {
+		var tagIDs []string
+		for _, name := range args.Tags {
+			tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+			if err != nil {
+				continue
+			}
+			tagIDs = append(tagIDs, tag.ID)
+			tagNames = append(tagNames, tag.Name)
+		}
+		if len(tagIDs) > 0 {
+			_ = e.services.Tags().SetNoteTags(ctx, userID, note.ID, tagIDs)
+		}
+	}
+
+	result := map[string]any{
 		"id":    note.ID,
 		"title": note.Title,
-	})
+	}
+	if len(tagNames) > 0 {
+		result["tags"] = tagNames
+	}
+	return toJSON(result)
 }
 
 type findTodosArgs struct {
@@ -209,6 +268,7 @@ func (e *Executor) findTodos(ctx context.Context, userID int64, argsJSON string)
 			"id":           todo.ID,
 			"title":        todo.Title,
 			"status":       string(todo.Status),
+			"priority":     string(todo.Priority),
 			"planned_date": todo.PlannedDate.Format("2006-01-02"),
 		}
 		if todo.Description != "" {
@@ -312,6 +372,7 @@ type updateTodoArgs struct {
 	PlannedDate string `json:"planned_date"`
 	Status      string `json:"status"`
 	Workspace   string `json:"workspace"`
+	Priority    string `json:"priority"`
 }
 
 func (e *Executor) updateTodo(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -344,6 +405,10 @@ func (e *Executor) updateTodo(ctx context.Context, userID int64, argsJSON string
 			params.WorkspaceID = &ws.ID
 		}
 	}
+	if args.Priority != "" {
+		p := models.TodoPriorityType(args.Priority)
+		params.Priority = &p
+	}
 
 	todo, err := e.services.Todos().Update(ctx, userID, args.ID, params)
 	if err != nil {
@@ -354,6 +419,7 @@ func (e *Executor) updateTodo(ctx context.Context, userID int64, argsJSON string
 		"id":           todo.ID,
 		"title":        todo.Title,
 		"status":       string(todo.Status),
+		"priority":     string(todo.Priority),
 		"planned_date": todo.PlannedDate.Format("2006-01-02"),
 	})
 }
@@ -635,6 +701,199 @@ func (e *Executor) convertInbox(ctx context.Context, userID int64, argsJSON stri
 
 	default:
 		return "", fmt.Errorf("invalid convert_to value: %s (must be 'todo' or 'note')", args.ConvertTo)
+	}
+}
+
+// --- Tag tools ---
+
+type manageTagsArgs struct {
+	Action string `json:"action"`
+	Name   string `json:"name"`
+	Color  string `json:"color"`
+	ID     string `json:"id"`
+}
+
+func (e *Executor) manageTags(ctx context.Context, userID int64, argsJSON string) (string, error) {
+	var args manageTagsArgs
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return "", fmt.Errorf("parse manage_tags args: %w", err)
+	}
+
+	switch args.Action {
+	case "create":
+		if args.Name == "" {
+			return "", fmt.Errorf("name is required for create action")
+		}
+		tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, args.Name)
+		if err != nil {
+			return "", fmt.Errorf("create tag: %w", err)
+		}
+		if args.Color != "" {
+			tag, err = e.services.Tags().Update(ctx, userID, tag.ID, tags.UpdateParams{Color: &args.Color})
+			if err != nil {
+				return "", fmt.Errorf("update tag color: %w", err)
+			}
+		}
+		return toJSON(map[string]any{
+			"id":    tag.ID,
+			"name":  tag.Name,
+			"color": tag.Color,
+		})
+
+	case "list":
+		result, err := e.services.Tags().Find(ctx, repo_tags.FindParams{UserID: userID})
+		if err != nil {
+			return "", fmt.Errorf("list tags: %w", err)
+		}
+		items := make([]map[string]any, 0, len(result.Items))
+		for _, t := range result.Items {
+			items = append(items, map[string]any{
+				"id":    t.ID,
+				"name":  t.Name,
+				"color": t.Color,
+			})
+		}
+		return toJSON(map[string]any{
+			"total_count": result.Count,
+			"items":       items,
+		})
+
+	case "delete":
+		if args.ID == "" {
+			return "", fmt.Errorf("id is required for delete action")
+		}
+		if err := e.services.Tags().Delete(ctx, userID, args.ID); err != nil {
+			return "", fmt.Errorf("delete tag: %w", err)
+		}
+		return toJSON(map[string]any{
+			"deleted": true,
+			"id":      args.ID,
+		})
+
+	default:
+		return "", fmt.Errorf("invalid action: %s (must be 'create', 'list', or 'delete')", args.Action)
+	}
+}
+
+type tagEntityArgs struct {
+	EntityType string   `json:"entity_type"`
+	EntityID   string   `json:"entity_id"`
+	Tags       []string `json:"tags"`
+}
+
+func (e *Executor) tagEntity(ctx context.Context, userID int64, argsJSON string) (string, error) {
+	var args tagEntityArgs
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return "", fmt.Errorf("parse tag_entity args: %w", err)
+	}
+
+	tagIDs := make([]string, 0, len(args.Tags))
+	for _, name := range args.Tags {
+		tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+		if err != nil {
+			return "", fmt.Errorf("resolve tag %q: %w", name, err)
+		}
+		tagIDs = append(tagIDs, tag.ID)
+	}
+
+	switch args.EntityType {
+	case "todo":
+		if err := e.services.Tags().SetTodoTags(ctx, userID, args.EntityID, tagIDs); err != nil {
+			return "", fmt.Errorf("set todo tags: %w", err)
+		}
+	case "note":
+		if err := e.services.Tags().SetNoteTags(ctx, userID, args.EntityID, tagIDs); err != nil {
+			return "", fmt.Errorf("set note tags: %w", err)
+		}
+	default:
+		return "", fmt.Errorf("invalid entity_type: %s", args.EntityType)
+	}
+
+	return toJSON(map[string]any{
+		"tagged":      true,
+		"entity_type": args.EntityType,
+		"entity_id":   args.EntityID,
+		"tags":        args.Tags,
+	})
+}
+
+type findByTagArgs struct {
+	EntityType string   `json:"entity_type"`
+	Tags       []string `json:"tags"`
+}
+
+func (e *Executor) findByTag(ctx context.Context, userID int64, argsJSON string) (string, error) {
+	var args findByTagArgs
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return "", fmt.Errorf("parse find_by_tag args: %w", err)
+	}
+
+	// Resolve tag names to IDs
+	tagIDs := make([]string, 0, len(args.Tags))
+	for _, name := range args.Tags {
+		tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+		if err != nil {
+			continue // skip unknown tags
+		}
+		tagIDs = append(tagIDs, tag.ID)
+	}
+
+	if len(tagIDs) == 0 {
+		return toJSON(map[string]any{
+			"total_count": 0,
+			"items":       []any{},
+		})
+	}
+
+	pageSize := uint32(50)
+
+	switch args.EntityType {
+	case "todo":
+		result, err := e.services.Todos().Find(ctx, repo_todos.FindParams{
+			UserID:   userID,
+			TagIDs:   tagIDs,
+			PageSize: &pageSize,
+		})
+		if err != nil {
+			return "", fmt.Errorf("find todos by tag: %w", err)
+		}
+		items := make([]map[string]any, 0, len(result.Items))
+		for _, todo := range result.Items {
+			items = append(items, map[string]any{
+				"id":           todo.ID,
+				"title":        todo.Title,
+				"status":       string(todo.Status),
+				"planned_date": todo.PlannedDate.Format("2006-01-02"),
+			})
+		}
+		return toJSON(map[string]any{
+			"total_count": result.Count,
+			"items":       items,
+		})
+
+	case "note":
+		result, err := e.services.Notes().Find(ctx, repo_notes.FindParams{
+			UserID:   userID,
+			TagIDs:   tagIDs,
+			PageSize: &pageSize,
+		})
+		if err != nil {
+			return "", fmt.Errorf("find notes by tag: %w", err)
+		}
+		items := make([]map[string]any, 0, len(result.Items))
+		for _, note := range result.Items {
+			items = append(items, map[string]any{
+				"id":    note.ID,
+				"title": note.Title,
+			})
+		}
+		return toJSON(map[string]any{
+			"total_count": result.Count,
+			"items":       items,
+		})
+
+	default:
+		return "", fmt.Errorf("invalid entity_type: %s", args.EntityType)
 	}
 }
 

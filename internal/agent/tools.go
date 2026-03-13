@@ -37,6 +37,16 @@ func toolDefinitions() []provider.ToolDefinition {
 							"type":        "string",
 							"description": "Optional workspace/project name. Will be auto-created if doesn't exist.",
 						},
+						"priority": map[string]any{
+							"type":        "string",
+							"enum":        []string{"none", "low", "medium", "high", "critical"},
+							"description": "Task priority level. Default: none.",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Optional tag names to attach. Tags are auto-created if they don't exist.",
+						},
 					},
 					"required": []string{"title"},
 				}),
@@ -61,6 +71,11 @@ func toolDefinitions() []provider.ToolDefinition {
 						"workspace": map[string]any{
 							"type":        "string",
 							"description": "Optional workspace/project name",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Optional tag names to attach. Tags are auto-created if they don't exist.",
 						},
 					},
 					"required": []string{"title"},
@@ -165,6 +180,11 @@ func toolDefinitions() []provider.ToolDefinition {
 						"workspace": map[string]any{
 							"type":        "string",
 							"description": "New workspace name",
+						},
+						"priority": map[string]any{
+							"type":        "string",
+							"enum":        []string{"none", "low", "medium", "high", "critical"},
+							"description": "New priority level",
 						},
 					},
 					"required": []string{"id"},
@@ -328,6 +348,86 @@ func toolDefinitions() []provider.ToolDefinition {
 						},
 					},
 					"required": []string{"inbox_id", "convert_to"},
+				}),
+			},
+		},
+		{
+			Type: "function",
+			Function: provider.FunctionDef{
+				Name:        "manage_tags",
+				Description: "Create, list, or delete tags/labels. Tags are colored labels that can be attached to todos and notes.",
+				Parameters: mustJSON(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"action": map[string]any{
+							"type":        "string",
+							"enum":        []string{"create", "list", "delete"},
+							"description": "Action to perform",
+						},
+						"name": map[string]any{
+							"type":        "string",
+							"description": "Tag name (required for create)",
+						},
+						"color": map[string]any{
+							"type":        "string",
+							"description": "Tag color as hex (e.g. #ef4444). Defaults to #6366f1",
+						},
+						"id": map[string]any{
+							"type":        "string",
+							"description": "Tag ID (required for delete)",
+						},
+					},
+					"required": []string{"action"},
+				}),
+			},
+		},
+		{
+			Type: "function",
+			Function: provider.FunctionDef{
+				Name:        "tag_entity",
+				Description: "Add tags to a todo or note. Tags will be auto-created if they don't exist.",
+				Parameters: mustJSON(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"entity_type": map[string]any{
+							"type":        "string",
+							"enum":        []string{"todo", "note"},
+							"description": "Type of entity to tag",
+						},
+						"entity_id": map[string]any{
+							"type":        "string",
+							"description": "ID of the todo or note",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Tag names to add",
+						},
+					},
+					"required": []string{"entity_type", "entity_id", "tags"},
+				}),
+			},
+		},
+		{
+			Type: "function",
+			Function: provider.FunctionDef{
+				Name:        "find_by_tag",
+				Description: "Find todos or notes that have specific tags.",
+				Parameters: mustJSON(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"entity_type": map[string]any{
+							"type":        "string",
+							"enum":        []string{"todo", "note"},
+							"description": "Type of entity to search",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Tag names to filter by",
+						},
+					},
+					"required": []string{"entity_type", "tags"},
 				}),
 			},
 		},
