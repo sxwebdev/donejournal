@@ -36,7 +36,7 @@ server:
 telegram:
   bot_token: ""
   bot_username: ""
-mcp:
+agent:
   groq:
     model: meta-llama/llama-4-scout-17b-16e-instruct
     api_key: ""

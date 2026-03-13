@@ -110,6 +110,14 @@ func (b *Bot) AnswerCallbackQuery(ctx context.Context, callbackQueryID string, t
 	return nil
 }
 
+// SendChatAction sends a chat action (e.g. "typing") to indicate the bot is processing.
+func (b *Bot) SendChatAction(ctx context.Context, chatID int64, action string) error {
+	return b.bot.SendChatAction(ctx, &telego.SendChatActionParams{
+		ChatID: telego.ChatID{ID: chatID},
+		Action: action,
+	})
+}
+
 // EditMessageText edits the text of a message.
 func (b *Bot) EditMessageText(ctx context.Context, chatID int64, messageID int, text string, buttons [][]telego.InlineKeyboardButton) error {
 	if chatID == 0 {

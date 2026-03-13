@@ -44,6 +44,7 @@ func New(
 	// Add processor worker
 	pWorker := &processorWorker{
 		processorService: processorService,
+		botService:       botService,
 	}
 	river.AddWorker(workers, pWorker)
 
@@ -168,7 +169,7 @@ func (m *Manager) handleUpdate(ctx context.Context, update telego.Update) {
 
 		// Handle commands (messages starting with /)
 		if len(update.Message.Text) > 0 && update.Message.Text[0] == '/' {
-			if err := m.processorService.HandleCommand(ctx, update.Message.Chat.ID, update.Message.Text); err != nil {
+			if err := m.processorService.HandleCommand(ctx, update.Message.Chat.ID, update.Message.From.ID, update.Message.Text); err != nil {
 				m.logger.Errorf("failed to handle command: %v", err)
 			}
 			return

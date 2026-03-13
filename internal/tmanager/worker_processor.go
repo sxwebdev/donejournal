@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/riverqueue/river"
+	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/processor"
 )
 
@@ -33,13 +34,17 @@ type processorWorker struct {
 
 	riverClient      *river.Client[*sql.Tx]
 	processorService *processor.Processor
+	botService       *bot.Bot
 }
 
 func (w *processorWorker) Timeout(*river.Job[processorWorkerArgs]) time.Duration {
-	return time.Second * 30
+	return 120 * time.Second
 }
 
 func (w *processorWorker) Work(ctx context.Context, job *river.Job[processorWorkerArgs]) error {
+	// Send typing indicator so user sees the bot is processing
+	_ = w.botService.SendChatAction(ctx, job.Args.UserID, "typing")
+
 	responseText, err := w.processorService.ProcessNewRequest(ctx, job.Args.UserID, job.Args.Data)
 	if err != nil {
 		return fmt.Errorf("failed to process new request: %w", err)
