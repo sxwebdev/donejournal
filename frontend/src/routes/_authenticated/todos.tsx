@@ -5,6 +5,7 @@ import { format, startOfDay } from "date-fns"
 import { TodoList } from "@/components/todos/todo-list"
 import { TodoFilters } from "@/components/todos/todo-filters"
 import { TodoDialog } from "@/components/todos/todo-dialog"
+import { OverdueBanner } from "@/components/todos/overdue-banner"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/todos")({
 
 function TodosPage() {
   const [createOpen, setCreateOpen] = useState(false)
+  const [showOverdue, setShowOverdue] = useState(false)
   const search = Route.useSearch()
   const navigate = useNavigate({ from: "/todos" })
   const initialFromRef = useRef(search.from)
@@ -51,11 +53,19 @@ function TodosPage() {
           New Todo
         </Button>
       </div>
-
       <TodoFilters />
-
-      <TodoList statuses={search.statuses} from={search.from} to={search.to} workspaceId={search.workspaceId} />
-
+      <OverdueBanner
+        showOverdue={showOverdue}
+        onToggle={() => setShowOverdue((v) => !v)}
+        workspaceId={search.workspaceId}
+      />
+      <TodoList
+        statuses={search.statuses}
+        from={search.from}
+        to={search.to}
+        workspaceId={search.workspaceId}
+        showOverdue={showOverdue}
+      />
       <TodoDialog
         mode="create"
         open={createOpen}

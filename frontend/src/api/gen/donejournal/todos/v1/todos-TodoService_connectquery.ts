@@ -47,6 +47,13 @@ export const deleteTodo = TodoService.method.deleteTodo;
 export const completeTodo = TodoService.method.completeTodo;
 
 /**
+ * CountTodos returns the count of todos matching the given filters (no pagination).
+ *
+ * @generated from rpc donejournal.todos.v1.TodoService.CountTodos
+ */
+export const countTodos = TodoService.method.countTodos;
+
+/**
  * GetCalendarEntries returns todos grouped by date for a date range (calendar view).
  *
  * @generated from rpc donejournal.todos.v1.TodoService.GetCalendarEntries

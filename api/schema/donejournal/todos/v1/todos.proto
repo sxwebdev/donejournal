@@ -25,6 +25,9 @@ service TodoService {
   // CompleteTodo marks a todo as completed with the current timestamp.
   rpc CompleteTodo(CompleteTodoRequest) returns (CompleteTodoResponse);
 
+  // CountTodos returns the count of todos matching the given filters (no pagination).
+  rpc CountTodos(CountTodosRequest) returns (CountTodosResponse);
+
   // GetCalendarEntries returns todos grouped by date for a date range (calendar view).
   rpc GetCalendarEntries(GetCalendarEntriesRequest) returns (GetCalendarEntriesResponse);
 
@@ -163,6 +166,24 @@ message CompleteTodoRequest {
 message CompleteTodoResponse {
   // The updated todo with completed status and completed_at timestamp.
   Todo todo = 1;
+}
+
+// CountTodosRequest is the request to count todos matching the given filters.
+message CountTodosRequest {
+  // Filter by status. If empty, all statuses are included.
+  repeated TodoStatus statuses = 1;
+  // Filter by planned_date range start (inclusive).
+  optional google.protobuf.Timestamp planned_date_from = 2;
+  // Filter by planned_date range end (inclusive).
+  optional google.protobuf.Timestamp planned_date_to = 3;
+  // Filter by workspace ID.
+  optional string workspace_id = 4;
+}
+
+// CountTodosResponse is the response containing the count of matching todos.
+message CountTodosResponse {
+  // The number of todos matching the filters.
+  uint32 count = 1;
 }
 
 // GetCalendarEntriesRequest is the request to get todos grouped by date for a calendar view.

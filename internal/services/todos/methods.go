@@ -76,6 +76,11 @@ func (s *Service) BatchCreate(ctx context.Context, userID int64, parsedResponse 
 	return nil
 }
 
+// Count returns the number of todos matching the given filters.
+func (s *Service) Count(ctx context.Context, params repo_todos.FindParams) (uint32, error) {
+	return s.store.Todos().Count(ctx, params)
+}
+
 // Find todos by params
 func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*storecmn.FindResponseWithCount[*models.Todo], error) {
 	return s.store.Todos().Find(ctx, params)

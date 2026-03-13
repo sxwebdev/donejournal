@@ -60,6 +60,16 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 	return sb
 }
 
+// Count returns the number of todos matching the given filters.
+func (s *CustomQueries) Count(ctx context.Context, params FindParams) (uint32, error) {
+	var count uint32
+	sql, args := findBuilder(params, "count(*)").Build()
+	if err := sqlscan.Get(ctx, s.db, &count, sql, args...); err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 // Find todos by user ID and status
 func (s *CustomQueries) Find(ctx context.Context, params FindParams) (*storecmn.FindResponseWithCount[*models.Todo], error) {
 	sb := findBuilder(params, TodosColumnNames().Strings()...)

@@ -37,6 +37,7 @@ import { useMutation, createConnectQueryKey } from "@connectrpc/connect-query"
 import { useQueryClient } from "@tanstack/react-query"
 import {
   completeTodo,
+  countTodos,
   deleteTodo,
   getCalendarEntries,
   listTodos,
@@ -44,7 +45,8 @@ import {
 } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import type { Todo } from "@/api/gen/donejournal/todos/v1/todos_pb"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { toDate } from "@/lib/dates"
+import { toDate, fromDateOnly } from "@/lib/dates"
+import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 
 const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
@@ -56,12 +58,14 @@ const STATUS_OPTIONS: { value: TodoStatus; label: string }[] = [
 
 type Props = {
   todo: Todo
+  isOverdue?: boolean
 }
 
-export function TodoItem({ todo }: Props) {
+export function TodoItem({ todo, isOverdue }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [statusOpen, setStatusOpen] = useState(false)
+  const [dateOpen, setDateOpen] = useState(false)
   const qc = useQueryClient()
 
   const invalidateTodos = () =>
@@ -75,6 +79,12 @@ export function TodoItem({ todo }: Props) {
       qc.invalidateQueries({
         queryKey: createConnectQueryKey({
           schema: getCalendarEntries,
+          cardinality: "finite",
+        }),
+      }),
+      qc.invalidateQueries({
+        queryKey: createConnectQueryKey({
+          schema: countTodos,
           cardinality: "finite",
         }),
       }),
@@ -153,9 +163,31 @@ export function TodoItem({ todo }: Props) {
             </p>
           )}
           {plannedDate && (
-            <p className="mt-1 text-xs text-muted-foreground">
-              {format(plannedDate, "MMM d, yyyy")}
-            </p>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger
+                className={cn(
+                  "mt-1 cursor-pointer text-xs hover:underline",
+                  isOverdue ? "font-medium text-red-500" : "text-muted-foreground"
+                )}
+              >
+                {format(plannedDate, "MMM d, yyyy")}
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={plannedDate}
+                  onSelect={(date) => {
+                    if (date) {
+                      uncheckMutation.mutate({
+                        id: todo.id,
+                        plannedDate: fromDateOnly(date),
+                      })
+                    }
+                    setDateOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           )}
         </div>
 

@@ -98,6 +98,45 @@ func (h *TodosHandler) ListTodos(ctx context.Context, req *connect.Request[todos
 	}), nil
 }
 
+func (h *TodosHandler) CountTodos(ctx context.Context, req *connect.Request[todosv1.CountTodosRequest]) (*connect.Response[todosv1.CountTodosResponse], error) {
+	userID, err := userIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	params := repo_todos.FindParams{
+		UserID: userID,
+	}
+
+	if req.Msg.PlannedDateFrom != nil {
+		t := req.Msg.GetPlannedDateFrom().AsTime()
+		params.DateFrom = &t
+	}
+	if req.Msg.PlannedDateTo != nil {
+		t := req.Msg.GetPlannedDateTo().AsTime()
+		params.DateTo = &t
+	}
+
+	for _, s := range req.Msg.GetStatuses() {
+		if s != todosv1.TodoStatus_TODO_STATUS_UNSPECIFIED {
+			params.Statuses = append(params.Statuses, todoStatusFromProto(s))
+		}
+	}
+
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
+	}
+
+	count, err := h.baseService.Todos().Count(ctx, params)
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	return connect.NewResponse(&todosv1.CountTodosResponse{
+		Count: count,
+	}), nil
+}
+
 func (h *TodosHandler) GetTodo(ctx context.Context, req *connect.Request[todosv1.GetTodoRequest]) (*connect.Response[todosv1.GetTodoResponse], error) {
 	userID, err := userIDFromContext(ctx)
 	if err != nil {
