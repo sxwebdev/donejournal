@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/mymmrac/telego"
 	tu "github.com/mymmrac/telego/telegoutil"
@@ -47,6 +48,7 @@ func (b *Bot) DownloadFile(ctx context.Context, fileID string) ([]byte, error) {
 }
 
 // SendMessage sends a message to a chat.
+// It tries Markdown parse mode first; on parse error it falls back to plain text.
 func (b *Bot) SendMessage(ctx context.Context, chatID int64, text string) error {
 	if chatID == 0 {
 		return fmt.Errorf("chatID is required")
@@ -62,6 +64,17 @@ func (b *Bot) SendMessage(ctx context.Context, chatID int64, text string) error 
 		ParseMode: "markdown",
 	})
 	if err != nil {
+		// If Telegram can't parse the markdown, retry without parse mode
+		if strings.Contains(err.Error(), "can't parse entities") {
+			_, err = b.bot.SendMessage(ctx, &telego.SendMessageParams{
+				ChatID: telego.ChatID{ID: chatID},
+				Text:   text,
+			})
+			if err != nil {
+				return fmt.Errorf("failed to send message: %w", err)
+			}
+			return nil
+		}
 		return fmt.Errorf("failed to send message: %w", err)
 	}
 
