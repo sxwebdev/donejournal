@@ -33,13 +33,13 @@ import {
   getCalendarEntries,
 } from "@/api/gen/donejournal/todos/v1/todos-TodoService_connectquery"
 import { fromDate } from "@/lib/dates"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().max(1000).optional(),
   plannedDate: z.date(),
-  projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -103,7 +103,7 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
       title: values.title,
       description: values.description ?? "",
       plannedDate: fromDate(values.plannedDate),
-      projectId: values.projectId,
+      workspaceId: values.workspaceId,
     })
   }
 
@@ -163,10 +163,10 @@ export function ConvertToTodoDialog({ item, open, onOpenChange }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Project</Label>
-            <ProjectSelector
-              value={watch("projectId")}
-              onChange={(v) => setValue("projectId", v)}
+            <Label>Workspace</Label>
+            <WorkspaceSelector
+              value={watch("workspaceId")}
+              onChange={(v) => setValue("workspaceId", v)}
             />
           </div>
 

@@ -3,10 +3,10 @@ import { z } from "zod"
 import { useState } from "react"
 import { startOfMonth } from "date-fns"
 import { CalendarView } from "@/components/calendar/calendar-view"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const calendarSearchSchema = z.object({
-  projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/calendar")({
@@ -28,22 +28,22 @@ function CalendarPage() {
           <h1 className="text-2xl font-semibold">Calendar</h1>
           <p className="mt-1 text-sm text-muted-foreground">View todos by date</p>
         </div>
-        <ProjectSelector
-          value={search.projectId}
+        <WorkspaceSelector
+          value={search.workspaceId}
           onChange={(v) =>
             navigate({
-              search: (prev) => ({ ...prev, projectId: v }),
+              search: (prev) => ({ ...prev, workspaceId: v }),
               replace: true,
             })
           }
-          placeholder="All projects"
+          placeholder="All workspaces"
           className="w-auto min-w-35"
         />
       </div>
       <CalendarView
         currentMonth={currentMonth}
         onMonthChange={setCurrentMonth}
-        projectId={search.projectId}
+        workspaceId={search.workspaceId}
       />
     </div>
   )

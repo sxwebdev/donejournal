@@ -62,14 +62,14 @@ export function NoteDialog(props: Props) {
         await createMutation.mutateAsync({
           title: values.title,
           body: values.body ?? "",
-          projectId: values.projectId,
+          workspaceId: values.workspaceId,
         })
       } else {
         await updateMutation.mutateAsync({
           id: props.note.id,
           title: values.title,
           body: values.body ?? "",
-          projectId: values.projectId,
+          workspaceId: values.workspaceId,
         })
       }
     } catch (err) {
@@ -84,7 +84,7 @@ export function NoteDialog(props: Props) {
       ? {
           title: props.note.title,
           body: props.note.body || undefined,
-          projectId: props.note.projectId || undefined,
+          workspaceId: props.note.workspaceId || undefined,
         }
       : undefined
 

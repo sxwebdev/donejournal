@@ -58,8 +58,8 @@ func (h *NotesHandler) ListNotes(ctx context.Context, req *connect.Request[notes
 		params.Search = &s
 	}
 
-	if req.Msg.ProjectId != nil {
-		params.ProjectID = req.Msg.ProjectId
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
 	}
 
 	result, err := h.baseService.Notes().Find(ctx, params)
@@ -114,7 +114,7 @@ func (h *NotesHandler) CreateNote(ctx context.Context, req *connect.Request[note
 		return nil, connect.NewError(connect.CodeInvalidArgument, fmt.Errorf("title is required"))
 	}
 
-	note, err := h.baseService.Notes().Create(ctx, userID, req.Msg.GetTitle(), req.Msg.GetBody(), req.Msg.ProjectId)
+	note, err := h.baseService.Notes().Create(ctx, userID, req.Msg.GetTitle(), req.Msg.GetBody(), req.Msg.WorkspaceId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -146,8 +146,8 @@ func (h *NotesHandler) UpdateNote(ctx context.Context, req *connect.Request[note
 	if req.Msg.Body != nil {
 		params.Body = req.Msg.Body
 	}
-	if req.Msg.ProjectId != nil {
-		params.ProjectID = req.Msg.ProjectId
+	if req.Msg.WorkspaceId != nil {
+		params.WorkspaceID = req.Msg.WorkspaceId
 	}
 
 	note, err := h.baseService.Notes().Update(ctx, userID, req.Msg.GetId(), params)

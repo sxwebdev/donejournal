@@ -13,9 +13,9 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, project_id)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id)
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, project_id
+	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id
 `
 
 type CreateParams struct {
@@ -26,7 +26,7 @@ type CreateParams struct {
 	Status      models.TodoStatusType `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate time.Time             `db:"planned_date" json:"planned_date"`
 	CompletedAt *time.Time            `db:"completed_at" json:"completed_at"`
-	ProjectID   *string               `db:"project_id" json:"project_id"`
+	WorkspaceID *string               `db:"workspace_id" json:"workspace_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {
@@ -38,7 +38,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		arg.Status,
 		arg.PlannedDate,
 		arg.CompletedAt,
-		arg.ProjectID,
+		arg.WorkspaceID,
 	)
 	var i models.Todo
 	err := row.Scan(
@@ -51,7 +51,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		&i.CompletedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.ProjectID,
+		&i.WorkspaceID,
 	)
 	return &i, err
 }
@@ -66,7 +66,7 @@ func (q *Queries) Delete(ctx context.Context, id string) error {
 }
 
 const getByID = `-- name: GetByID :one
-SELECT id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, project_id FROM todos WHERE id=? LIMIT 1
+SELECT id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id FROM todos WHERE id=? LIMIT 1
 `
 
 func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) {
@@ -82,7 +82,7 @@ func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) 
 		&i.CompletedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.ProjectID,
+		&i.WorkspaceID,
 	)
 	return &i, err
 }

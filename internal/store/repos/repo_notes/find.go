@@ -13,7 +13,7 @@ import (
 type FindParams struct {
 	UserID    int64
 	Search    *string
-	ProjectID *string
+	WorkspaceID *string
 	OrderBy   string
 	Page      *uint32
 	PageSize  *uint32
@@ -32,8 +32,8 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		sb.Where(sb.Or(titleExpr, bodyExpr))
 	}
 
-	if params.ProjectID != nil {
-		sb.Where(sb.Equal(ColumnNameNotesProjectId.String(), *params.ProjectID))
+	if params.WorkspaceID != nil {
+		sb.Where(sb.Equal(ColumnNameNotesWorkspaceId.String(), *params.WorkspaceID))
 	}
 
 	return sb

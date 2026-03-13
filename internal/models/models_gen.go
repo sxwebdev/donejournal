@@ -20,23 +20,13 @@ type Inbox struct {
 }
 
 type Note struct {
-	ID        string    `db:"id" json:"id" validate:"required"`
-	UserID    int64     `db:"user_id" json:"user_id" validate:"required"`
-	Title     string    `db:"title" json:"title" validate:"required"`
-	Body      string    `db:"body" json:"body"`
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
-	ProjectID *string   `db:"project_id" json:"project_id"`
-}
-
-type Project struct {
 	ID          string    `db:"id" json:"id" validate:"required"`
 	UserID      int64     `db:"user_id" json:"user_id" validate:"required"`
-	Name        string    `db:"name" json:"name" validate:"required"`
-	Description string    `db:"description" json:"description"`
-	Archived    bool      `db:"archived" json:"archived"`
+	Title       string    `db:"title" json:"title" validate:"required"`
+	Body        string    `db:"body" json:"body"`
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+	WorkspaceID *string   `db:"workspace_id" json:"workspace_id"`
 }
 
 type Todo struct {
@@ -49,5 +39,15 @@ type Todo struct {
 	CompletedAt *time.Time     `db:"completed_at" json:"completed_at"`
 	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
-	ProjectID   *string        `db:"project_id" json:"project_id"`
+	WorkspaceID *string        `db:"workspace_id" json:"workspace_id"`
+}
+
+type Workspace struct {
+	ID          string    `db:"id" json:"id" validate:"required"`
+	UserID      int64     `db:"user_id" json:"user_id" validate:"required"`
+	Name        string    `db:"name" json:"name" validate:"required"`
+	Description string    `db:"description" json:"description"`
+	Archived    bool      `db:"archived" json:"archived"`
+	CreatedAt   time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }

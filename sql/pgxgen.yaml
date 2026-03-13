@@ -57,9 +57,9 @@ sqlc:
             get:
               name: GetByID
 
-        # projects
-        projects:
-          output_dir: queries/projects
+        # workspaces
+        workspaces:
+          output_dir: queries/workspaces
           primary_column: id
           methods:
             create:
@@ -82,6 +82,6 @@ sqlc:
         notes:
           output_dir: ../internal/store/repos/repo_notes
           include_column_names: true
-        projects:
-          output_dir: ../internal/store/repos/repo_projects
+        workspaces:
+          output_dir: ../internal/store/repos/repo_workspaces
           include_column_names: true

@@ -6,10 +6,10 @@ import (
 	authv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1"
 	inboxv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1"
 	notesv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/notes/v1"
-	projectsv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/projects/v1"
 	todosv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1"
+	workspacesv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/workspaces/v1"
 	"github.com/sxwebdev/donejournal/internal/models"
-	"github.com/sxwebdev/donejournal/internal/store/repos/repo_projects"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -22,7 +22,7 @@ func todoToProto(t *models.Todo) *todosv1.Todo {
 		PlannedDate: timestamppb.New(t.PlannedDate),
 		CreatedAt:   timestamppb.New(t.CreatedAt),
 		UpdatedAt:   timestamppb.New(t.UpdatedAt),
-		ProjectId:   t.ProjectID,
+		WorkspaceId: t.WorkspaceID,
 	}
 	if t.CompletedAt != nil {
 		pb.CompletedAt = timestamppb.New(*t.CompletedAt)
@@ -72,29 +72,29 @@ func inboxItemToProto(i *models.Inbox) *inboxv1.InboxItem {
 
 func noteToProto(n *models.Note) *notesv1.Note {
 	return &notesv1.Note{
-		Id:        n.ID,
-		Title:     n.Title,
-		Body:      n.Body,
-		CreatedAt: timestamppb.New(n.CreatedAt),
-		UpdatedAt: timestamppb.New(n.UpdatedAt),
-		ProjectId: n.ProjectID,
+		Id:          n.ID,
+		Title:       n.Title,
+		Body:        n.Body,
+		CreatedAt:   timestamppb.New(n.CreatedAt),
+		UpdatedAt:   timestamppb.New(n.UpdatedAt),
+		WorkspaceId: n.WorkspaceID,
 	}
 }
 
-func projectToProto(p *models.Project) *projectsv1.Project {
-	return &projectsv1.Project{
-		Id:          p.ID,
-		Name:        p.Name,
-		Description: p.Description,
-		Archived:    p.Archived,
-		CreatedAt:   timestamppb.New(p.CreatedAt),
-		UpdatedAt:   timestamppb.New(p.UpdatedAt),
+func workspaceToProto(w *models.Workspace) *workspacesv1.Workspace {
+	return &workspacesv1.Workspace{
+		Id:          w.ID,
+		Name:        w.Name,
+		Description: w.Description,
+		Archived:    w.Archived,
+		CreatedAt:   timestamppb.New(w.CreatedAt),
+		UpdatedAt:   timestamppb.New(w.UpdatedAt),
 	}
 }
 
-func projectStatsToProto(s *repo_projects.ProjectStats) *projectsv1.ProjectStats {
-	return &projectsv1.ProjectStats{
-		Project:            projectToProto(&s.Project),
+func workspaceStatsToProto(s *repo_workspaces.WorkspaceStats) *workspacesv1.WorkspaceStats {
+	return &workspacesv1.WorkspaceStats{
+		Workspace:          workspaceToProto(&s.Workspace),
 		TodoCount:          s.TodoCount,
 		NoteCount:          s.NoteCount,
 		CompletedTodoCount: s.CompletedTodoCount,

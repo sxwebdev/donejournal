@@ -97,7 +97,7 @@ func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 }
 
 // ConvertToTodo converts an inbox item to a todo and deletes the inbox item
-func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID int64, title, description string, plannedDate time.Time, projectID *string) (string, error) {
+func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID int64, title, description string, plannedDate time.Time, workspaceID *string) (string, error) {
 	if inboxItemID == "" {
 		return "", storecmn.ErrEmptyID
 	}
@@ -121,7 +121,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 			Description: description,
 			Status:      models.TodoStatusPending,
 			PlannedDate: plannedDate,
-			ProjectID:   projectID,
+			WorkspaceID:   workspaceID,
 		})
 		if err != nil {
 			return fmt.Errorf("create todo: %w", err)
@@ -142,7 +142,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 }
 
 // ConvertToNote converts an inbox item to a note and deletes the inbox item
-func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID int64, title, body string, projectID *string) (string, error) {
+func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID int64, title, body string, workspaceID *string) (string, error) {
 	if inboxItemID == "" {
 		return "", storecmn.ErrEmptyID
 	}
@@ -164,7 +164,7 @@ func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID 
 			UserID:    userID,
 			Title:     title,
 			Body:      body,
-			ProjectID: projectID,
+			WorkspaceID: workspaceID,
 		})
 		if err != nil {
 			return fmt.Errorf("create note: %w", err)

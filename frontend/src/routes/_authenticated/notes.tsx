@@ -6,11 +6,11 @@ import { NoteDialog } from "@/components/notes/note-dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const notesSearchSchema = z.object({
   search: z.string().optional(),
-  projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 export const Route = createFileRoute("/_authenticated/notes")({
@@ -70,20 +70,20 @@ function NotesPage() {
             className="pl-9"
           />
         </div>
-        <ProjectSelector
-          value={search.projectId}
+        <WorkspaceSelector
+          value={search.workspaceId}
           onChange={(v) =>
             navigate({
-              search: (prev) => ({ ...prev, projectId: v }),
+              search: (prev) => ({ ...prev, workspaceId: v }),
               replace: true,
             })
           }
-          placeholder="All projects"
+          placeholder="All workspaces"
           className="w-auto min-w-35"
         />
       </div>
 
-      <NoteList search={search.search} projectId={search.projectId} />
+      <NoteList search={search.search} workspaceId={search.workspaceId} />
 
       <NoteDialog
         mode="create"

@@ -36,8 +36,8 @@ type Note struct {
 	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	// Last update timestamp.
 	UpdatedAt *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	// Optional project ID this note belongs to.
-	ProjectId     *string `protobuf:"bytes,6,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
+	// Optional workspace ID this note belongs to.
+	WorkspaceId   *string `protobuf:"bytes,6,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -107,9 +107,9 @@ func (x *Note) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Note) GetProjectId() string {
-	if x != nil && x.ProjectId != nil {
-		return *x.ProjectId
+func (x *Note) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
 	}
 	return ""
 }
@@ -123,8 +123,8 @@ type ListNotesRequest struct {
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// Optional search query for partial matching on title and body.
 	Search *string `protobuf:"bytes,3,opt,name=search,proto3,oneof" json:"search,omitempty"`
-	// Filter by project ID.
-	ProjectId     *string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
+	// Filter by workspace ID.
+	WorkspaceId   *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -180,9 +180,9 @@ func (x *ListNotesRequest) GetSearch() string {
 	return ""
 }
 
-func (x *ListNotesRequest) GetProjectId() string {
-	if x != nil && x.ProjectId != nil {
-		return *x.ProjectId
+func (x *ListNotesRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
 	}
 	return ""
 }
@@ -350,8 +350,8 @@ type CreateNoteRequest struct {
 	Title string `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	// Note body (markdown).
 	Body string `protobuf:"bytes,2,opt,name=body,proto3" json:"body,omitempty"`
-	// Optional project ID.
-	ProjectId     *string `protobuf:"bytes,3,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
+	// Optional workspace ID.
+	WorkspaceId   *string `protobuf:"bytes,3,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -400,9 +400,9 @@ func (x *CreateNoteRequest) GetBody() string {
 	return ""
 }
 
-func (x *CreateNoteRequest) GetProjectId() string {
-	if x != nil && x.ProjectId != nil {
-		return *x.ProjectId
+func (x *CreateNoteRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
 	}
 	return ""
 }
@@ -462,8 +462,8 @@ type UpdateNoteRequest struct {
 	Title *string `protobuf:"bytes,2,opt,name=title,proto3,oneof" json:"title,omitempty"`
 	// Updated body. If not set, body is not changed.
 	Body *string `protobuf:"bytes,3,opt,name=body,proto3,oneof" json:"body,omitempty"`
-	// Updated project ID. If not set, project_id is not changed.
-	ProjectId     *string `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3,oneof" json:"project_id,omitempty"`
+	// Updated workspace ID. If not set, workspace_id is not changed.
+	WorkspaceId   *string `protobuf:"bytes,4,opt,name=workspace_id,json=workspaceId,proto3,oneof" json:"workspace_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -519,9 +519,9 @@ func (x *UpdateNoteRequest) GetBody() string {
 	return ""
 }
 
-func (x *UpdateNoteRequest) GetProjectId() string {
-	if x != nil && x.ProjectId != nil {
-		return *x.ProjectId
+func (x *UpdateNoteRequest) GetWorkspaceId() string {
+	if x != nil && x.WorkspaceId != nil {
+		return *x.WorkspaceId
 	}
 	return ""
 }
@@ -696,7 +696,7 @@ var File_donejournal_notes_v1_notes_proto protoreflect.FileDescriptor
 
 const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe9\x01\n" +
+	" donejournal/notes/v1/notes.proto\x12\x14donejournal.notes.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xef\x01\n" +
 	"\x04Note\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x12\n" +
@@ -704,19 +704,17 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12\"\n" +
-	"\n" +
-	"project_id\x18\x06 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
-	"\v_project_id\"\xa9\x01\n" +
+	"updated_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12&\n" +
+	"\fworkspace_id\x18\x06 \x01(\tH\x00R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\r_workspace_id\"\xaf\x01\n" +
 	"\x10ListNotesRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x02 \x01(\tR\tpageToken\x12\x1b\n" +
-	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"project_id\x18\x04 \x01(\tH\x01R\tprojectId\x88\x01\x01B\t\n" +
-	"\a_searchB\r\n" +
-	"\v_project_id\"\x8e\x01\n" +
+	"\x06search\x18\x03 \x01(\tH\x00R\x06search\x88\x01\x01\x12&\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x01R\vworkspaceId\x88\x01\x01B\t\n" +
+	"\a_searchB\x0f\n" +
+	"\r_workspace_id\"\x8e\x01\n" +
 	"\x11ListNotesResponse\x120\n" +
 	"\x05notes\x18\x01 \x03(\v2\x1a.donejournal.notes.v1.NoteR\x05notes\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\x12\x1f\n" +
@@ -725,24 +723,22 @@ const file_donejournal_notes_v1_notes_proto_rawDesc = "" +
 	"\x0eGetNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"p\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"v\n" +
 	"\x11CreateNoteRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x12\n" +
-	"\x04body\x18\x02 \x01(\tR\x04body\x12\"\n" +
-	"\n" +
-	"project_id\x18\x03 \x01(\tH\x00R\tprojectId\x88\x01\x01B\r\n" +
-	"\v_project_id\"D\n" +
+	"\x04body\x18\x02 \x01(\tR\x04body\x12&\n" +
+	"\fworkspace_id\x18\x03 \x01(\tH\x00R\vworkspaceId\x88\x01\x01B\x0f\n" +
+	"\r_workspace_id\"D\n" +
 	"\x12CreateNoteResponse\x12.\n" +
-	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"\x9d\x01\n" +
+	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"\xa3\x01\n" +
 	"\x11UpdateNoteRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
 	"\x05title\x18\x02 \x01(\tH\x00R\x05title\x88\x01\x01\x12\x17\n" +
-	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01\x12\"\n" +
-	"\n" +
-	"project_id\x18\x04 \x01(\tH\x02R\tprojectId\x88\x01\x01B\b\n" +
+	"\x04body\x18\x03 \x01(\tH\x01R\x04body\x88\x01\x01\x12&\n" +
+	"\fworkspace_id\x18\x04 \x01(\tH\x02R\vworkspaceId\x88\x01\x01B\b\n" +
 	"\x06_titleB\a\n" +
-	"\x05_bodyB\r\n" +
-	"\v_project_id\"D\n" +
+	"\x05_bodyB\x0f\n" +
+	"\r_workspace_id\"D\n" +
 	"\x12UpdateNoteResponse\x12.\n" +
 	"\x04note\x18\x01 \x01(\v2\x1a.donejournal.notes.v1.NoteR\x04note\"#\n" +
 	"\x11DeleteNoteRequest\x12\x0e\n" +

@@ -12,17 +12,17 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO notes (id, user_id, title, body, project_id)
+INSERT INTO notes (id, user_id, title, body, workspace_id)
 	VALUES (?, ?, ?, ?, ?)
-	RETURNING id, user_id, title, body, created_at, updated_at, project_id
+	RETURNING id, user_id, title, body, created_at, updated_at, workspace_id
 `
 
 type CreateParams struct {
-	ID        string  `db:"id" json:"id" validate:"required"`
-	UserID    int64   `db:"user_id" json:"user_id" validate:"required"`
-	Title     string  `db:"title" json:"title" validate:"required"`
-	Body      string  `db:"body" json:"body"`
-	ProjectID *string `db:"project_id" json:"project_id"`
+	ID          string  `db:"id" json:"id" validate:"required"`
+	UserID      int64   `db:"user_id" json:"user_id" validate:"required"`
+	Title       string  `db:"title" json:"title" validate:"required"`
+	Body        string  `db:"body" json:"body"`
+	WorkspaceID *string `db:"workspace_id" json:"workspace_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Note, error) {
@@ -31,7 +31,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Note, e
 		arg.UserID,
 		arg.Title,
 		arg.Body,
-		arg.ProjectID,
+		arg.WorkspaceID,
 	)
 	var i models.Note
 	err := row.Scan(
@@ -41,7 +41,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Note, e
 		&i.Body,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.ProjectID,
+		&i.WorkspaceID,
 	)
 	return &i, err
 }
@@ -56,7 +56,7 @@ func (q *Queries) Delete(ctx context.Context, id string) error {
 }
 
 const getByID = `-- name: GetByID :one
-SELECT id, user_id, title, body, created_at, updated_at, project_id FROM notes WHERE id=? LIMIT 1
+SELECT id, user_id, title, body, created_at, updated_at, workspace_id FROM notes WHERE id=? LIMIT 1
 `
 
 func (q *Queries) GetByID(ctx context.Context, id string) (*models.Note, error) {
@@ -69,7 +69,7 @@ func (q *Queries) GetByID(ctx context.Context, id string) (*models.Note, error) 
 		&i.Body,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.ProjectID,
+		&i.WorkspaceID,
 	)
 	return &i, err
 }

@@ -1,5 +1,5 @@
 -- name: Create :one
-INSERT INTO notes (id, user_id, title, body, project_id)
+INSERT INTO notes (id, user_id, title, body, workspace_id)
 	VALUES (?, ?, ?, ?, ?)
 	RETURNING *;
 

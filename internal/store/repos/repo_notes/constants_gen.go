@@ -39,13 +39,13 @@ func (s ColumnNames) Strings() []string {
 }
 
 const (
-	ColumnNameNotesId        ColumnName = "id"
-	ColumnNameNotesUserId    ColumnName = "user_id"
-	ColumnNameNotesTitle     ColumnName = "title"
-	ColumnNameNotesBody      ColumnName = "body"
-	ColumnNameNotesCreatedAt ColumnName = "created_at"
-	ColumnNameNotesUpdatedAt ColumnName = "updated_at"
-	ColumnNameNotesProjectId ColumnName = "project_id"
+	ColumnNameNotesId          ColumnName = "id"
+	ColumnNameNotesUserId      ColumnName = "user_id"
+	ColumnNameNotesTitle       ColumnName = "title"
+	ColumnNameNotesBody        ColumnName = "body"
+	ColumnNameNotesCreatedAt   ColumnName = "created_at"
+	ColumnNameNotesUpdatedAt   ColumnName = "updated_at"
+	ColumnNameNotesWorkspaceId ColumnName = "workspace_id"
 )
 
 func NotesColumnNames() ColumnNames {
@@ -56,6 +56,6 @@ func NotesColumnNames() ColumnNames {
 		ColumnNameNotesBody,
 		ColumnNameNotesCreatedAt,
 		ColumnNameNotesUpdatedAt,
-		ColumnNameNotesProjectId,
+		ColumnNameNotesWorkspaceId,
 	}
 }

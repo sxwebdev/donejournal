@@ -21,12 +21,12 @@ import {
 import { listNotes } from "@/api/gen/donejournal/notes/v1/notes-NoteService_connectquery"
 import type { InboxItem } from "@/api/gen/donejournal/inbox/v1/inbox_pb"
 import { useTheme } from "@/components/theme-provider"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required"),
   body: z.string().optional(),
-  projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -83,7 +83,7 @@ export function ConvertToNoteDialog({ item, open, onOpenChange }: Props) {
       inboxItemId: item.id,
       title: values.title,
       body: values.body ?? "",
-      projectId: values.projectId,
+      workspaceId: values.workspaceId,
     })
   }
 
@@ -121,10 +121,10 @@ export function ConvertToNoteDialog({ item, open, onOpenChange }: Props) {
           </div>
 
           <div className="space-y-1.5">
-            <Label>Project</Label>
-            <ProjectSelector
-              value={watch("projectId")}
-              onChange={(v) => setValue("projectId", v)}
+            <Label>Workspace</Label>
+            <WorkspaceSelector
+              value={watch("workspaceId")}
+              onChange={(v) => setValue("workspaceId", v)}
             />
           </div>
 

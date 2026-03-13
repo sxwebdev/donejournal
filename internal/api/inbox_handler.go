@@ -183,7 +183,7 @@ func (h *InboxHandler) ConvertToTodo(ctx context.Context, req *connect.Request[i
 		req.Msg.GetTitle(),
 		req.Msg.GetDescription(),
 		plannedDate,
-		req.Msg.ProjectId,
+		req.Msg.WorkspaceId,
 	)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
@@ -215,7 +215,7 @@ func (h *InboxHandler) ConvertToNote(ctx context.Context, req *connect.Request[i
 		userID,
 		req.Msg.GetTitle(),
 		req.Msg.GetBody(),
-		req.Msg.ProjectId,
+		req.Msg.WorkspaceId,
 	)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)

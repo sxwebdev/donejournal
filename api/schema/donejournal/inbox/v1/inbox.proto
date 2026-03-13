@@ -124,8 +124,8 @@ message ConvertToTodoRequest {
   string title = 3;
   // Optional description for the new todo.
   string description = 4;
-  // Optional project ID.
-  optional string project_id = 5;
+  // Optional workspace ID.
+  optional string workspace_id = 5;
 }
 
 // ConvertToTodoResponse is the response after converting an inbox item to a todo.
@@ -142,8 +142,8 @@ message ConvertToNoteRequest {
   string title = 2;
   // Note body (markdown).
   string body = 3;
-  // Optional project ID.
-  optional string project_id = 4;
+  // Optional workspace ID.
+  optional string workspace_id = 4;
 }
 
 // ConvertToNoteResponse is the response after converting an inbox item to a note.

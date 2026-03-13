@@ -1,5 +1,5 @@
 -- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, project_id)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id)
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 	RETURNING *;
 

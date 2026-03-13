@@ -71,21 +71,21 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		return "Saved to inbox 📥", nil
 	}
 
-	// Resolve project IDs from project names
-	projectIDs := make(map[string]*string) // projectName -> projectID
+	// Resolve workspace IDs from workspace names
+	workspaceIDs := make(map[string]*string) // workspaceName -> workspaceID
 	for _, entry := range resp.Entries {
-		if entry.Project == "" {
+		if entry.Workspace == "" {
 			continue
 		}
-		if _, ok := projectIDs[entry.Project]; ok {
+		if _, ok := workspaceIDs[entry.Workspace]; ok {
 			continue
 		}
-		project, err := s.baseService.Projects().FindOrCreateByName(ctx, userID, entry.Project)
+		workspace, err := s.baseService.Workspaces().FindOrCreateByName(ctx, userID, entry.Workspace)
 		if err != nil {
-			s.logger.Warnw("failed to resolve project, ignoring", "project", entry.Project, "error", err)
+			s.logger.Warnw("failed to resolve workspace, ignoring", "workspace", entry.Workspace, "error", err)
 			continue
 		}
-		projectIDs[entry.Project] = &project.ID
+		workspaceIDs[entry.Workspace] = &workspace.ID
 	}
 
 	// Separate note entries from todo/done entries
@@ -102,7 +102,7 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 	// Create todos
 	if len(todoEntries) > 0 {
 		todoResp := &mcp.ParsedResponse{Entries: todoEntries}
-		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp, projectIDs); err != nil {
+		if err := s.baseService.Todos().BatchCreate(ctx, userID, todoResp, workspaceIDs); err != nil {
 			return "", fmt.Errorf("failed to batch create todos: %w", err)
 		}
 	}
@@ -113,11 +113,11 @@ func (s *Processor) ProcessNewRequest(ctx context.Context, userID int64, data st
 		if body == "" {
 			body = entry.Description
 		}
-		var projectID *string
-		if entry.Project != "" {
-			projectID = projectIDs[entry.Project]
+		var workspaceID *string
+		if entry.Workspace != "" {
+			workspaceID = workspaceIDs[entry.Workspace]
 		}
-		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body, projectID); err != nil {
+		if _, err := s.baseService.Notes().Create(ctx, userID, entry.Title, body, workspaceID); err != nil {
 			return "", fmt.Errorf("failed to create note '%s': %w", entry.Title, err)
 		}
 	}

@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useTheme } from "@/components/theme-provider"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   body: z.string().optional(),
-  projectId: z.string().optional(),
+  workspaceId: z.string().optional(),
 })
 
 export type NoteFormValues = z.infer<typeof schema>
@@ -73,10 +73,10 @@ export function NoteForm({
       </div>
 
       <div className="space-y-1.5">
-        <Label>Project</Label>
-        <ProjectSelector
-          value={watch("projectId")}
-          onChange={(v) => setValue("projectId", v)}
+        <Label>Workspace</Label>
+        <WorkspaceSelector
+          value={watch("workspaceId")}
+          onChange={(v) => setValue("workspaceId", v)}
         />
       </div>
 

@@ -15,7 +15,7 @@ type FindParams struct {
 	UserID    int64
 	DateFrom  *time.Time
 	DateTo    *time.Time
-	ProjectID *string
+	WorkspaceID *string
 	OrderBy   string
 	Page      *uint32
 	PageSize  *uint32
@@ -53,8 +53,8 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		}
 	}
 
-	if params.ProjectID != nil {
-		sb.Where(sb.Equal(ColumnNameTodosProjectId.String(), *params.ProjectID))
+	if params.WorkspaceID != nil {
+		sb.Where(sb.Equal(ColumnNameTodosWorkspaceId.String(), *params.WorkspaceID))
 	}
 
 	return sb

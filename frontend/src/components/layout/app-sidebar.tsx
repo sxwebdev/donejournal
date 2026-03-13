@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Inbox, CheckSquare, Calendar, FileText, FolderOpen, LogOut, Sun, Moon } from "lucide-react"
+import { Inbox, CheckSquare, Calendar, FileText, FolderOpen, LogOut, Sun, Moon, Monitor } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -22,16 +22,20 @@ import {
 import { useAuth } from "@/hooks/use-auth"
 import { useTheme } from "@/components/theme-provider"
 
+const themeOrder = ["system", "light", "dark"] as const
+const themeIcons = { light: Sun, dark: Moon, system: Monitor } as const
+
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const nextTheme = themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length]
+  const Icon = themeIcons[theme]
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(nextTheme)}
       className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       title="Toggle theme"
     >
-      <Sun className="hidden h-4 w-4 dark:block" />
-      <Moon className="block h-4 w-4 dark:hidden" />
+      <Icon className="h-4 w-4" />
       <span className="text-muted-foreground capitalize">{theme}</span>
     </button>
   )
@@ -42,7 +46,7 @@ const navItems = [
   { to: "/todos", label: "Todos", icon: CheckSquare },
   { to: "/notes", label: "Notes", icon: FileText },
   { to: "/calendar", label: "Calendar", icon: Calendar },
-  { to: "/projects", label: "Projects", icon: FolderOpen },
+  { to: "/workspaces", label: "Workspaces", icon: FolderOpen },
 ] as const
 
 export function AppSidebar() {

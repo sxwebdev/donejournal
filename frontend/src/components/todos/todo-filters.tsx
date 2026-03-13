@@ -10,7 +10,7 @@ import {
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import { TodoStatus } from "@/api/gen/donejournal/todos/v1/todos_pb"
-import { ProjectSelector } from "@/components/projects/project-selector"
+import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 
 const STATUS_OPTIONS = [
   { value: TodoStatus.PENDING, label: "Pending" },
@@ -25,7 +25,7 @@ export function TodoFilters() {
     statuses = [],
     from,
     to,
-    projectId,
+    workspaceId,
   } = useSearch({ from: "/_authenticated/todos" })
 
   const fromDate = from ? new Date(from) : undefined
@@ -62,13 +62,13 @@ export function TodoFilters() {
     navigate({ search: {} })
   }
 
-  const setProjectId = (id: string | undefined) => {
+  const setWorkspaceId = (id: string | undefined) => {
     navigate({
-      search: (prev) => ({ ...prev, projectId: id }),
+      search: (prev) => ({ ...prev, workspaceId: id }),
     })
   }
 
-  const hasFilters = statuses.length > 0 || !!from || !!to || !!projectId
+  const hasFilters = statuses.length > 0 || !!from || !!to || !!workspaceId
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -118,10 +118,10 @@ export function TodoFilters() {
         </PopoverContent>
       </Popover>
 
-      <ProjectSelector
-        value={projectId}
-        onChange={setProjectId}
-        placeholder="All projects"
+      <WorkspaceSelector
+        value={workspaceId}
+        onChange={setWorkspaceId}
+        placeholder="All workspaces"
         className="h-7 w-auto min-w-35 text-xs"
       />
 
