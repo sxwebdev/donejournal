@@ -12,8 +12,8 @@ import (
 )
 
 type processorWorkerArgs struct {
-	Data   string
-	UserID int64
+	Data   string `json:"data"`
+	UserID int64  `json:"user_id"`
 }
 
 func (processorWorkerArgs) Kind() string { return "processor" }

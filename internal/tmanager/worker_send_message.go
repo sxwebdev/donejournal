@@ -9,8 +9,8 @@ import (
 )
 
 type sendMessageWorkerArgs struct {
-	Data   string
-	UserID int64
+	Data   string `json:"data"`
+	UserID int64  `json:"user_id"`
 }
 
 func (sendMessageWorkerArgs) Kind() string { return "send_message" }
