@@ -39,17 +39,19 @@ func (s ColumnNames) Strings() []string {
 }
 
 const (
-	ColumnNameTodosId          ColumnName = "id"
-	ColumnNameTodosUserId      ColumnName = "user_id"
-	ColumnNameTodosTitle       ColumnName = "title"
-	ColumnNameTodosDescription ColumnName = "description"
-	ColumnNameTodosStatus      ColumnName = "status"
-	ColumnNameTodosPlannedDate ColumnName = "planned_date"
-	ColumnNameTodosCompletedAt ColumnName = "completed_at"
-	ColumnNameTodosCreatedAt   ColumnName = "created_at"
-	ColumnNameTodosUpdatedAt   ColumnName = "updated_at"
-	ColumnNameTodosWorkspaceId ColumnName = "workspace_id"
-	ColumnNameTodosPriority    ColumnName = "priority"
+	ColumnNameTodosId                 ColumnName = "id"
+	ColumnNameTodosUserId             ColumnName = "user_id"
+	ColumnNameTodosTitle              ColumnName = "title"
+	ColumnNameTodosDescription        ColumnName = "description"
+	ColumnNameTodosStatus             ColumnName = "status"
+	ColumnNameTodosPlannedDate        ColumnName = "planned_date"
+	ColumnNameTodosCompletedAt        ColumnName = "completed_at"
+	ColumnNameTodosCreatedAt          ColumnName = "created_at"
+	ColumnNameTodosUpdatedAt          ColumnName = "updated_at"
+	ColumnNameTodosWorkspaceId        ColumnName = "workspace_id"
+	ColumnNameTodosPriority           ColumnName = "priority"
+	ColumnNameTodosRecurrenceRule     ColumnName = "recurrence_rule"
+	ColumnNameTodosRecurrenceParentId ColumnName = "recurrence_parent_id"
 )
 
 func TodosColumnNames() ColumnNames {
@@ -65,5 +67,7 @@ func TodosColumnNames() ColumnNames {
 		ColumnNameTodosUpdatedAt,
 		ColumnNameTodosWorkspaceId,
 		ColumnNameTodosPriority,
+		ColumnNameTodosRecurrenceRule,
+		ColumnNameTodosRecurrenceParentId,
 	}
 }

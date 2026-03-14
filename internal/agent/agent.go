@@ -215,7 +215,10 @@ Rules:
 - Default priority is none unless user explicitly mentions importance or urgency
 - If user mentions #hashtags (e.g. "#urgent купить молоко"), extract them as tag names and pass in the tags parameter
 - When user mentions tags, match to existing ones if possible (case-insensitive). New tags are auto-created.
-- Use manage_tags to list/create/delete tags, tag_entity to add tags to existing items, find_by_tag to search by tags`,
+- Use manage_tags to list/create/delete tags, tag_entity to add tags to existing items, find_by_tag to search by tags
+- Recurring tasks: use create_recurring_todo when user says "every day"/"каждый день", "every week"/"каждую неделю"/"еженедельно", "every month"/"каждый месяц"/"ежемесячно", "every Monday"/"каждый понедельник", etc.
+- recurrence_rule values: "daily" for daily/every day, "weekly" for weekly/every week/every weekday, "monthly" for monthly
+- When a recurring todo is completed, the next occurrence is created automatically`,
 		today.ToDateString(),
 		today.ToWeekString(),
 		weekStart.ToDateString(),

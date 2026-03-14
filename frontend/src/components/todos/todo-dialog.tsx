@@ -83,6 +83,7 @@ export function TodoDialog(props: Props) {
           workspaceId: values.workspaceId,
           priority: values.priority,
           tagIds: values.tagIds ?? [],
+          recurrenceRule: values.recurrenceRule || undefined,
         })
       } else {
         await updateMutation.mutateAsync({
@@ -115,6 +116,7 @@ export function TodoDialog(props: Props) {
           priority: props.todo.priority as TodoPriority,
           workspaceId: props.todo.workspaceId || undefined,
           tagIds: props.todo.tagIds.length > 0 ? [...props.todo.tagIds] : undefined,
+          recurrenceRule: props.todo.recurrenceRule || undefined,
         }
       : props.initialDate
         ? { plannedDate: props.initialDate }

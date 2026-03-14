@@ -44,17 +44,19 @@ type Tag struct {
 }
 
 type Todo struct {
-	ID          string           `db:"id" json:"id" validate:"required"`
-	UserID      int64            `db:"user_id" json:"user_id" validate:"required"`
-	Title       string           `db:"title" json:"title" validate:"required"`
-	Description string           `db:"description" json:"description"`
-	Status      TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
-	PlannedDate time.Time        `db:"planned_date" json:"planned_date"`
-	CompletedAt *time.Time       `db:"completed_at" json:"completed_at"`
-	CreatedAt   time.Time        `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time        `db:"updated_at" json:"updated_at"`
-	WorkspaceID *string          `db:"workspace_id" json:"workspace_id"`
-	Priority    TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
+	ID                 string           `db:"id" json:"id" validate:"required"`
+	UserID             int64            `db:"user_id" json:"user_id" validate:"required"`
+	Title              string           `db:"title" json:"title" validate:"required"`
+	Description        string           `db:"description" json:"description"`
+	Status             TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
+	PlannedDate        time.Time        `db:"planned_date" json:"planned_date"`
+	CompletedAt        *time.Time       `db:"completed_at" json:"completed_at"`
+	CreatedAt          time.Time        `db:"created_at" json:"created_at"`
+	UpdatedAt          time.Time        `db:"updated_at" json:"updated_at"`
+	WorkspaceID        *string          `db:"workspace_id" json:"workspace_id"`
+	Priority           TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
+	RecurrenceRule     *string          `db:"recurrence_rule" json:"recurrence_rule,omitempty"`
+	RecurrenceParentID *string          `db:"recurrence_parent_id" json:"recurrence_parent_id,omitempty"`
 }
 
 type TodoTag struct {

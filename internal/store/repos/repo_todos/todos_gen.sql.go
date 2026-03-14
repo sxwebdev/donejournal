@@ -13,21 +13,23 @@ import (
 )
 
 const create = `-- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id, priority)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id, priority
+INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id, priority, recurrence_rule, recurrence_parent_id)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	RETURNING id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id, priority, recurrence_rule, recurrence_parent_id
 `
 
 type CreateParams struct {
-	ID          string                  `db:"id" json:"id" validate:"required"`
-	UserID      int64                   `db:"user_id" json:"user_id" validate:"required"`
-	Title       string                  `db:"title" json:"title" validate:"required"`
-	Description string                  `db:"description" json:"description"`
-	Status      models.TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
-	PlannedDate time.Time               `db:"planned_date" json:"planned_date"`
-	CompletedAt *time.Time              `db:"completed_at" json:"completed_at"`
-	WorkspaceID *string                 `db:"workspace_id" json:"workspace_id"`
-	Priority    models.TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
+	ID                 string                  `db:"id" json:"id" validate:"required"`
+	UserID             int64                   `db:"user_id" json:"user_id" validate:"required"`
+	Title              string                  `db:"title" json:"title" validate:"required"`
+	Description        string                  `db:"description" json:"description"`
+	Status             models.TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
+	PlannedDate        time.Time               `db:"planned_date" json:"planned_date"`
+	CompletedAt        *time.Time              `db:"completed_at" json:"completed_at"`
+	WorkspaceID        *string                 `db:"workspace_id" json:"workspace_id"`
+	Priority           models.TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
+	RecurrenceRule     *string                 `db:"recurrence_rule" json:"recurrence_rule"`
+	RecurrenceParentID *string                 `db:"recurrence_parent_id" json:"recurrence_parent_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {
@@ -41,6 +43,8 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		arg.CompletedAt,
 		arg.WorkspaceID,
 		arg.Priority,
+		arg.RecurrenceRule,
+		arg.RecurrenceParentID,
 	)
 	var i models.Todo
 	err := row.Scan(
@@ -55,6 +59,8 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, e
 		&i.UpdatedAt,
 		&i.WorkspaceID,
 		&i.Priority,
+		&i.RecurrenceRule,
+		&i.RecurrenceParentID,
 	)
 	return &i, err
 }
@@ -69,7 +75,7 @@ func (q *Queries) Delete(ctx context.Context, id string) error {
 }
 
 const getByID = `-- name: GetByID :one
-SELECT id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id, priority FROM todos WHERE id=? LIMIT 1
+SELECT id, user_id, title, description, status, planned_date, completed_at, created_at, updated_at, workspace_id, priority, recurrence_rule, recurrence_parent_id FROM todos WHERE id=? LIMIT 1
 `
 
 func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) {
@@ -87,6 +93,8 @@ func (q *Queries) GetByID(ctx context.Context, id string) (*models.Todo, error) 
 		&i.UpdatedAt,
 		&i.WorkspaceID,
 		&i.Priority,
+		&i.RecurrenceRule,
+		&i.RecurrenceParentID,
 	)
 	return &i, err
 }

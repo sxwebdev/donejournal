@@ -35,6 +35,8 @@ func (e *Executor) Execute(ctx context.Context, userID int64, call provider.Tool
 	switch call.Function.Name {
 	case "create_todo":
 		return e.createTodo(ctx, userID, call.Function.Arguments)
+	case "create_recurring_todo":
+		return e.createRecurringTodo(ctx, userID, call.Function.Arguments)
 	case "create_note":
 		return e.createNote(ctx, userID, call.Function.Arguments)
 	case "find_todos":
@@ -112,7 +114,7 @@ func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string
 		priority = models.TodoPriorityType(args.Priority)
 	}
 
-	todo, err := e.services.Todos().CreateFromAPI(ctx, userID, args.Title, args.Description, plannedDate, workspaceID, priority)
+	todo, err := e.services.Todos().CreateFromAPI(ctx, userID, args.Title, args.Description, plannedDate, workspaceID, priority, nil)
 	if err != nil {
 		return "", fmt.Errorf("create todo: %w", err)
 	}
@@ -148,6 +150,80 @@ func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string
 		"status":       todo.Status,
 		"priority":     todo.Priority,
 		"planned_date": todo.PlannedDate.Format("2006-01-02"),
+	}
+	if len(tagNames) > 0 {
+		result["tags"] = tagNames
+	}
+	return toJSON(result)
+}
+
+type createRecurringTodoArgs struct {
+	Title          string   `json:"title"`
+	Description    string   `json:"description"`
+	PlannedDate    string   `json:"planned_date"`
+	RecurrenceRule string   `json:"recurrence_rule"`
+	Workspace      string   `json:"workspace"`
+	Priority       string   `json:"priority"`
+	Tags           []string `json:"tags"`
+}
+
+func (e *Executor) createRecurringTodo(ctx context.Context, userID int64, argsJSON string) (string, error) {
+	var args createRecurringTodoArgs
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return "", fmt.Errorf("parse create_recurring_todo args: %w", err)
+	}
+
+	plannedDate := time.Now()
+	if args.PlannedDate != "" {
+		parsed := carbon.Parse(args.PlannedDate).StdTime()
+		if !parsed.IsZero() {
+			plannedDate = parsed
+		}
+	}
+
+	var workspaceID *string
+	if args.Workspace != "" {
+		ws, err := e.services.Workspaces().FindOrCreateByName(ctx, userID, args.Workspace)
+		if err != nil {
+			return "", fmt.Errorf("resolve workspace: %w", err)
+		}
+		workspaceID = &ws.ID
+	}
+
+	priority := models.TodoPriorityNone
+	if args.Priority != "" {
+		priority = models.TodoPriorityType(args.Priority)
+	}
+
+	rule := args.RecurrenceRule
+	todo, err := e.services.Todos().CreateFromAPI(ctx, userID, args.Title, args.Description, plannedDate, workspaceID, priority, &rule)
+	if err != nil {
+		return "", fmt.Errorf("create recurring todo: %w", err)
+	}
+
+	var tagNames []string
+	if len(args.Tags) > 0 {
+		var tagIDs []string
+		for _, name := range args.Tags {
+			tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+			if err != nil {
+				continue
+			}
+			tagIDs = append(tagIDs, tag.ID)
+			tagNames = append(tagNames, tag.Name)
+		}
+		if len(tagIDs) > 0 {
+			_ = e.services.Tags().SetTodoTags(ctx, userID, todo.ID, tagIDs)
+		}
+	}
+
+	result := map[string]any{
+		"id":              todo.ID,
+		"title":          todo.Title,
+		"status":         todo.Status,
+		"priority":       todo.Priority,
+		"planned_date":   todo.PlannedDate.Format("2006-01-02"),
+		"recurrence_rule": rule,
 	}
 	if len(tagNames) > 0 {
 		result["tags"] = tagNames

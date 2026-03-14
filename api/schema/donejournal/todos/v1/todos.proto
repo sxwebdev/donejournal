@@ -90,6 +90,12 @@ message Todo {
   TodoPriority priority = 10;
   // IDs of tags attached to this todo.
   repeated string tag_ids = 11;
+  // Recurrence rule for the todo (e.g. "daily", "weekly", "monthly"). Empty means no recurrence.
+  optional string recurrence_rule = 12;
+  // ID of the parent todo this was spawned from (for recurring occurrences).
+  optional string recurrence_parent_id = 13;
+  // True if this is a projected/virtual occurrence (no DB record). Read-only, never set by clients.
+  bool is_virtual = 14;
 }
 
 // ListTodosRequest is the request to list todos with optional filters.
@@ -146,6 +152,8 @@ message CreateTodoRequest {
   TodoPriority priority = 5;
   // Optional tag IDs to attach to the todo.
   repeated string tag_ids = 6;
+  // Recurrence rule (e.g. "daily", "weekly", "monthly"). Empty means no recurrence.
+  optional string recurrence_rule = 7;
 }
 
 // CreateTodoResponse is the response after creating a todo.

@@ -143,9 +143,9 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - AI-режим: ввод с `/` переключает на natural language → отправка агенту
 - Горячие клавиши: `N` — новый таск, `I` — inbox, `/` — поиск
 
-### 2.4 Недельный вид календаря
+### 2.4 Недельный вид календаря ✅
 
-**Effort**: Medium | **Impact**: Medium
+**Effort**: Medium | **Impact**: Medium | **Status**: Done
 
 Текущий календарь — только месяц. Добавить переключатель Week/Month. Недельный вид показывает больше деталей на день. RPC `getCalendarEntries` уже поддерживает произвольные диапазоны дат.
 
@@ -183,7 +183,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 ## 3. Улучшения текущей реализации
 
-### 3.1 Приоритеты задач ~~DONE~~
+### 3.1 Приоритеты задач ✅
 
 **Effort**: Small | **Impact**: High | **Status**: Done
 
@@ -195,7 +195,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Новый параметр `priority` в tool `create_todo` и `update_todo` в `tools.go`
 - Обновить system prompt в `agent.go` для распознавания приоритета
 
-### 3.2 Повторяющиеся задачи
+### 3.2 Повторяющиеся задачи ✅ done
 
 **Effort**: Large | **Impact**: High
 
@@ -231,11 +231,11 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 ---
 
-## 4. Улучшения карточек Todo (`todo-item.tsx`) ~~DONE~~
+## 4. Улучшения карточек Todo (`todo-item.tsx`) ✅
 
 Текущая карточка: статус-иконка, title, description (2 строки), planned date, status badge, menu. Не отображается workspace (хотя `workspaceId` есть в модели), `createdAt`, `completedAt`. Нужна подготовка к будущим тегам и приоритетам.
 
-### 4.1 Workspace badge ~~DONE~~
+### 4.1 Workspace badge ✅
 
 **Effort**: Small | **Impact**: High | **Status**: Done
 
@@ -244,7 +244,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Стиль: `text-xs bg-muted px-1.5 py-0.5 rounded`
 - Если workspace не задан — не показывать
 
-### 4.2 Metadata row (рефакторинг нижней строки) ~~DONE~~
+### 4.2 Metadata row (рефакторинг нижней строки) ✅
 
 **Effort**: Small | **Impact**: Medium | **Status**: Done
 
@@ -256,7 +256,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 
 Формат: `flex items-center gap-1.5 text-xs text-muted-foreground`. Это фундамент для будущих тегов и приоритетов — новые элементы просто добавляются в строку.
 
-### 4.3 Relative dates + иконки ~~DONE~~
+### 4.3 Relative dates + иконки ✅
 
 **Effort**: Small | **Impact**: Small-Medium | **Status**: Done
 
@@ -264,7 +264,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Иконка `Calendar` перед датой
 - Overdue: `AlertTriangle` + красный текст (частично есть)
 
-### 4.4 Priority indicator (left border) ~~DONE~~
+### 4.4 Priority indicator (left border) ✅
 
 **Effort**: Small | **Impact**: High | **Зависимость**: после 3.1 Приоритеты задач | **Status**: Done
 
@@ -272,7 +272,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Urgent: `border-red-500`, High: `border-orange-500`, Medium: `border-yellow-500`, Low/None: без индикатора
 - Самый компактный вариант — не добавляет элементов в layout
 
-### 4.5 Теги как chips ~~DONE~~
+### 4.5 Теги как chips ✅
 
 **Effort**: Medium | **Impact**: Medium | **Зависимость**: после 3.4 Теги/Метки | **Status**: Done
 
@@ -280,7 +280,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Максимум 3 видимых + "+N" badge
 - Клик по тегу → фильтрация списка
 
-### 4.6 Completion info ~~DONE~~
+### 4.6 Completion info ✅
 
 **Effort**: Small | **Impact**: Small | **Status**: Done
 
@@ -288,7 +288,7 @@ DoneJournal — productivity-приложение с Telegram-ботом для 
 - Приглушённая карточка: `opacity-60` или `bg-muted/30`
 - Tooltip на иконке: "Completed 2 hours ago"
 
-### 4.7 Quick actions на hover ~~DONE~~
+### 4.7 Quick actions на hover ✅
 
 **Effort**: Medium | **Impact**: Medium | **Status**: Done
 

@@ -28,6 +28,13 @@ import {
 import { WorkspaceSelector } from "@/components/workspaces/workspace-selector"
 import { TagSelector } from "@/components/tags/tag-selector"
 
+const RECURRENCE_OPTIONS = [
+  { value: "", label: "No recurrence" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
+]
+
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
   description: z.string().max(1000).optional(),
@@ -36,6 +43,7 @@ const schema = z.object({
   priority: z.nativeEnum(TodoPriority).optional(),
   workspaceId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
+  recurrenceRule: z.string().optional(),
 })
 
 export type TodoFormValues = z.infer<typeof schema>
@@ -84,6 +92,7 @@ export function TodoForm({
   const plannedDate = watch("plannedDate")
   const status = watch("status")
   const priority = watch("priority")
+  const recurrenceRule = watch("recurrenceRule")
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -177,6 +186,27 @@ export function TodoForm({
           <SelectContent>
             {PRIORITY_OPTIONS.map((opt) => (
               <SelectItem key={opt.value} value={String(opt.value)}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Recurrence</Label>
+        <Select
+          value={recurrenceRule ?? ""}
+          onValueChange={(v) => setValue("recurrenceRule", v || undefined)}
+        >
+          <SelectTrigger className="w-full">
+            <SelectValue>
+              {RECURRENCE_OPTIONS.find((o) => o.value === (recurrenceRule ?? ""))?.label ?? "No recurrence"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {RECURRENCE_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
             ))}

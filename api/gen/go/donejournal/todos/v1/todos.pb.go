@@ -173,7 +173,13 @@ type Todo struct {
 	// Priority level.
 	Priority TodoPriority `protobuf:"varint,10,opt,name=priority,proto3,enum=donejournal.todos.v1.TodoPriority" json:"priority,omitempty"`
 	// IDs of tags attached to this todo.
-	TagIds        []string `protobuf:"bytes,11,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	TagIds []string `protobuf:"bytes,11,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	// Recurrence rule for the todo (e.g. "daily", "weekly", "monthly"). Empty means no recurrence.
+	RecurrenceRule *string `protobuf:"bytes,12,opt,name=recurrence_rule,json=recurrenceRule,proto3,oneof" json:"recurrence_rule,omitempty"`
+	// ID of the parent todo this was spawned from (for recurring occurrences).
+	RecurrenceParentId *string `protobuf:"bytes,13,opt,name=recurrence_parent_id,json=recurrenceParentId,proto3,oneof" json:"recurrence_parent_id,omitempty"`
+	// True if this is a projected/virtual occurrence (no DB record). Read-only, never set by clients.
+	IsVirtual     bool `protobuf:"varint,14,opt,name=is_virtual,json=isVirtual,proto3" json:"is_virtual,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -283,6 +289,27 @@ func (x *Todo) GetTagIds() []string {
 		return x.TagIds
 	}
 	return nil
+}
+
+func (x *Todo) GetRecurrenceRule() string {
+	if x != nil && x.RecurrenceRule != nil {
+		return *x.RecurrenceRule
+	}
+	return ""
+}
+
+func (x *Todo) GetRecurrenceParentId() string {
+	if x != nil && x.RecurrenceParentId != nil {
+		return *x.RecurrenceParentId
+	}
+	return ""
+}
+
+func (x *Todo) GetIsVirtual() bool {
+	if x != nil {
+		return x.IsVirtual
+	}
+	return false
 }
 
 // ListTodosRequest is the request to list todos with optional filters.
@@ -555,9 +582,11 @@ type CreateTodoRequest struct {
 	// Priority level.
 	Priority TodoPriority `protobuf:"varint,5,opt,name=priority,proto3,enum=donejournal.todos.v1.TodoPriority" json:"priority,omitempty"`
 	// Optional tag IDs to attach to the todo.
-	TagIds        []string `protobuf:"bytes,6,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	TagIds []string `protobuf:"bytes,6,rep,name=tag_ids,json=tagIds,proto3" json:"tag_ids,omitempty"`
+	// Recurrence rule (e.g. "daily", "weekly", "monthly"). Empty means no recurrence.
+	RecurrenceRule *string `protobuf:"bytes,7,opt,name=recurrence_rule,json=recurrenceRule,proto3,oneof" json:"recurrence_rule,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
 func (x *CreateTodoRequest) Reset() {
@@ -630,6 +659,13 @@ func (x *CreateTodoRequest) GetTagIds() []string {
 		return x.TagIds
 	}
 	return nil
+}
+
+func (x *CreateTodoRequest) GetRecurrenceRule() string {
+	if x != nil && x.RecurrenceRule != nil {
+		return *x.RecurrenceRule
+	}
+	return ""
 }
 
 // CreateTodoResponse is the response after creating a todo.
@@ -1351,7 +1387,7 @@ var File_donejournal_todos_v1_todos_proto protoreflect.FileDescriptor
 
 const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\n" +
-	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa4\x04\n" +
+	" donejournal/todos/v1/todos.proto\x12\x14donejournal.todos.v1\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xd5\x05\n" +
 	"\x04Todo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -1366,9 +1402,15 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\fworkspace_id\x18\t \x01(\tH\x01R\vworkspaceId\x88\x01\x01\x12>\n" +
 	"\bpriority\x18\n" +
 	" \x01(\x0e2\".donejournal.todos.v1.TodoPriorityR\bpriority\x12\x17\n" +
-	"\atag_ids\x18\v \x03(\tR\x06tagIdsB\x0f\n" +
+	"\atag_ids\x18\v \x03(\tR\x06tagIds\x12,\n" +
+	"\x0frecurrence_rule\x18\f \x01(\tH\x02R\x0erecurrenceRule\x88\x01\x01\x125\n" +
+	"\x14recurrence_parent_id\x18\r \x01(\tH\x03R\x12recurrenceParentId\x88\x01\x01\x12\x1d\n" +
+	"\n" +
+	"is_virtual\x18\x0e \x01(\bR\tisVirtualB\x0f\n" +
 	"\r_completed_atB\x0f\n" +
-	"\r_workspace_id\"\x9e\x03\n" +
+	"\r_workspace_idB\x12\n" +
+	"\x10_recurrence_ruleB\x17\n" +
+	"\x15_recurrence_parent_id\"\x9e\x03\n" +
 	"\x10ListTodosRequest\x12\x1b\n" +
 	"\tpage_size\x18\x01 \x01(\x05R\bpageSize\x12\x1d\n" +
 	"\n" +
@@ -1389,15 +1431,17 @@ const file_donejournal_todos_v1_todos_proto_rawDesc = "" +
 	"\x0eGetTodoRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"A\n" +
 	"\x0fGetTodoResponse\x12.\n" +
-	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\x9c\x02\n" +
+	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xde\x02\n" +
 	"\x11CreateTodoRequest\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12=\n" +
 	"\fplanned_date\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vplannedDate\x12&\n" +
 	"\fworkspace_id\x18\x04 \x01(\tH\x00R\vworkspaceId\x88\x01\x01\x12>\n" +
 	"\bpriority\x18\x05 \x01(\x0e2\".donejournal.todos.v1.TodoPriorityR\bpriority\x12\x17\n" +
-	"\atag_ids\x18\x06 \x03(\tR\x06tagIdsB\x0f\n" +
-	"\r_workspace_id\"D\n" +
+	"\atag_ids\x18\x06 \x03(\tR\x06tagIds\x12,\n" +
+	"\x0frecurrence_rule\x18\a \x01(\tH\x01R\x0erecurrenceRule\x88\x01\x01B\x0f\n" +
+	"\r_workspace_idB\x12\n" +
+	"\x10_recurrence_rule\"D\n" +
 	"\x12CreateTodoResponse\x12.\n" +
 	"\x04todo\x18\x01 \x01(\v2\x1a.donejournal.todos.v1.TodoR\x04todo\"\xc2\x03\n" +
 	"\x11UpdateTodoRequest\x12\x0e\n" +

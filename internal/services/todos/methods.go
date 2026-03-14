@@ -21,19 +21,20 @@ func (s *Service) Find(ctx context.Context, params repo_todos.FindParams) (*stor
 }
 
 // CreateFromAPI creates a new todo from API request
-func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, workspaceID *string, priority models.TodoPriorityType) (*models.Todo, error) {
+func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, description string, plannedDate time.Time, workspaceID *string, priority models.TodoPriorityType, recurrenceRule *string) (*models.Todo, error) {
 	if priority == "" {
 		priority = models.TodoPriorityNone
 	}
 	todo, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
-		ID:          utils.GenerateULID(),
-		UserID:      userID,
-		Title:       title,
-		Description: description,
-		Status:      models.TodoStatusPending,
-		PlannedDate: plannedDate,
-		WorkspaceID: workspaceID,
-		Priority:    priority,
+		ID:             utils.GenerateULID(),
+		UserID:         userID,
+		Title:          title,
+		Description:    description,
+		Status:         models.TodoStatusPending,
+		PlannedDate:    plannedDate,
+		WorkspaceID:    workspaceID,
+		Priority:       priority,
+		RecurrenceRule: recurrenceRule,
 	})
 	if err != nil {
 		return nil, err
@@ -122,7 +123,7 @@ func (s *Service) Update(ctx context.Context, userID int64, id string, params Up
 	return todo, nil
 }
 
-// Complete marks a todo as completed
+// Complete marks a todo as completed and spawns the next occurrence if recurring.
 func (s *Service) Complete(ctx context.Context, userID int64, id string) (*models.Todo, error) {
 	if id == "" {
 		return nil, storecmn.ErrEmptyID
@@ -142,8 +143,50 @@ func (s *Service) Complete(ctx context.Context, userID int64, id string) (*model
 		return nil, err
 	}
 
+	// If this is a recurring todo, create the next occurrence
+	if todo.RecurrenceRule != nil && *todo.RecurrenceRule != "" {
+		nextDate := NextRecurrenceDate(todo.PlannedDate, *todo.RecurrenceRule)
+		next, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
+			ID:                 utils.GenerateULID(),
+			UserID:             userID,
+			Title:              todo.Title,
+			Description:        todo.Description,
+			Status:             models.TodoStatusPending,
+			PlannedDate:        nextDate,
+			WorkspaceID:        todo.WorkspaceID,
+			Priority:           todo.Priority,
+			RecurrenceRule:     todo.RecurrenceRule,
+			RecurrenceParentID: &todo.ID,
+		})
+		if err == nil {
+			// Copy tags from completed todo to the new occurrence
+			tags, tagErr := s.store.Tags().FindByTodoID(ctx, todo.ID)
+			if tagErr == nil && len(tags) > 0 {
+				tagIDs := make([]string, len(tags))
+				for i, t := range tags {
+					tagIDs[i] = t.ID
+				}
+				_ = s.store.Tags().SetTodoTags(ctx, next.ID, tagIDs)
+			}
+		}
+	}
+
 	s.broker.Publish(TodoEvent{UserID: userID})
 	return todo, nil
+}
+
+// NextRecurrenceDate calculates the next planned date based on the recurrence rule.
+func NextRecurrenceDate(from time.Time, rule string) time.Time {
+	switch rule {
+	case "daily":
+		return from.AddDate(0, 0, 1)
+	case "weekly":
+		return from.AddDate(0, 0, 7)
+	case "monthly":
+		return from.AddDate(0, 1, 0)
+	default:
+		return from.AddDate(0, 0, 1)
+	}
 }
 
 // Delete deletes a todo
@@ -151,6 +194,11 @@ func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 	if id == "" {
 		return storecmn.ErrEmptyID
 	}
+	// Clear recurrence_parent_id on any child todos before deleting the parent
+	// to avoid FK constraint failures.
+	_, _ = s.store.SQLite().ExecContext(ctx,
+		"UPDATE todos SET recurrence_parent_id = NULL WHERE recurrence_parent_id = ?", id,
+	)
 	if err := s.store.Todos().Delete(ctx, id); err != nil {
 		return err
 	}

@@ -11,15 +11,17 @@ import (
 )
 
 type FindParams struct {
-	Statuses    []models.TodoStatusType
-	UserID      int64
-	DateFrom    *time.Time
-	DateTo      *time.Time
-	WorkspaceID *string
-	TagIDs      []string
-	OrderBy     string
-	Page        *uint32
-	PageSize    *uint32
+	Statuses          []models.TodoStatusType
+	UserID            int64
+	DateFrom          *time.Time
+	DateTo            *time.Time
+	WorkspaceID       *string
+	TagIDs            []string
+	OrderBy           string
+	Page              *uint32
+	PageSize          *uint32
+	HasRecurrenceRule bool
+	NoPagination      bool
 }
 
 func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
@@ -58,6 +60,10 @@ func findBuilder(params FindParams, col ...string) *sqlbuilder.SelectBuilder {
 		sb.Where(sb.Equal(ColumnNameTodosWorkspaceId.String(), *params.WorkspaceID))
 	}
 
+	if params.HasRecurrenceRule {
+		sb.Where("recurrence_rule IS NOT NULL AND recurrence_rule != ''")
+	}
+
 	if len(params.TagIDs) > 0 {
 		tagVals := make([]interface{}, len(params.TagIDs))
 		for i, id := range params.TagIDs {
@@ -91,11 +97,13 @@ func (s *CustomQueries) Find(ctx context.Context, params FindParams) (*storecmn.
 
 	sb.OrderByDesc(params.OrderBy)
 
-	limit, offset, err := storecmn.Pagination(params.Page, params.PageSize)
-	if err != nil {
-		return nil, err
+	if !params.NoPagination {
+		limit, offset, err := storecmn.Pagination(params.Page, params.PageSize)
+		if err != nil {
+			return nil, err
+		}
+		sb.Limit(int(limit)).Offset(int(offset))
 	}
-	sb.Limit(int(limit)).Offset(int(offset))
 
 	items := []*models.Todo{}
 	sql, args := sb.Build()

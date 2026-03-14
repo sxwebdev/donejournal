@@ -16,7 +16,8 @@ import { todosClient } from "@/api/client"
 import { useSubscriptionRefetch } from "@/hooks/use-subscription-refetch"
 import { TodoDialog } from "@/components/todos/todo-dialog"
 import { fromDate, fromDateOnly, toDate, formatDateISO } from "@/lib/dates"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Repeat } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Link } from "@tanstack/react-router"
 import {
   DndContext,
@@ -38,6 +39,7 @@ import {
   isSameMonth,
   isToday,
   format,
+  addWeeks,
 } from "date-fns"
 import { cn } from "@/lib/utils"
 import { ConnectError } from "@connectrpc/connect"
@@ -81,7 +83,19 @@ function TodoRow({
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `todo-${todo.id}`,
     data: { todo, sourceDate: dateStr },
+    disabled: todo.isVirtual,
   })
+
+  if (todo.isVirtual) {
+    return (
+      <div
+        className="w-full rounded px-1 py-0.5 text-left text-xs flex items-center gap-0.5 border-l-2 border-dashed border-muted-foreground/40 bg-muted/30 text-muted-foreground/60 cursor-default select-none"
+      >
+        <Repeat className="h-2.5 w-2.5 shrink-0" />
+        <span className="truncate">{todo.title}</span>
+      </div>
+    )
+  }
 
   return (
     <button
@@ -93,12 +107,13 @@ function TodoRow({
         onClick()
       }}
       className={cn(
-        "w-full truncate rounded px-1 py-0.5 text-left text-xs touch-none",
+        "w-full rounded px-1 py-0.5 text-left text-xs touch-none flex items-center gap-0.5",
         statusStyle[todo.status] ?? "bg-muted text-muted-foreground",
         isDragging && "opacity-30"
       )}
     >
-      {todo.title}
+      {todo.recurrenceRule && <Repeat className="h-2.5 w-2.5 shrink-0" />}
+      <span className="truncate">{todo.title}</span>
     </button>
   )
 }
@@ -193,9 +208,92 @@ function DayCell({
   )
 }
 
+function WeekDayCell({
+  date,
+  calDay,
+  dateStr,
+}: {
+  date: Date
+  calDay: CalendarDay | undefined
+  dateStr: string
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `day-${dateStr}`,
+    data: { date, dateStr },
+  })
+  const [editTodo, setEditTodo] = useState<Todo | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
+  const todos = calDay?.todos ?? []
+
+  return (
+    <>
+      <div
+        ref={setNodeRef}
+        className={cn(
+          "flex min-h-40 flex-col border-r p-2 transition-colors",
+          isOver && "bg-primary/10 ring-2 ring-inset ring-primary/30"
+        )}
+        onClick={() => setCreateOpen(true)}
+      >
+        <div className="mb-2 flex flex-col items-center">
+          <span className="text-xs font-medium text-muted-foreground">
+            {format(date, "EEE")}
+          </span>
+          <span
+            className={cn(
+              "flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold",
+              isToday(date) && "bg-primary text-primary-foreground"
+            )}
+          >
+            {date.getDate()}
+          </span>
+        </div>
+        <div className="flex flex-col gap-1 overflow-y-auto">
+          {todos.map((todo) => (
+            <TodoRow
+              key={todo.id}
+              todo={todo}
+              dateStr={dateStr}
+              onClick={() => setEditTodo(todo)}
+            />
+          ))}
+          {todos.length === 0 && (
+            <span className="text-center text-xs text-muted-foreground/50">—</span>
+          )}
+        </div>
+      </div>
+
+      {editTodo && (
+        <TodoDialog
+          mode="edit"
+          todo={editTodo}
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setEditTodo(null)
+          }}
+        />
+      )}
+      {createOpen && (
+        <TodoDialog
+          mode="create"
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setCreateOpen(false)
+          }}
+          initialDate={date}
+        />
+      )}
+    </>
+  )
+}
+
 export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props) {
   const qc = useQueryClient()
   const [activeTodo, setActiveTodo] = useState<Todo | null>(null)
+  const [viewMode, setViewMode] = useState<"month" | "week">("month")
+  const [currentWeek, setCurrentWeek] = useState(() =>
+    startOfWeek(new Date(), WEEK_START)
+  )
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -242,8 +340,14 @@ export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props
     moveMutation.mutate({ id: todo.id, plannedDate: fromDateOnly(newDate) })
   }
 
-  const start = startOfWeek(startOfMonth(currentMonth), WEEK_START)
-  const end = endOfWeek(endOfMonth(currentMonth), WEEK_START)
+  const start =
+    viewMode === "month"
+      ? startOfWeek(startOfMonth(currentMonth), WEEK_START)
+      : startOfWeek(currentWeek, WEEK_START)
+  const end =
+    viewMode === "month"
+      ? endOfWeek(endOfMonth(currentMonth), WEEK_START)
+      : endOfWeek(currentWeek, WEEK_START)
 
   const query = useQuery(getCalendarEntries, {
     from: fromDate(start),
@@ -272,16 +376,17 @@ export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props
   const days = eachDayOfInterval({ start, end })
   const weeks = chunk(days, 7)
 
-  const prevMonth = new Date(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth() - 1,
-    1
-  )
-  const nextMonth = new Date(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth() + 1,
-    1
-  )
+  const prevMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1)
+  const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1)
+
+  const weekStart = startOfWeek(currentWeek, WEEK_START)
+  const weekEnd = endOfWeek(currentWeek, WEEK_START)
+  const weekLabel =
+    format(weekStart, "MMM d") +
+    " – " +
+    (weekStart.getMonth() === weekEnd.getMonth()
+      ? format(weekEnd, "d, yyyy")
+      : format(weekEnd, "MMM d, yyyy"))
 
   return (
     <DndContext
@@ -293,56 +398,98 @@ export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props
         {/* Header */}
         <div className="flex items-center justify-between border-b px-4 py-3">
           <button
-            onClick={() => onMonthChange(prevMonth)}
+            onClick={() =>
+              viewMode === "month"
+                ? onMonthChange(prevMonth)
+                : setCurrentWeek(addWeeks(currentWeek, -1))
+            }
             className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
-            aria-label="Previous month"
+            aria-label="Previous"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h2 className="text-base font-semibold">
-            {format(currentMonth, "MMMM yyyy")}
-          </h2>
+
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-semibold">
+              {viewMode === "month" ? format(currentMonth, "MMMM yyyy") : weekLabel}
+            </h2>
+            <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "month" | "week")}>
+              <TabsList className="h-7 text-xs">
+                <TabsTrigger value="month" className="px-2.5 py-1 text-xs">Month</TabsTrigger>
+                <TabsTrigger value="week" className="px-2.5 py-1 text-xs">Week</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
           <button
-            onClick={() => onMonthChange(nextMonth)}
+            onClick={() =>
+              viewMode === "month"
+                ? onMonthChange(nextMonth)
+                : setCurrentWeek(addWeeks(currentWeek, 1))
+            }
             className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-muted"
-            aria-label="Next month"
+            aria-label="Next"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Weekday labels */}
-        <div className="grid grid-cols-7 border-b">
-          {WEEKDAYS.map((day) => (
-            <div
-              key={day}
-              className="border-r py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
-            >
-              {day}
+        {viewMode === "month" && (
+          <>
+            {/* Weekday labels */}
+            <div className="grid grid-cols-7 border-b">
+              {WEEKDAYS.map((day) => (
+                <div
+                  key={day}
+                  className="border-r py-2 text-center text-xs font-medium text-muted-foreground last:border-r-0"
+                >
+                  {day}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        {/* Calendar grid */}
-        <div className="flex-1">
-          {weeks.map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7">
-              {week.map((date, di) => {
+            {/* Month grid */}
+            <div className="flex-1">
+              {weeks.map((week, wi) => (
+                <div key={wi} className="grid grid-cols-7">
+                  {week.map((date, di) => {
+                    const dateStr = formatDateISO(date)
+                    return (
+                      <div key={di} className={cn(di === 6 && "border-r-0")}>
+                        <DayCell
+                          date={date}
+                          calDay={dayMap.get(dateStr)}
+                          isCurrentMonth={isSameMonth(date, currentMonth)}
+                          dateStr={dateStr}
+                        />
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {viewMode === "week" && (
+          <>
+            {/* Week grid — single row of 7 days */}
+            <div className="grid grid-cols-7 border-b">
+              {days.map((date, di) => {
                 const dateStr = formatDateISO(date)
                 return (
                   <div key={di} className={cn(di === 6 && "border-r-0")}>
-                    <DayCell
+                    <WeekDayCell
                       date={date}
                       calDay={dayMap.get(dateStr)}
-                      isCurrentMonth={isSameMonth(date, currentMonth)}
                       dateStr={dateStr}
                     />
                   </div>
                 )
               })}
             </div>
-          ))}
-        </div>
+          </>
+        )}
 
         {/* Legend */}
         <div className="flex flex-wrap gap-4 border-t px-4 py-3 text-xs text-muted-foreground">
@@ -366,11 +513,12 @@ export function CalendarView({ currentMonth, onMonthChange, workspaceId }: Props
         {activeTodo ? (
           <div
             className={cn(
-              "w-32 truncate rounded px-1 py-0.5 text-xs shadow-lg",
+              "w-32 rounded px-1 py-0.5 text-xs shadow-lg flex items-center gap-0.5",
               statusStyle[activeTodo.status] ?? "bg-muted text-muted-foreground"
             )}
           >
-            {activeTodo.title}
+            {activeTodo.recurrenceRule && <Repeat className="h-2.5 w-2.5 shrink-0" />}
+            <span className="truncate">{activeTodo.title}</span>
           </div>
         ) : null}
       </DragOverlay>

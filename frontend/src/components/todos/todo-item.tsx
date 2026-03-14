@@ -10,6 +10,7 @@ import {
   Calendar as CalendarIcon,
   AlertTriangle,
   Folder,
+  Repeat,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -150,8 +151,10 @@ export function TodoItem({ todo, isOverdue }: Props) {
     return null
   })()
 
+  const recurrenceLabel: Record<string, string> = { daily: "Daily", weekly: "Weekly", monthly: "Monthly" }
+
   // Check if metadata row has content
-  const hasMetadata = dateInfo || workspaceName || todo.tagIds.length > 0
+  const hasMetadata = dateInfo || workspaceName || todo.tagIds.length > 0 || !!todo.recurrenceRule
 
   return (
     <>
@@ -270,8 +273,21 @@ export function TodoItem({ todo, isOverdue }: Props) {
                 </span>
               )}
 
+              {/* Separator before recurrence */}
+              {(dateInfo || workspaceName) && todo.recurrenceRule && (
+                <span className="text-muted-foreground/50">·</span>
+              )}
+
+              {/* Recurrence badge */}
+              {todo.recurrenceRule && (
+                <span className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5">
+                  <Repeat className="h-3 w-3" />
+                  {recurrenceLabel[todo.recurrenceRule] ?? todo.recurrenceRule}
+                </span>
+              )}
+
               {/* Separator before tags */}
-              {(dateInfo || workspaceName) && todo.tagIds.length > 0 && (
+              {(dateInfo || workspaceName || todo.recurrenceRule) && todo.tagIds.length > 0 && (
                 <span className="text-muted-foreground/50">·</span>
               )}
 

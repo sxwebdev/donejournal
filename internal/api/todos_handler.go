@@ -7,6 +7,7 @@ import (
 
 	"connectrpc.com/connect"
 	todosv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1"
+	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/services/todos"
@@ -197,7 +198,7 @@ func (h *TodosHandler) CreateTodo(ctx context.Context, req *connect.Request[todo
 	}
 
 	priority := todoPriorityFromProto(req.Msg.GetPriority())
-	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate, req.Msg.WorkspaceId, priority)
+	todo, err := h.baseService.Todos().CreateFromAPI(ctx, userID, req.Msg.GetTitle(), req.Msg.GetDescription(), plannedDate, req.Msg.WorkspaceId, priority, req.Msg.RecurrenceRule)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -349,6 +350,20 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
+	// Also fetch active recurring todos whose planned_date is before the visible range
+	// so we can project them into the range.
+	beforeFrom := from.AddDate(0, 0, -1)
+	recurringResult, err := h.baseService.Todos().Find(ctx, repo_todos.FindParams{
+		UserID:            userID,
+		DateTo:            &beforeFrom,
+		Statuses:          []models.TodoStatusType{models.TodoStatusPending, models.TodoStatusInProgress},
+		HasRecurrenceRule: true,
+		NoPagination:      true,
+	})
+	if err != nil {
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
 	// Group by date
 	dayMap := make(map[string]*todosv1.CalendarDay)
 	for _, t := range result.Items {
@@ -364,6 +379,46 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 		day.TotalCount++
 		if t.Status == "completed" {
 			day.CompletedCount++
+		}
+	}
+
+	// Project recurring todos (both in-range and pre-range) into virtual occurrences
+	allRecurring := append(result.Items, recurringResult.Items...)
+	seenRecurring := make(map[string]bool)
+	for _, t := range allRecurring {
+		if t.RecurrenceRule == nil || *t.RecurrenceRule == "" {
+			continue
+		}
+		if t.Status != models.TodoStatusPending && t.Status != models.TodoStatusInProgress {
+			continue
+		}
+		if seenRecurring[t.ID] {
+			continue
+		}
+		seenRecurring[t.ID] = true
+
+		// Find first projected date within or after [from, to]
+		projDate := todos.NextRecurrenceDate(t.PlannedDate, *t.RecurrenceRule)
+		// Fast-forward to the first date >= from
+		for projDate.Before(from) {
+			projDate = todos.NextRecurrenceDate(projDate, *t.RecurrenceRule)
+		}
+		for !projDate.After(to) {
+			dateKey := projDate.Format(time.DateOnly)
+			vTodo := todoToProto(t)
+			vTodo.Id = fmt.Sprintf("%s_v_%s", t.ID, projDate.Format("20060102"))
+			vTodo.PlannedDate = timestampFromDate(projDate)
+			vTodo.IsVirtual = true
+
+			day, ok := dayMap[dateKey]
+			if !ok {
+				day = &todosv1.CalendarDay{Date: timestampFromDate(projDate)}
+				dayMap[dateKey] = day
+			}
+			day.Todos = append(day.Todos, vTodo)
+			day.TotalCount++
+
+			projDate = todos.NextRecurrenceDate(projDate, *t.RecurrenceRule)
 		}
 	}
 

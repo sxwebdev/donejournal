@@ -16,15 +16,17 @@ import (
 
 func todoToProto(t *models.Todo) *todosv1.Todo {
 	pb := &todosv1.Todo{
-		Id:          t.ID,
-		Title:       t.Title,
-		Description: t.Description,
-		Status:      todoStatusToProto(t.Status),
-		Priority:    todoPriorityToProto(t.Priority),
-		PlannedDate: timestamppb.New(t.PlannedDate),
-		CreatedAt:   timestamppb.New(t.CreatedAt),
-		UpdatedAt:   timestamppb.New(t.UpdatedAt),
-		WorkspaceId: t.WorkspaceID,
+		Id:                 t.ID,
+		Title:              t.Title,
+		Description:        t.Description,
+		Status:             todoStatusToProto(t.Status),
+		Priority:           todoPriorityToProto(t.Priority),
+		PlannedDate:        timestamppb.New(t.PlannedDate),
+		CreatedAt:          timestamppb.New(t.CreatedAt),
+		UpdatedAt:          timestamppb.New(t.UpdatedAt),
+		WorkspaceId:        t.WorkspaceID,
+		RecurrenceRule:     t.RecurrenceRule,
+		RecurrenceParentId: t.RecurrenceParentID,
 	}
 	if t.CompletedAt != nil {
 		pb.CompletedAt = timestamppb.New(*t.CompletedAt)

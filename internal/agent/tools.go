@@ -55,6 +55,50 @@ func toolDefinitions() []provider.ToolDefinition {
 		{
 			Type: "function",
 			Function: provider.FunctionDef{
+				Name:        "create_recurring_todo",
+				Description: "Create a recurring task that automatically repeats. Use when user says 'every day', 'weekly', 'каждый день', 'еженедельно', 'каждый понедельник', etc.",
+				Parameters: mustJSON(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"title": map[string]any{
+							"type":        "string",
+							"description": "Task title",
+						},
+						"description": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "Optional longer description",
+						},
+						"planned_date": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "First occurrence date in YYYY-MM-DD format. Defaults to today.",
+						},
+						"recurrence_rule": map[string]any{
+							"type":        "string",
+							"enum":        []string{"daily", "weekly", "monthly"},
+							"description": "How often to repeat: daily (every day), weekly (every 7 days), monthly (every month).",
+						},
+						"workspace": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "Optional workspace/project name.",
+						},
+						"priority": map[string]any{
+							"type":        []string{"string", "null"},
+							"enum":        []string{"none", "low", "medium", "high", "critical"},
+							"description": "Task priority level. Default: none.",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Optional tag names to attach.",
+						},
+					},
+					"required": []string{"title", "recurrence_rule"},
+				}),
+			},
+		},
+		{
+			Type: "function",
+			Function: provider.FunctionDef{
 				Name:        "create_note",
 				Description: "Create a note. Use for ideas, reference material, things to remember.",
 				Parameters: mustJSON(map[string]any{
