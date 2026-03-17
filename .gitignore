@@ -29,6 +29,7 @@ go.work.sum
 
 .vite
 .DS_Store
+.claude
 
 # Editor/IDE
 # .idea/
