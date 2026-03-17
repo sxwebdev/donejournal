@@ -2,7 +2,7 @@ package tags
 
 import (
 	"github.com/sxwebdev/donejournal/internal/store"
-	"github.com/sxwebdev/donejournal/pkg/broker"
+	"github.com/sxwebdev/xutils/broker"
 )
 
 // TagEvent is published whenever a tag or tag association is created, updated, or deleted.

@@ -2,7 +2,7 @@ package workspaces
 
 import (
 	"github.com/sxwebdev/donejournal/internal/store"
-	"github.com/sxwebdev/donejournal/pkg/broker"
+	"github.com/sxwebdev/xutils/broker"
 )
 
 // WorkspaceEvent is published whenever a workspace is created, updated, or deleted.

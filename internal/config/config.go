@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/tkcrm/mx/launcher/ops"
 	"github.com/tkcrm/mx/logger"
-	"github.com/tkcrm/mx/ops"
 )
 
 type Config struct {
@@ -12,8 +12,8 @@ type Config struct {
 	Server   ServerConfig
 	Telegram TelegramConfig
 	Agent    AgentConfig `yaml:"agent"`
-	STT      STTConfig  `yaml:"stt"`
-	Timezone string    `yaml:"timezone" validate:"required" default:"UTC"`
+	STT      STTConfig   `yaml:"stt"`
+	Timezone string      `yaml:"timezone" validate:"required" default:"UTC"`
 }
 
 type AuthConfig struct {

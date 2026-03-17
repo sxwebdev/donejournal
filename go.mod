@@ -17,21 +17,22 @@ require (
 	github.com/sxwebdev/tokenmanager v0.0.0-20260113130624-437d3b251605
 	github.com/sxwebdev/xconfig v0.3.1
 	github.com/sxwebdev/xconfig/decoders/xconfigyaml v0.0.0-20260204103015-8002f9e58740
-	github.com/tkcrm/mx v0.2.34
+	github.com/sxwebdev/xutils v0.0.0-20260316153528-d7ac94d1d65a
+	github.com/tkcrm/mx v0.4.0
 	github.com/urfave/cli/v3 v3.7.0
 	google.golang.org/protobuf v1.36.11
-	modernc.org/sqlite v1.46.1
+	modernc.org/sqlite v1.47.0
 )
 
 require (
-	github.com/dgraph-io/ristretto/v2 v2.2.0 // indirect
-	github.com/google/flatbuffers v25.2.10+incompatible // indirect
+	github.com/dgraph-io/ristretto/v2 v2.4.0 // indirect
+	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 )
 
 require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bytedance/gopkg v0.1.3 // indirect
+	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.0 // indirect
 	github.com/bytedance/sonic/loader v0.5.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -87,11 +88,11 @@ require (
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/arch v0.25.0 // indirect
-	golang.org/x/crypto v0.48.0 // indirect
-	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	modernc.org/libc v1.70.0 // indirect
 	modernc.org/mathutil v1.7.1 // indirect

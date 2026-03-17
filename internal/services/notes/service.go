@@ -2,7 +2,7 @@ package notes
 
 import (
 	"github.com/sxwebdev/donejournal/internal/store"
-	"github.com/sxwebdev/donejournal/pkg/broker"
+	"github.com/sxwebdev/xutils/broker"
 )
 
 // NoteEvent is published whenever a note is created, updated, or deleted.

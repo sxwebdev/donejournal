@@ -2,7 +2,7 @@ package inbox
 
 import (
 	"github.com/sxwebdev/donejournal/internal/store"
-	"github.com/sxwebdev/donejournal/pkg/broker"
+	"github.com/sxwebdev/xutils/broker"
 )
 
 // InboxEvent is published whenever an inbox item is created, updated, or deleted.

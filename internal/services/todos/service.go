@@ -2,7 +2,7 @@ package todos
 
 import (
 	"github.com/sxwebdev/donejournal/internal/store"
-	"github.com/sxwebdev/donejournal/pkg/broker"
+	"github.com/sxwebdev/xutils/broker"
 )
 
 // TodoEvent is published whenever a todo is created, updated, or deleted.

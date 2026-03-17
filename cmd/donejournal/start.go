@@ -11,16 +11,16 @@ import (
 	"github.com/dromara/carbon/v2"
 	"github.com/riverqueue/river/riverdriver/riversqlite"
 	"github.com/riverqueue/river/rivermigrate"
+	"github.com/sxwebdev/donejournal/internal/agent"
+	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/api"
 	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/config"
-	"github.com/sxwebdev/donejournal/internal/agent"
-	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/processor"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
-	"github.com/sxwebdev/donejournal/internal/stt"
 	"github.com/sxwebdev/donejournal/internal/store"
 	"github.com/sxwebdev/donejournal/internal/store/badgerdb"
+	"github.com/sxwebdev/donejournal/internal/stt"
 	"github.com/sxwebdev/donejournal/internal/tmanager"
 	"github.com/sxwebdev/donejournal/pkg/migrator"
 	"github.com/sxwebdev/donejournal/pkg/sqlite"
@@ -28,9 +28,8 @@ import (
 	"github.com/sxwebdev/donejournal/sql"
 	"github.com/sxwebdev/tokenmanager"
 	"github.com/tkcrm/mx/launcher"
+	"github.com/tkcrm/mx/launcher/services/pingpong"
 	"github.com/tkcrm/mx/logger"
-	"github.com/tkcrm/mx/service"
-	"github.com/tkcrm/mx/service/pingpong"
 	"github.com/urfave/cli/v3"
 )
 
@@ -221,16 +220,16 @@ func startCMD() *cli.Command {
 
 			// register services
 			ln.ServicesRunner().Register(
-				service.New(service.WithService(pingpong.New(l))),
-				service.New(service.WithService(badgerDB)),
-				service.New(service.WithService(sqliteDB)),
-				service.New(service.WithService(riverSqliteDB)),
-				service.New(
-					service.WithService(taskManager),
-					service.WithShutdownTimeout(time.Minute),
+				launcher.NewService(launcher.WithService(pingpong.New(l))),
+				launcher.NewService(launcher.WithService(badgerDB)),
+				launcher.NewService(launcher.WithService(sqliteDB)),
+				launcher.NewService(launcher.WithService(riverSqliteDB)),
+				launcher.NewService(
+					launcher.WithService(taskManager),
+					launcher.WithShutdownTimeout(time.Minute),
 				),
-				service.New(service.WithService(botService)),
-				service.New(service.WithService(apiService)),
+				launcher.NewService(launcher.WithService(botService)),
+				launcher.NewService(launcher.WithService(apiService)),
 			)
 
 			return ln.Run()
