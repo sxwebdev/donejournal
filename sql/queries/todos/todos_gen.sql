@@ -1,6 +1,6 @@
 -- name: Create :one
-INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id, priority)
-	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+INSERT INTO todos (id, user_id, title, description, status, planned_date, completed_at, workspace_id, priority, recurrence_rule, recurrence_parent_id)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	RETURNING *;
 
 -- name: Delete :exec

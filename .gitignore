@@ -42,5 +42,6 @@ config.yaml
 config-agent.yaml
 dist
 .tmp
+.pgxgen
 
 scripts/

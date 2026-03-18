@@ -1,106 +1,159 @@
-version: "1"
-sqlc:
-  - schema_dir: migrations
+version: "2"
+schemas:
+  - name: main
+    engine: sqlite
+    schema_dir: migrations
     models:
-      replace_sqlc_nullable_types: true
-      move:
-        output_dir: ../internal/models
-        output_file_name: models_gen.go
-        package_name: models
-        package_path: github.com/sxwebdev/donejournal/internal/models
-        imports:
-          - path: github.com/sxwebdev/donejournal/internal/models
-            go_type: TodoStatusType
-          - path: github.com/sxwebdev/donejournal/internal/models
-            go_type: TodoPriorityType
-    crud:
-      auto_remove_generated_files: true
-      exclude_table_name_from_methods: true
-      tables:
-        # inbox
-        inbox:
-          output_dir: queries/inbox
-          primary_column: id
+      output_dir: ../internal/models
+      output_file_name: models_gen.go
+      package_name: models
+      package_path: github.com/sxwebdev/donejournal/internal/models
+      replace_nullable_types: true
+      custom_types:
+        - TodoStatusType
+        - TodoPriorityType
+    sqlc:
+      defaults:
+        emit_interface: true
+        emit_json_tags: true
+        emit_db_tags: true
+        emit_empty_slices: true
+        emit_result_struct_pointers: true
+        emit_enum_valid_method: true
+        emit_all_enum_values: true
+      overrides:
+        types:
+          - db_type: jsonb
+            go_type:
+              import: github.com/sxwebdev/donejournal/internal/store/storecmn
+              type: JSONField
+          - db_type: JSONB
+            go_type:
+              import: github.com/sxwebdev/donejournal/internal/store/storecmn
+              type: JSONField
+        columns:
+          - column: inbox.id
+            go_struct_tag: validate:"required"
+          - column: inbox.data
+            go_struct_tag: validate:"required"
+          - column: inbox.user_id
+            go_struct_tag: validate:"required"
+          - column: todos.id
+            go_struct_tag: validate:"required"
+          - column: todos.title
+            go_struct_tag: validate:"required"
+          - column: todos.status
+            go_type:
+              type: TodoStatusType
+            go_struct_tag: validate:"required,oneof=pending inprogress completed cancelled"
+          - column: todos.user_id
+            go_struct_tag: validate:"required"
+          - column: todos.priority
+            go_type:
+              type: TodoPriorityType
+            go_struct_tag: validate:"required,oneof=none low medium high critical"
+          - column: notes.id
+            go_struct_tag: validate:"required"
+          - column: notes.title
+            go_struct_tag: validate:"required"
+          - column: notes.user_id
+            go_struct_tag: validate:"required"
+          - column: workspaces.id
+            go_struct_tag: validate:"required"
+          - column: workspaces.name
+            go_struct_tag: validate:"required"
+          - column: workspaces.user_id
+            go_struct_tag: validate:"required"
+          - column: tags.id
+            go_struct_tag: validate:"required"
+          - column: tags.name
+            go_struct_tag: validate:"required"
+          - column: tags.user_id
+            go_struct_tag: validate:"required"
+    defaults:
+      queries_dir_prefix: queries
+      output_dir_prefix: ../internal/store/repos
+      crud:
+        auto_clean: true
+        exclude_table_name: true
+    tables:
+      inbox:
+        primary_column: id
+        sqlc:
+          query_parameter_limit: 2
+        crud:
           methods:
             create:
+              returning: "*"
               skip_columns:
                 - created_at
                 - updated_at
-              returning: "*"
-            delete:
+            delete: {}
             get:
               name: GetByID
-
-        # todos
-        todos:
-          output_dir: queries/todos
-          primary_column: id
-          methods:
-            create:
-              skip_columns:
-                - created_at
-                - updated_at
-              returning: "*"
-            delete:
-            get:
-              name: GetByID
-
-        # notes
-        notes:
-          output_dir: queries/notes
-          primary_column: id
-          methods:
-            create:
-              skip_columns:
-                - created_at
-                - updated_at
-              returning: "*"
-            delete:
-            get:
-              name: GetByID
-
-        # workspaces
-        workspaces:
-          output_dir: queries/workspaces
-          primary_column: id
-          methods:
-            create:
-              skip_columns:
-                - created_at
-                - updated_at
-              returning: "*"
-            delete:
-            get:
-              name: GetByID
-
-        # tags
-        tags:
-          output_dir: queries/tags
-          primary_column: id
-          methods:
-            create:
-              skip_columns:
-                - created_at
-                - updated_at
-              returning: "*"
-            delete:
-            get:
-              name: GetByID
-
-    constants:
-      tables:
-        inbox:
-          output_dir: ../internal/store/repos/repo_inbox
+        constants:
           include_column_names: true
-        todos:
-          output_dir: ../internal/store/repos/repo_todos
+      notes:
+        primary_column: id
+        sqlc:
+          query_parameter_limit: 2
+        crud:
+          methods:
+            create:
+              returning: "*"
+              skip_columns:
+                - created_at
+                - updated_at
+            delete: {}
+            get:
+              name: GetByID
+        constants:
           include_column_names: true
-        notes:
-          output_dir: ../internal/store/repos/repo_notes
+      tags:
+        primary_column: id
+        sqlc:
+          query_parameter_limit: 2
+        crud:
+          methods:
+            create:
+              returning: "*"
+              skip_columns:
+                - created_at
+                - updated_at
+            delete: {}
+            get:
+              name: GetByID
+        constants:
           include_column_names: true
-        workspaces:
-          output_dir: ../internal/store/repos/repo_workspaces
+      todos:
+        primary_column: id
+        sqlc:
+          query_parameter_limit: 2
+        crud:
+          methods:
+            create:
+              returning: "*"
+              skip_columns:
+                - created_at
+                - updated_at
+            delete: {}
+            get:
+              name: GetByID
+        constants:
           include_column_names: true
-        tags:
-          output_dir: ../internal/store/repos/repo_tags
+      workspaces:
+        primary_column: id
+        sqlc:
+          query_parameter_limit: 2
+        crud:
+          methods:
+            create:
+              returning: "*"
+              skip_columns:
+                - created_at
+                - updated_at
+            delete: {}
+            get:
+              name: GetByID
+        constants:
           include_column_names: true

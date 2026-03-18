@@ -24,8 +24,7 @@ genenvs:
 	go run ./cmd/donejournal config genenvs
 
 gensql:
-	pgxgen --pgxgen-config sql/pgxgen.yaml --sqlc-config sql/sqlc.yaml crud
-	pgxgen --pgxgen-config sql/pgxgen.yaml --sqlc-config sql/sqlc.yaml sqlc generate
+	pgxgen -config sql/pgxgen.yaml generate
 
 genproto:
 	rm -rf api/gen
