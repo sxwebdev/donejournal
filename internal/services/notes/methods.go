@@ -12,11 +12,11 @@ import (
 // Create a new note
 func (s *Service) Create(ctx context.Context, userID int64, title, body string, workspaceID *string) (*models.Note, error) {
 	note, err := s.store.Notes().Create(ctx, repo_notes.CreateParams{
-		ID:        utils.GenerateULID(),
-		UserID:    userID,
-		Title:     title,
-		Body:      body,
-		WorkspaceID: workspaceID,
+		ID:          utils.GenerateULID(),
+		UserID:      userID,
+		Title:       title,
+		Body:        body,
+		WorkspaceID: storecmn.PtrToNullString(workspaceID),
 	})
 	if err != nil {
 		return nil, err
@@ -40,8 +40,8 @@ func (s *Service) GetByID(ctx context.Context, id string) (*models.Note, error) 
 
 // UpdateParams contains optional fields for partial update
 type UpdateParams struct {
-	Title     *string
-	Body      *string
+	Title       *string
+	Body        *string
 	WorkspaceID *string
 }
 

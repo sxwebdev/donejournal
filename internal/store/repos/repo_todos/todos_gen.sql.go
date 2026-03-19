@@ -7,6 +7,7 @@ package repo_todos
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/sxwebdev/donejournal/internal/models"
@@ -25,11 +26,11 @@ type CreateParams struct {
 	Description        string                  `db:"description" json:"description"`
 	Status             models.TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate        time.Time               `db:"planned_date" json:"planned_date"`
-	CompletedAt        *time.Time              `db:"completed_at" json:"completed_at"`
-	WorkspaceID        *string                 `db:"workspace_id" json:"workspace_id"`
+	CompletedAt        sql.NullTime            `db:"completed_at" json:"completed_at"`
+	WorkspaceID        sql.NullString          `db:"workspace_id" json:"workspace_id"`
 	Priority           models.TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
-	RecurrenceRule     *string                 `db:"recurrence_rule" json:"recurrence_rule"`
-	RecurrenceParentID *string                 `db:"recurrence_parent_id" json:"recurrence_parent_id"`
+	RecurrenceRule     sql.NullString          `db:"recurrence_rule" json:"recurrence_rule"`
+	RecurrenceParentID sql.NullString          `db:"recurrence_parent_id" json:"recurrence_parent_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Todo, error) {

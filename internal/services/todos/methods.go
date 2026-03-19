@@ -2,6 +2,7 @@ package todos
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/sxwebdev/donejournal/internal/models"
@@ -32,9 +33,9 @@ func (s *Service) CreateFromAPI(ctx context.Context, userID int64, title, descri
 		Description:    description,
 		Status:         models.TodoStatusPending,
 		PlannedDate:    plannedDate,
-		WorkspaceID:    workspaceID,
+		WorkspaceID:    storecmn.PtrToNullString(workspaceID),
 		Priority:       priority,
-		RecurrenceRule: recurrenceRule,
+		RecurrenceRule: storecmn.PtrToNullString(recurrenceRule),
 	})
 	if err != nil {
 		return nil, err
@@ -144,8 +145,8 @@ func (s *Service) Complete(ctx context.Context, userID int64, id string) (*model
 	}
 
 	// If this is a recurring todo, create the next occurrence
-	if todo.RecurrenceRule != nil && *todo.RecurrenceRule != "" {
-		nextDate := NextRecurrenceDate(todo.PlannedDate, *todo.RecurrenceRule)
+	if todo.RecurrenceRule.Valid && todo.RecurrenceRule.String != "" {
+		nextDate := NextRecurrenceDate(todo.PlannedDate, todo.RecurrenceRule.String)
 		next, err := s.store.Todos().Create(ctx, repo_todos.CreateParams{
 			ID:                 utils.GenerateULID(),
 			UserID:             userID,
@@ -156,7 +157,7 @@ func (s *Service) Complete(ctx context.Context, userID int64, id string) (*model
 			WorkspaceID:        todo.WorkspaceID,
 			Priority:           todo.Priority,
 			RecurrenceRule:     todo.RecurrenceRule,
-			RecurrenceParentID: &todo.ID,
+			RecurrenceParentID: sql.NullString{String: todo.ID, Valid: true},
 		})
 		if err == nil {
 			// Copy tags from completed todo to the new occurrence

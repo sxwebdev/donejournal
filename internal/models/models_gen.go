@@ -2,6 +2,7 @@
 package models
 
 import (
+	"database/sql"
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 	"time"
 )
@@ -16,13 +17,13 @@ type Inbox struct {
 }
 
 type Note struct {
-	ID          string    `db:"id" json:"id" validate:"required"`
-	UserID      int64     `db:"user_id" json:"user_id" validate:"required"`
-	Title       string    `db:"title" json:"title" validate:"required"`
-	Body        string    `db:"body" json:"body"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
-	WorkspaceID *string   `db:"workspace_id" json:"workspace_id"`
+	ID          string         `db:"id" json:"id" validate:"required"`
+	UserID      int64          `db:"user_id" json:"user_id" validate:"required"`
+	Title       string         `db:"title" json:"title" validate:"required"`
+	Body        string         `db:"body" json:"body"`
+	CreatedAt   time.Time      `db:"created_at" json:"created_at"`
+	UpdatedAt   time.Time      `db:"updated_at" json:"updated_at"`
+	WorkspaceID sql.NullString `db:"workspace_id" json:"workspace_id"`
 }
 
 type NoteTag struct {
@@ -46,13 +47,13 @@ type Todo struct {
 	Description        string           `db:"description" json:"description"`
 	Status             TodoStatusType   `db:"status" json:"status" validate:"required,oneof=pending inprogress completed cancelled"`
 	PlannedDate        time.Time        `db:"planned_date" json:"planned_date"`
-	CompletedAt        *time.Time       `db:"completed_at" json:"completed_at"`
+	CompletedAt        sql.NullTime     `db:"completed_at" json:"completed_at"`
 	CreatedAt          time.Time        `db:"created_at" json:"created_at"`
 	UpdatedAt          time.Time        `db:"updated_at" json:"updated_at"`
-	WorkspaceID        *string          `db:"workspace_id" json:"workspace_id"`
+	WorkspaceID        sql.NullString   `db:"workspace_id" json:"workspace_id"`
 	Priority           TodoPriorityType `db:"priority" json:"priority" validate:"required,oneof=none low medium high critical"`
-	RecurrenceRule     *string          `db:"recurrence_rule" json:"recurrence_rule"`
-	RecurrenceParentID *string          `db:"recurrence_parent_id" json:"recurrence_parent_id"`
+	RecurrenceRule     sql.NullString   `db:"recurrence_rule" json:"recurrence_rule"`
+	RecurrenceParentID sql.NullString   `db:"recurrence_parent_id" json:"recurrence_parent_id"`
 }
 
 type TodoTag struct {

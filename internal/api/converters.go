@@ -1,7 +1,7 @@
 package api
 
 import (
-	"time"
+	"database/sql"
 
 	authv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/auth/v1"
 	inboxv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/inbox/v1"
@@ -24,12 +24,12 @@ func todoToProto(t *models.Todo) *todosv1.Todo {
 		PlannedDate:        timestamppb.New(t.PlannedDate),
 		CreatedAt:          timestamppb.New(t.CreatedAt),
 		UpdatedAt:          timestamppb.New(t.UpdatedAt),
-		WorkspaceId:        t.WorkspaceID,
-		RecurrenceRule:     t.RecurrenceRule,
-		RecurrenceParentId: t.RecurrenceParentID,
+		WorkspaceId:        nullStringPtr(t.WorkspaceID),
+		RecurrenceRule:     nullStringPtr(t.RecurrenceRule),
+		RecurrenceParentId: nullStringPtr(t.RecurrenceParentID),
 	}
-	if t.CompletedAt != nil {
-		pb.CompletedAt = timestamppb.New(*t.CompletedAt)
+	if t.CompletedAt.Valid {
+		pb.CompletedAt = timestamppb.New(t.CompletedAt.Time)
 	}
 	return pb
 }
@@ -115,7 +115,7 @@ func noteToProto(n *models.Note) *notesv1.Note {
 		Body:        n.Body,
 		CreatedAt:   timestamppb.New(n.CreatedAt),
 		UpdatedAt:   timestamppb.New(n.UpdatedAt),
-		WorkspaceId: n.WorkspaceID,
+		WorkspaceId: nullStringPtr(n.WorkspaceID),
 	}
 }
 
@@ -159,9 +159,9 @@ func tagToProto(t *models.Tag) *tagsv1.Tag {
 	}
 }
 
-func timeToOptionalTimestamp(t *time.Time) *timestamppb.Timestamp {
-	if t == nil {
+func nullStringPtr(ns sql.NullString) *string {
+	if !ns.Valid {
 		return nil
 	}
-	return timestamppb.New(*t)
+	return &ns.String
 }

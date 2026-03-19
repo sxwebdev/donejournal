@@ -121,7 +121,7 @@ func (s *Service) ConvertToTodo(ctx context.Context, inboxItemID string, userID 
 			Description: description,
 			Status:      models.TodoStatusPending,
 			PlannedDate: plannedDate,
-			WorkspaceID: workspaceID,
+			WorkspaceID: storecmn.PtrToNullString(workspaceID),
 			Priority:    models.TodoPriorityNone,
 		})
 		if err != nil {
@@ -161,11 +161,11 @@ func (s *Service) ConvertToNote(ctx context.Context, inboxItemID string, userID 
 
 	if err := storecmn.WrapTx(ctx, s.store.SQLite(), func(tx *sql.Tx) error {
 		_, err := s.store.Notes(repos.WithTx(tx)).Create(ctx, repo_notes.CreateParams{
-			ID:        noteID,
-			UserID:    userID,
-			Title:     title,
-			Body:      body,
-			WorkspaceID: workspaceID,
+			ID:          noteID,
+			UserID:      userID,
+			Title:       title,
+			Body:        body,
+			WorkspaceID: storecmn.PtrToNullString(workspaceID),
 		})
 		if err != nil {
 			return fmt.Errorf("create note: %w", err)

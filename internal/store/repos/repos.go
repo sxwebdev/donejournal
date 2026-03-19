@@ -5,8 +5,8 @@ import (
 
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_inbox"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_notes"
-	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_tags"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 )
 

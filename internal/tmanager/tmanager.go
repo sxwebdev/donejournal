@@ -18,12 +18,12 @@ import (
 )
 
 type Manager struct {
-	logger              logger.Logger
-	riverClient         *river.Client[*sql.Tx]
-	botService          *bot.Bot
-	processorService    *processor.Processor
-	sttService          *stt.Service
-	maxVoiceDuration    int
+	logger           logger.Logger
+	riverClient      *river.Client[*sql.Tx]
+	botService       *bot.Bot
+	processorService *processor.Processor
+	sttService       *stt.Service
+	maxVoiceDuration int
 }
 
 func New(

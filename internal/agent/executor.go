@@ -219,11 +219,11 @@ func (e *Executor) createRecurringTodo(ctx context.Context, userID int64, argsJS
 
 	result := map[string]any{
 		"id":              todo.ID,
-		"title":          todo.Title,
-		"status":         todo.Status,
-		"priority":       todo.Priority,
-		"planned_date":   todo.PlannedDate.Format("2006-01-02"),
-		"recurrence_rule": rule,
+		"title":           todo.Title,
+		"status":          todo.Status,
+		"priority":        todo.Priority,
+		"planned_date":    todo.PlannedDate.Format("2006-01-02"),
+		"recurrence_rule": args.RecurrenceRule,
 	}
 	if len(tagNames) > 0 {
 		result["tags"] = tagNames
@@ -286,10 +286,10 @@ func (e *Executor) createNote(ctx context.Context, userID int64, argsJSON string
 }
 
 type findTodosArgs struct {
-	Status   []string `json:"status"`
-	DateFrom string   `json:"date_from"`
-	DateTo   string   `json:"date_to"`
-	Workspace string  `json:"workspace"`
+	Status    []string `json:"status"`
+	DateFrom  string   `json:"date_from"`
+	DateTo    string   `json:"date_to"`
+	Workspace string   `json:"workspace"`
 }
 
 func (e *Executor) findTodos(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -350,8 +350,8 @@ func (e *Executor) findTodos(ctx context.Context, userID int64, argsJSON string)
 		if todo.Description != "" {
 			item["description"] = todo.Description
 		}
-		if todo.CompletedAt != nil {
-			item["completed_at"] = todo.CompletedAt.Format("2006-01-02 15:04")
+		if todo.CompletedAt.Valid {
+			item["completed_at"] = todo.CompletedAt.Time.Format("2006-01-02 15:04")
 		}
 		items = append(items, item)
 	}
@@ -980,4 +980,3 @@ func toJSON(v any) (string, error) {
 	}
 	return string(data), nil
 }
-

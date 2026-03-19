@@ -7,6 +7,12 @@ air:
 start:
 	go run ./cmd/donejournal start -c config.yaml
 
+fmt:
+	gofumpt -l -w .
+
+lint:
+	golangci-lint run
+
 # Migrations
 
 migrateup:

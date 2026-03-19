@@ -160,7 +160,7 @@ type groqChatMessage struct {
 }
 
 type groqToolDefinition struct {
-	Type     string         `json:"type"`
+	Type     string          `json:"type"`
 	Function groqFunctionDef `json:"function"`
 }
 

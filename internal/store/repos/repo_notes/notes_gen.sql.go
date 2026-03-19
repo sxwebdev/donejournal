@@ -7,6 +7,7 @@ package repo_notes
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/sxwebdev/donejournal/internal/models"
 )
@@ -18,11 +19,11 @@ INSERT INTO notes (id, user_id, title, body, workspace_id)
 `
 
 type CreateParams struct {
-	ID          string  `db:"id" json:"id" validate:"required"`
-	UserID      int64   `db:"user_id" json:"user_id" validate:"required"`
-	Title       string  `db:"title" json:"title" validate:"required"`
-	Body        string  `db:"body" json:"body"`
-	WorkspaceID *string `db:"workspace_id" json:"workspace_id"`
+	ID          string         `db:"id" json:"id" validate:"required"`
+	UserID      int64          `db:"user_id" json:"user_id" validate:"required"`
+	Title       string         `db:"title" json:"title" validate:"required"`
+	Body        string         `db:"body" json:"body"`
+	WorkspaceID sql.NullString `db:"workspace_id" json:"workspace_id"`
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*models.Note, error) {

@@ -8,10 +8,10 @@ import (
 	"connectrpc.com/connect"
 	todosv1 "github.com/sxwebdev/donejournal/api/gen/go/donejournal/todos/v1"
 	"github.com/sxwebdev/donejournal/internal/models"
-	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/sxwebdev/donejournal/internal/services/baseservices"
 	"github.com/sxwebdev/donejournal/internal/services/todos"
 	"github.com/sxwebdev/donejournal/internal/store"
+	"github.com/sxwebdev/donejournal/internal/store/repos/repo_todos"
 	"github.com/tkcrm/mx/logger"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -386,7 +386,7 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 	allRecurring := append(result.Items, recurringResult.Items...)
 	seenRecurring := make(map[string]bool)
 	for _, t := range allRecurring {
-		if t.RecurrenceRule == nil || *t.RecurrenceRule == "" {
+		if !t.RecurrenceRule.Valid || t.RecurrenceRule.String == "" {
 			continue
 		}
 		if t.Status != models.TodoStatusPending && t.Status != models.TodoStatusInProgress {
@@ -398,10 +398,10 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 		seenRecurring[t.ID] = true
 
 		// Find first projected date within or after [from, to]
-		projDate := todos.NextRecurrenceDate(t.PlannedDate, *t.RecurrenceRule)
+		projDate := todos.NextRecurrenceDate(t.PlannedDate, t.RecurrenceRule.String)
 		// Fast-forward to the first date >= from
 		for projDate.Before(from) {
-			projDate = todos.NextRecurrenceDate(projDate, *t.RecurrenceRule)
+			projDate = todos.NextRecurrenceDate(projDate, t.RecurrenceRule.String)
 		}
 		for !projDate.After(to) {
 			dateKey := projDate.Format(time.DateOnly)
@@ -418,7 +418,7 @@ func (h *TodosHandler) GetCalendarEntries(ctx context.Context, req *connect.Requ
 			day.Todos = append(day.Todos, vTodo)
 			day.TotalCount++
 
-			projDate = todos.NextRecurrenceDate(projDate, *t.RecurrenceRule)
+			projDate = todos.NextRecurrenceDate(projDate, t.RecurrenceRule.String)
 		}
 	}
 

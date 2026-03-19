@@ -247,8 +247,8 @@ func (s *Processor) showDoneForDay(ctx context.Context, chatID int64, messageID 
 			if todo.Description != "" {
 				text.WriteString(fmt.Sprintf("\n   %s", todo.Description))
 			}
-			if todo.CompletedAt != nil && !todo.CompletedAt.IsZero() {
-				text.WriteString(fmt.Sprintf("\n   ⏰ %s", todo.CompletedAt.Format("15:04")))
+			if todo.CompletedAt.Valid && !todo.CompletedAt.Time.IsZero() {
+				text.WriteString(fmt.Sprintf("\n   ⏰ %s", todo.CompletedAt.Time.Format("15:04")))
 			}
 			text.WriteString("\n\n")
 		}
