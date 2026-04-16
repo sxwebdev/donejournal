@@ -8,4 +8,3 @@ DELETE FROM notes WHERE id=?;
 
 -- name: GetByID :one
 SELECT * FROM notes WHERE id=? LIMIT 1;
-

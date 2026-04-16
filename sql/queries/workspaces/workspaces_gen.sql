@@ -8,4 +8,3 @@ DELETE FROM workspaces WHERE id=?;
 
 -- name: GetByID :one
 SELECT * FROM workspaces WHERE id=? LIMIT 1;
-

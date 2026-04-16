@@ -73,6 +73,7 @@ schemas:
     defaults:
       queries_dir_prefix: queries
       output_dir_prefix: ../internal/store/repos
+      package_prefix: "repo_"
       crud:
         auto_clean: true
         exclude_table_name: true

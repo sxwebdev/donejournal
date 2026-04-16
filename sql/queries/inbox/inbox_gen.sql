@@ -8,4 +8,3 @@ DELETE FROM inbox WHERE id=?;
 
 -- name: GetByID :one
 SELECT * FROM inbox WHERE id=? LIMIT 1;
-

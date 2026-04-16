@@ -8,4 +8,3 @@ DELETE FROM todos WHERE id=?;
 
 -- name: GetByID :one
 SELECT * FROM todos WHERE id=? LIMIT 1;
-
