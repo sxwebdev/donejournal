@@ -92,7 +92,7 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 	messages = append(messages, history...)
 	messages = append(messages, provider.ChatMessage{
 		Role:    "system",
-		Content: fmt.Sprintf("Current date: %s. Use this date for any 'today' / relative date references in this turn. Ignore any dates from previous tool calls in history — those were created on different days.", carbon.Now().ToDateString()),
+		Content: fmt.Sprintf("Current date and time: %s %s (%s). Use this for any 'today' / 'now' / relative date references in this turn. Ignore any dates from previous tool calls in history — those were created on different days.", carbon.Now().ToDateString(), carbon.Now().ToTimeString(), carbon.Now().Timezone()),
 	})
 	messages = append(messages, provider.ChatMessage{
 		Role:    "user",
@@ -203,7 +203,7 @@ func buildSystemPrompt(workspaceNames []string, tagNames []string) string {
 
 	return fmt.Sprintf(`You are DoneJournal assistant. You help users manage their tasks (todos) and notes.
 
-Today: %s (%s)
+Today: %s (%s), current time: %s (%s)
 This week: Mon %s – Sun %s
 %s
 %s
@@ -230,6 +230,9 @@ Rules:
 - If the user's intent is unclear, ask a clarifying question instead of guessing
 - When user asks to modify a task but doesn't specify which one, first use find_todos to find candidates, then ask user to clarify
 - NEVER delete tasks or notes without explicit user confirmation. When user asks to delete, first show what will be deleted and ask "Are you sure?"
+- Bulk delete: if user asks to delete MULTIPLE tasks by criteria (e.g. "удали все завершённые до DATE", "delete cancelled tasks in project X"): (1) call find_todos with the same filters and explicit status, (2) show the count and a short numbered list, ask for confirmation in the user's language, (3) on confirmation call bulk_delete_todos with the same filters and confirmed=true. Do NOT loop delete_todo for bulk operations — it will hit the iteration limit.
+- Date bound semantics: "до DATE" / "before DATE" is EXCLUSIVE — pass date_to as the day before DATE (e.g. "до 2026-04-25" → date_to=2026-04-24). "по DATE" / "до DATE включительно" / "until DATE" / "through DATE" is INCLUSIVE — pass date_to=DATE.
+- When filtering completed tasks by completion date, set status=["completed"] so date_from/date_to filter by completed_at instead of planned_date.
 - When creating multiple items, respond with a compact numbered list of what was created
 - Priority keywords: "critical"/"срочно"/"asap"/"критично" → priority=critical, "important"/"важно" → priority=high, "medium priority"/"средний приоритет" → priority=medium, "low priority"/"неважно"/"когда-нибудь" → priority=low
 - Default priority is none unless user explicitly mentions importance or urgency
@@ -241,6 +244,8 @@ Rules:
 - When a recurring todo is completed, the next occurrence is created automatically`,
 		today.ToDateString(),
 		today.ToWeekString(),
+		today.ToTimeString(),
+		today.Timezone(),
 		weekStart.ToDateString(),
 		weekStart.AddDays(6).ToDateString(),
 		workspacesInfo,

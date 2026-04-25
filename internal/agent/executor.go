@@ -53,6 +53,8 @@ func (e *Executor) Execute(ctx context.Context, userID int64, call provider.Tool
 		return e.saveToInbox(ctx, userID, call.Function.Arguments)
 	case "delete_todo":
 		return e.deleteTodo(ctx, userID, call.Function.Arguments)
+	case "bulk_delete_todos":
+		return e.bulkDeleteTodos(ctx, userID, call.Function.Arguments)
 	case "delete_note":
 		return e.deleteNote(ctx, userID, call.Function.Arguments)
 	case "update_note":
@@ -574,6 +576,88 @@ func (e *Executor) deleteTodo(ctx context.Context, userID int64, argsJSON string
 	return toJSON(map[string]any{
 		"deleted": true,
 		"id":      args.ID,
+	})
+}
+
+type bulkDeleteTodosArgs struct {
+	Status    []string `json:"status"`
+	DateFrom  string   `json:"date_from"`
+	DateTo    string   `json:"date_to"`
+	Workspace string   `json:"workspace"`
+	Tags      []string `json:"tags"`
+	Confirmed bool     `json:"confirmed"`
+}
+
+func (e *Executor) bulkDeleteTodos(ctx context.Context, userID int64, argsJSON string) (string, error) {
+	var args bulkDeleteTodosArgs
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return "", fmt.Errorf("parse bulk_delete_todos args: %w", err)
+	}
+
+	// Safety gate: never delete without explicit confirmed=true.
+	// Returned as a tool result (not a Go error) so the LLM can react and ask the user.
+	if !args.Confirmed {
+		return toJSON(map[string]any{
+			"error": "confirmation_required",
+			"hint":  "First call find_todos with the same filters, show the user what will be deleted, ask for confirmation, then call bulk_delete_todos again with confirmed=true.",
+		})
+	}
+
+	params := repo_todos.FindParams{UserID: userID}
+
+	for _, s := range args.Status {
+		params.Statuses = append(params.Statuses, models.TodoStatusType(s))
+	}
+	if args.DateFrom != "" {
+		t := carbon.Parse(args.DateFrom).StartOfDay().StdTime()
+		if !t.IsZero() {
+			params.DateFrom = &t
+		}
+	}
+	if args.DateTo != "" {
+		t := carbon.Parse(args.DateTo).EndOfDay().StdTime()
+		if !t.IsZero() {
+			params.DateTo = &t
+		}
+	}
+	if args.Workspace != "" {
+		ws, err := e.services.Workspaces().FindOrCreateByName(ctx, userID, args.Workspace)
+		if err != nil {
+			return "", fmt.Errorf("resolve workspace: %w", err)
+		}
+		params.WorkspaceID = &ws.ID
+	}
+	for _, name := range args.Tags {
+		tag, err := e.services.Tags().FindOrCreateByName(ctx, userID, name)
+		if err != nil {
+			continue
+		}
+		params.TagIDs = append(params.TagIDs, tag.ID)
+	}
+
+	// Mirror the repo-level filter requirement so the LLM gets a clear, structured error.
+	if len(params.Statuses) == 0 && params.DateFrom == nil && params.DateTo == nil &&
+		params.WorkspaceID == nil && len(params.TagIDs) == 0 {
+		return toJSON(map[string]any{
+			"error": "no_filter",
+			"hint":  "At least one of status / date_from / date_to / workspace / tags must be set.",
+		})
+	}
+
+	count, err := e.services.Todos().BulkDelete(ctx, userID, params)
+	if err != nil {
+		return "", fmt.Errorf("bulk delete todos: %w", err)
+	}
+
+	return toJSON(map[string]any{
+		"deleted_count": count,
+		"filters": map[string]any{
+			"status":     args.Status,
+			"date_from":  args.DateFrom,
+			"date_to":    args.DateTo,
+			"workspace":  args.Workspace,
+			"tags":       args.Tags,
+		},
 	})
 }
 

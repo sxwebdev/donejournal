@@ -12,6 +12,7 @@ type ICustomQuerier interface {
 	Querier
 	Count(ctx context.Context, params FindParams) (uint32, error)
 	Find(ctx context.Context, params FindParams) (*storecmn.FindResponseWithCount[*models.Todo], error)
+	DeleteWhere(ctx context.Context, params FindParams) (int64, error)
 }
 
 type CustomQueries struct {

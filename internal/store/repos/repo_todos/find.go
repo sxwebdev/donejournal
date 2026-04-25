@@ -2,6 +2,7 @@ package repo_todos
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/georgysavva/scany/v2/sqlscan"
@@ -9,6 +10,10 @@ import (
 	"github.com/sxwebdev/donejournal/internal/models"
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 )
+
+// ErrBulkDeleteNoFilters is returned by DeleteWhere when no narrowing filter is set.
+// UserID alone is not enough — that would wipe the entire user's todos.
+var ErrBulkDeleteNoFilters = errors.New("bulk delete requires at least one filter (status / date / workspace / tags)")
 
 type FindParams struct {
 	Statuses          []models.TodoStatusType
@@ -122,4 +127,41 @@ func (s *CustomQueries) Find(ctx context.Context, params FindParams) (*storecmn.
 		Count: totalCount,
 		Items: items,
 	}, nil
+}
+
+// DeleteWhere bulk-deletes todos matching the given filters. UserID is always required;
+// at least one additional filter (Statuses / DateFrom / DateTo / WorkspaceID / TagIDs) must
+// be set, otherwise it returns ErrBulkDeleteNoFilters. Children pointing at deleted rows via
+// recurrence_parent_id are nullified first, mirroring Service.Delete's FK fix-up.
+// Returns the number of rows deleted.
+func (s *CustomQueries) DeleteWhere(ctx context.Context, params FindParams) (int64, error) {
+	if params.UserID == 0 {
+		return 0, errors.New("UserID required for bulk delete")
+	}
+	if len(params.Statuses) == 0 && params.DateFrom == nil && params.DateTo == nil &&
+		params.WorkspaceID == nil && len(params.TagIDs) == 0 {
+		return 0, ErrBulkDeleteNoFilters
+	}
+
+	// Step 1: nullify recurrence_parent_id on any children referencing rows we are about to delete.
+	// findBuilder is rebuilt for each statement because its bound args belong to that builder instance.
+	nullify := sqlbuilder.NewUpdateBuilder()
+	nullify.Update(TableNameTodos.String())
+	nullify.Set(nullify.Assign(ColumnNameTodosRecurrenceParentId.String(), nil))
+	nullify.Where(nullify.In(ColumnNameTodosRecurrenceParentId.String(), findBuilder(params, ColumnNameTodosId.String())))
+	nullifySQL, nullifyArgs := nullify.Build()
+	if _, err := s.db.ExecContext(ctx, nullifySQL, nullifyArgs...); err != nil {
+		return 0, err
+	}
+
+	// Step 2: delete the matching rows.
+	del := sqlbuilder.NewDeleteBuilder()
+	del.DeleteFrom(TableNameTodos.String())
+	del.Where(del.In(ColumnNameTodosId.String(), findBuilder(params, ColumnNameTodosId.String())))
+	delSQL, delArgs := del.Build()
+	res, err := s.db.ExecContext(ctx, delSQL, delArgs...)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }

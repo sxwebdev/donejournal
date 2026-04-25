@@ -190,6 +190,21 @@ func NextRecurrenceDate(from time.Time, rule string) time.Time {
 	}
 }
 
+// BulkDelete deletes all todos matching the given filters for the user. UserID from
+// the parameter overrides any value in params to prevent cross-user deletion. The
+// underlying repo enforces that at least one narrowing filter is set.
+func (s *Service) BulkDelete(ctx context.Context, userID int64, params repo_todos.FindParams) (int64, error) {
+	params.UserID = userID
+	count, err := s.store.Todos().DeleteWhere(ctx, params)
+	if err != nil {
+		return 0, err
+	}
+	if count > 0 {
+		s.broker.Publish(TodoEvent{UserID: userID})
+	}
+	return count, nil
+}
+
 // Delete deletes a todo
 func (s *Service) Delete(ctx context.Context, userID int64, id string) error {
 	if id == "" {

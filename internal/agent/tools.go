@@ -141,11 +141,11 @@ func toolDefinitions() []provider.ToolDefinition {
 						},
 						"date_from": map[string]any{
 							"type":        []string{"string", "null"},
-							"description": "Start date filter in YYYY-MM-DD format",
+							"description": "Start date filter (YYYY-MM-DD), inclusive. When status=[\"completed\"] this filters by completed_at (when the task was finished); otherwise by planned_date.",
 						},
 						"date_to": map[string]any{
 							"type":        []string{"string", "null"},
-							"description": "End date filter in YYYY-MM-DD format",
+							"description": "End date filter (YYYY-MM-DD), inclusive. When status=[\"completed\"] this filters by completed_at; otherwise by planned_date.",
 						},
 						"workspace": map[string]any{
 							"type":        []string{"string", "null"},
@@ -277,6 +277,45 @@ func toolDefinitions() []provider.ToolDefinition {
 						},
 					},
 					"required": []string{"id"},
+				}),
+			},
+		},
+		{
+			Type: "function",
+			Function: provider.FunctionDef{
+				Name:        "bulk_delete_todos",
+				Description: "Delete multiple todos matching filters in one call. Use for queries like 'delete all completed tasks before DATE', 'delete cancelled tasks in workspace X'. REQUIRED two-step flow: (1) call find_todos with the same filters, show the user what will be deleted, ask for confirmation; (2) only after explicit user confirmation, call this with confirmed=true. At least one filter (status / date_from / date_to / workspace / tags) is required. Do NOT loop delete_todo for bulk operations.",
+				Parameters: mustJSON(map[string]any{
+					"type": "object",
+					"properties": map[string]any{
+						"status": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string", "enum": []string{"pending", "inprogress", "completed", "cancelled"}},
+							"description": "Filter by status. When status=[\"completed\"], date_from/date_to filter by completed_at; otherwise by planned_date.",
+						},
+						"date_from": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "Start date filter (YYYY-MM-DD), inclusive. Same field semantics as find_todos.",
+						},
+						"date_to": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "End date filter (YYYY-MM-DD), inclusive. Same field semantics as find_todos.",
+						},
+						"workspace": map[string]any{
+							"type":        []string{"string", "null"},
+							"description": "Filter by workspace name",
+						},
+						"tags": map[string]any{
+							"type":        "array",
+							"items":       map[string]any{"type": "string"},
+							"description": "Filter by tag names (matches todos that have ANY of these tags)",
+						},
+						"confirmed": map[string]any{
+							"type":        "boolean",
+							"description": "Must be true. The tool refuses to delete without explicit user confirmation. Set true ONLY after the user has confirmed the deletion in this conversation.",
+						},
+					},
+					"required": []string{"confirmed"},
 				}),
 			},
 		},
