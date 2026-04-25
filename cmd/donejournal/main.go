@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"runtime"
 
-	mxsignal "github.com/tkcrm/mx/util/signal"
+	"github.com/tkcrm/mx/launcher"
 	"github.com/urfave/cli/v3"
 
 	"github.com/tkcrm/mx/logger"
@@ -39,7 +39,7 @@ func defaultLoggerOpts() []logger.Option {
 }
 
 func main() {
-	ctx, cancel := signal.NotifyContext(context.Background(), mxsignal.Shutdown()...)
+	ctx, cancel := signal.NotifyContext(context.Background(), launcher.ShutdownSiganl()...)
 	defer cancel()
 
 	l := logger.NewExtended(defaultLoggerOpts()...)
