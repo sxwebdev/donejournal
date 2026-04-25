@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/agent"
 	"github.com/sxwebdev/donejournal/internal/agent/provider"
+	"github.com/sxwebdev/donejournal/internal/agent/provider/baseten"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/openrouter"
 	"github.com/sxwebdev/donejournal/internal/api"
@@ -259,7 +260,16 @@ func selectLLMProvider(log logger.Logger, cfg config.AgentConfig) (provider.Prov
 		}
 		log.Infof("using LLM provider: openrouter (model=%s)", cfg.OpenRouter.Model)
 		return openrouter.NewClient(log, cfg.OpenRouter.APIKey, cfg.OpenRouter.Model), nil
+	case cfg.Baseten.Enabled:
+		if cfg.Baseten.APIKey == "" {
+			return nil, fmt.Errorf("baseten is enabled but api_key is empty")
+		}
+		if cfg.Baseten.Model == "" {
+			return nil, fmt.Errorf("baseten is enabled but model is empty")
+		}
+		log.Infof("using LLM provider: baseten (model=%s)", cfg.Baseten.Model)
+		return baseten.NewProvider(log, cfg.Baseten.APIKey, cfg.Baseten.Model), nil
 	default:
-		return nil, fmt.Errorf("no LLM provider enabled: set agent.groq.enabled or agent.openrouter.enabled to true")
+		return nil, fmt.Errorf("no LLM provider enabled: set agent.groq.enabled, agent.openrouter.enabled or agent.baseten.enabled to true")
 	}
 }

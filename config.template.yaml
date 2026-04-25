@@ -47,6 +47,10 @@ agent:
     enabled: false
     model: openai/gpt-4o-mini
     api_key: ""
+  baseten:
+    enabled: false
+    model: ""
+    api_key: ""
 stt:
   enabled: false
   model_path: ""

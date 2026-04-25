@@ -35,6 +35,7 @@ type TelegramConfig struct {
 type AgentConfig struct {
 	Groq       GroqConfig       `yaml:"groq"`
 	OpenRouter OpenRouterConfig `yaml:"openrouter"`
+	Baseten    BasetenConfig    `yaml:"baseten"`
 }
 
 type STTConfig struct {
@@ -52,5 +53,11 @@ type GroqConfig struct {
 type OpenRouterConfig struct {
 	Enabled bool   `yaml:"enabled" default:"false"`
 	Model   string `yaml:"model" default:"openai/gpt-4o-mini"`
+	APIKey  string `yaml:"api_key"`
+}
+
+type BasetenConfig struct {
+	Enabled bool   `yaml:"enabled" default:"false"`
+	Model   string `yaml:"model"`
 	APIKey  string `yaml:"api_key"`
 }
