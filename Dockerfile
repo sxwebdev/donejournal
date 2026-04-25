@@ -16,7 +16,7 @@ RUN pnpm run build
 FROM ghcr.io/ggml-org/whisper.cpp:main AS whisper-source
 
 # Backend build stage
-FROM golang:1.26.1-alpine AS backend-builder
+FROM golang:1.26.2-alpine AS backend-builder
 
 # Define build arguments for version, commit, and date.
 ARG VERSION="unknown"
@@ -45,12 +45,12 @@ FROM debian:bookworm-slim
 # Install runtime dependencies: tzdata, ffmpeg for OGG→WAV conversion,
 # libstdc++ and libgomp for whisper-cli shared library dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    tzdata \
-    ffmpeg \
-    libstdc++6 \
-    libgomp1 \
-    && rm -rf /var/lib/apt/lists/*
+  ca-certificates \
+  tzdata \
+  ffmpeg \
+  libstdc++6 \
+  libgomp1 \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
