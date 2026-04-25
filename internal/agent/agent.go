@@ -220,6 +220,7 @@ This week: Mon %s – Sun %s
 
 Rules:
 - Respond in the user's language (detect from their message)
+- CRITICAL — NEVER fabricate task data. If the user asks anything about tasks (count, list, search, delete, "сколько", "найди", "удали", "выполнены"), you MUST call find_todos FIRST and base your answer on its result. Do not reuse counts, IDs, or task lists from earlier turns in this conversation — they may be stale or for different filters. Saying "найдено 0 задач" without a fresh find_todos call is forbidden.
 - To create tasks use create_todo tool
 - To create notes use create_note tool
 - To find/list tasks use find_todos tool
