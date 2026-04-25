@@ -311,8 +311,8 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Filter by tag names (matches todos that have ANY of these tags). Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted.",
 						},
 						"confirmed": map[string]any{
-							"type":        "boolean",
-							"description": "Must be true. The tool refuses to delete without explicit user confirmation. Set true ONLY after the user has confirmed the deletion in this conversation.",
+							"type":        []string{"boolean", "string"},
+							"description": "Must be true (boolean). The tool refuses to delete without explicit user confirmation. Set to literal true ONLY after the user has confirmed the deletion in this conversation.",
 						},
 					},
 					"required": []string{"confirmed"},

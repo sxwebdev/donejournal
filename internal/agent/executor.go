@@ -22,6 +22,38 @@ import (
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 )
 
+// flexBool tolerates LLM tool arguments where booleans arrive as strings
+// (e.g. `"confirmed": "true"` instead of `true`). Accepted: true/false, "true"/"false"
+// (case-insensitive), "1"/"0", null/missing → false.
+type flexBool bool
+
+func (b *flexBool) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || bytes.Equal(data, []byte("null")) {
+		return nil
+	}
+	if bytes.Equal(data, []byte("true")) {
+		*b = true
+		return nil
+	}
+	if bytes.Equal(data, []byte("false")) {
+		*b = false
+		return nil
+	}
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	switch strings.ToLower(strings.TrimSpace(str)) {
+	case "true", "1", "yes":
+		*b = true
+	case "", "false", "0", "no", "null":
+		*b = false
+	default:
+		return fmt.Errorf("flexBool: cannot parse %q as bool", str)
+	}
+	return nil
+}
+
 // stringSlice tolerates malformed LLM tool arguments. Some Groq models stringify
 // arrays (e.g. `"status": "[\"completed\"]"` instead of `["completed"]`) or send
 // a single bare value. Accepted shapes: JSON array of strings, JSON-encoded array
@@ -667,7 +699,7 @@ type bulkDeleteTodosArgs struct {
 	DateTo    string      `json:"date_to"`
 	Workspace string      `json:"workspace"`
 	Tags      stringSlice `json:"tags"`
-	Confirmed bool        `json:"confirmed"`
+	Confirmed flexBool    `json:"confirmed"`
 }
 
 func (e *Executor) bulkDeleteTodos(ctx context.Context, userID int64, argsJSON string) (string, error) {
