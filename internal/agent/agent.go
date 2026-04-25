@@ -135,6 +135,11 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 
 		// Execute each tool call and append results
 		for _, tc := range resp.ToolCalls {
+			a.log.Infow("agent tool call",
+				"iteration", i+1,
+				"tool", tc.Function.Name,
+				"args", tc.Function.Arguments,
+			)
 			result, err := a.executor.Execute(ctx, userID, tc)
 			if err != nil {
 				a.log.Warnw("tool execution failed",
@@ -142,6 +147,11 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 					"error", err,
 				)
 				result = fmt.Sprintf(`{"error": "%s"}`, err.Error())
+			} else {
+				a.log.Debugw("agent tool result",
+					"tool", tc.Function.Name,
+					"result", result,
+				)
 			}
 
 			messages = append(messages, provider.ChatMessage{
@@ -231,7 +241,7 @@ Rules:
 - When user asks to modify a task but doesn't specify which one, first use find_todos to find candidates, then ask user to clarify
 - NEVER delete tasks or notes without explicit user confirmation. When user asks to delete, first show what will be deleted and ask "Are you sure?"
 - Bulk delete: if user asks to delete MULTIPLE tasks by criteria (e.g. "удали все завершённые до DATE", "delete cancelled tasks in project X"): (1) call find_todos with the same filters and explicit status, (2) show the count and a short numbered list, ask for confirmation in the user's language, (3) on confirmation call bulk_delete_todos with the same filters and confirmed=true. Do NOT loop delete_todo for bulk operations — it will hit the iteration limit.
-- Date bound semantics: "до DATE" / "before DATE" is EXCLUSIVE — pass date_to as the day before DATE (e.g. "до 2026-04-25" → date_to=2026-04-24). "по DATE" / "до DATE включительно" / "until DATE" / "through DATE" is INCLUSIVE — pass date_to=DATE.
+- Date bound semantics: by default "до DATE" / "по DATE" / "until DATE" / "through DATE" is INCLUSIVE — pass date_to=DATE. Only treat as exclusive when user is explicit ("before DATE", "до DATE не включая", "строго раньше DATE") — then pass date_to as the day before DATE. Echo the actual date you used in your reply so the user can verify ("до 2026-04-27 включительно").
 - When filtering completed tasks by completion date, set status=["completed"] so date_from/date_to filter by completed_at instead of planned_date.
 - When creating multiple items, respond with a compact numbered list of what was created
 - Priority keywords: "critical"/"срочно"/"asap"/"критично" → priority=critical, "important"/"важно" → priority=high, "medium priority"/"средний приоритет" → priority=medium, "low priority"/"неважно"/"когда-нибудь" → priority=low
