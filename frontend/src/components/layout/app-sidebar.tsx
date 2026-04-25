@@ -1,5 +1,16 @@
 import { Link, useRouterState } from "@tanstack/react-router"
-import { Inbox, CheckSquare, Calendar, FileText, FolderOpen, Tag, LogOut, Sun, Moon, Monitor } from "lucide-react"
+import {
+  Inbox,
+  CheckSquare,
+  Calendar,
+  FileText,
+  FolderOpen,
+  Tag,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -27,7 +38,8 @@ const themeIcons = { light: Sun, dark: Moon, system: Monitor } as const
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
-  const nextTheme = themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length]
+  const nextTheme =
+    themeOrder[(themeOrder.indexOf(theme) + 1) % themeOrder.length]
   const Icon = themeIcons[theme]
   return (
     <button
@@ -52,7 +64,7 @@ const navItems = [
 
 export function AppSidebar() {
   const { user, logout } = useAuth()
-  const { setOpenMobile } = useSidebar()
+  const { setOpenMobile, state } = useSidebar()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   const initials = user
@@ -64,7 +76,9 @@ export function AppSidebar() {
       <SidebarHeader className="px-4 py-4">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-5 w-5 text-primary" />
-          <span className="font-semibold">DoneJournal</span>
+          <span className="font-semibold">
+            {state === "collapsed" ? "DJ" : "DoneJournal"}
+          </span>
         </div>
       </SidebarHeader>
 
