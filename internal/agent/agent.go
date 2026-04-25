@@ -2,6 +2,7 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -107,6 +108,18 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 			Tools:    a.tools,
 		})
 		if err != nil {
+			// If we've already executed at least one tool successfully, the user-visible
+			// operation is done — don't fail the whole turn just because the LLM follow-up
+			// (e.g. rate-limited summary) couldn't complete. Synthesize a minimal reply
+			// from the last tool result instead.
+			if i > 0 {
+				if fb := synthesizeFallback(messages); fb != "" {
+					a.log.Warnw("LLM follow-up failed after tool execution; using fallback",
+						"iteration", i+1, "error", err)
+					finalContent = fb
+					break
+				}
+			}
 			return "", fmt.Errorf("llm request failed: %w", err)
 		}
 
@@ -262,4 +275,38 @@ Rules:
 		workspacesInfo,
 		tagsInfo,
 	)
+}
+
+// synthesizeFallback returns a short user-facing message describing the most
+// recent successful tool result. Used when the LLM follow-up call fails (e.g.
+// rate limit) AFTER a tool has already mutated state, so we don't tell the user
+// the operation failed when it actually succeeded.
+func synthesizeFallback(messages []provider.ChatMessage) string {
+	for i := len(messages) - 1; i >= 0; i-- {
+		m := messages[i]
+		if m.Role != "tool" {
+			continue
+		}
+		var payload map[string]any
+		if err := json.Unmarshal([]byte(m.Content), &payload); err != nil {
+			return ""
+		}
+		if e, ok := payload["error"].(string); ok && e != "" {
+			return ""
+		}
+		if v, ok := payload["deleted_count"]; ok {
+			return fmt.Sprintf("✅ Удалено: %v\n\n_(LLM rate-limited, ответ синтезирован из результата tool call.)_", v)
+		}
+		if v, ok := payload["deleted"].(bool); ok && v {
+			return "✅ Удалено.\n\n_(LLM rate-limited, ответ синтезирован из результата tool call.)_"
+		}
+		if v, ok := payload["total_count"]; ok {
+			return fmt.Sprintf("Найдено: %v\n\n_(LLM rate-limited; повторите запрос для подробностей.)_", v)
+		}
+		if title, ok := payload["title"].(string); ok && title != "" {
+			return fmt.Sprintf("✅ Готово: %s\n\n_(LLM rate-limited, ответ синтезирован из результата tool call.)_", title)
+		}
+		return "✅ Операция выполнена.\n\n_(LLM rate-limited; повторите запрос для подробностей.)_"
+	}
+	return ""
 }
