@@ -1,4 +1,3 @@
-import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { TransportProvider } from "@connectrpc/connect-query"
@@ -31,15 +30,13 @@ function AppRouter() {
 }
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <TransportProvider transport={transport}>
-          <AuthProvider>
-            <AppRouter />
-          </AuthProvider>
-        </TransportProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </StrictMode>
+  <ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <TransportProvider transport={transport}>
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </TransportProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 )
