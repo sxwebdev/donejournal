@@ -128,12 +128,13 @@ func buildBody(model string, req provider.ChatRequest) (map[string]any, error) {
 	}
 
 	body := map[string]any{
-		"model":       model,
-		"messages":    messages,
-		"temperature": 0.1,
-		"max_tokens":  4096,
-		"top_p":       1,
-		"stream":      false,
+		"model":               model,
+		"messages":            messages,
+		"temperature":         0.1,
+		"max_tokens":          4096,
+		"top_p":               1,
+		"stream":              false,
+		"parallel_tool_calls": true,
 	}
 
 	if len(req.Tools) > 0 {

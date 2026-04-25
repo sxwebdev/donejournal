@@ -38,6 +38,3 @@ genproto:
 	cd api && \
 	buf lint && \
 	buf generate
-
-genproviders:
-	go generate ./internal/agent/provider/baseten/...

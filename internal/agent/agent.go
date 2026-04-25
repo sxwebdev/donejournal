@@ -238,7 +238,8 @@ Rules:
 - To create notes use create_note tool
 - To find/list tasks use find_todos tool
 - To find/list notes use find_notes tool
-- If user lists multiple tasks in one message, create each one separately with individual create_todo calls
+- If user lists multiple tasks in one message (bullets, numbered list, separate lines), emit ALL create_todo tool calls IN THE SAME assistant message (parallel tool calls), one call per item — do NOT spread them across multiple turns.
+- ANTI-HALLUCINATION (write ops): NEVER state in your reply that a task/note was created, updated, completed or deleted unless the corresponding tool call appears in the tool results of the CURRENT turn. Before writing the summary, count successful tool results — if user asked for N items and only K tool results came back, either issue the missing tool calls or report the actual K, never invent the rest.
 - "сделал"/"done"/"completed" → create_todo with status="completed"
 - "нужно"/"надо"/"добавь"/"todo" → create_todo with status="pending"
 - "заметка"/"note"/"запомни" → create_note

@@ -56,12 +56,13 @@ func (c *Client) ChatCompletion(ctx context.Context, req provider.ChatRequest) (
 	}
 
 	reqBody := groqRequest{
-		Model:       c.model,
-		Messages:    groqMessages,
-		Temperature: 0.1,
-		MaxTokens:   4096,
-		TopP:        1,
-		Stream:      false,
+		Model:             c.model,
+		Messages:          groqMessages,
+		Temperature:       0.1,
+		MaxTokens:         4096,
+		TopP:              1,
+		Stream:            false,
+		ParallelToolCalls: true,
 	}
 
 	if len(req.Tools) > 0 {
@@ -143,13 +144,14 @@ func (c *Client) ChatCompletion(ctx context.Context, req provider.ChatRequest) (
 // Groq API types
 
 type groqRequest struct {
-	Model       string               `json:"model"`
-	Messages    []groqChatMessage    `json:"messages"`
-	Temperature float64              `json:"temperature"`
-	MaxTokens   int                  `json:"max_completion_tokens"`
-	TopP        float64              `json:"top_p"`
-	Stream      bool                 `json:"stream"`
-	Tools       []groqToolDefinition `json:"tools,omitempty"`
+	Model             string               `json:"model"`
+	Messages          []groqChatMessage    `json:"messages"`
+	Temperature       float64              `json:"temperature"`
+	MaxTokens         int                  `json:"max_completion_tokens"`
+	TopP              float64              `json:"top_p"`
+	Stream            bool                 `json:"stream"`
+	ParallelToolCalls bool                 `json:"parallel_tool_calls"`
+	Tools             []groqToolDefinition `json:"tools,omitempty"`
 }
 
 type groqChatMessage struct {
