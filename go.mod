@@ -4,6 +4,7 @@ go 1.26.2
 
 require (
 	connectrpc.com/connect v1.19.2
+	github.com/OpenRouterTeam/go-sdk v0.4.1
 	github.com/dromara/carbon/v2 v2.6.16
 	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/go-playground/validator/v10 v10.30.2
@@ -27,6 +28,7 @@ require (
 require (
 	github.com/dgraph-io/ristretto/v2 v2.4.0 // indirect
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
+	github.com/spyzhov/ajson v0.8.0 // indirect
 )
 
 require (

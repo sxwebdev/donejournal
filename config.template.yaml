@@ -21,6 +21,8 @@ ops:
     enabled: false
     path: /healthy
     port: "10000"
+    livenesspath: /livez
+    readinesspath: /readyz
   profiler:
     enabled: false
     path: /debug/pprof
@@ -38,7 +40,12 @@ telegram:
   bot_username: ""
 agent:
   groq:
+    enabled: false
     model: meta-llama/llama-4-scout-17b-16e-instruct
+    api_key: ""
+  openrouter:
+    enabled: false
+    model: openai/gpt-4o-mini
     api_key: ""
 stt:
   enabled: false

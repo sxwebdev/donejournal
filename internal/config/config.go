@@ -33,7 +33,8 @@ type TelegramConfig struct {
 }
 
 type AgentConfig struct {
-	Groq GroqConfig `yaml:"groq"`
+	Groq       GroqConfig       `yaml:"groq"`
+	OpenRouter OpenRouterConfig `yaml:"openrouter"`
 }
 
 type STTConfig struct {
@@ -43,6 +44,13 @@ type STTConfig struct {
 }
 
 type GroqConfig struct {
-	Model  string `yaml:"model" validate:"required" default:"meta-llama/llama-4-scout-17b-16e-instruct"`
-	APIKey string `yaml:"api_key" validate:"required"`
+	Enabled bool   `yaml:"enabled" default:"false"`
+	Model   string `yaml:"model" default:"meta-llama/llama-4-scout-17b-16e-instruct"`
+	APIKey  string `yaml:"api_key"`
+}
+
+type OpenRouterConfig struct {
+	Enabled bool   `yaml:"enabled" default:"false"`
+	Model   string `yaml:"model" default:"openai/gpt-4o-mini"`
+	APIKey  string `yaml:"api_key"`
 }

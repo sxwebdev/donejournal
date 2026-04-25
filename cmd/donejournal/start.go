@@ -12,7 +12,9 @@ import (
 	"github.com/riverqueue/river/riverdriver/riversqlite"
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/agent"
+	"github.com/sxwebdev/donejournal/internal/agent/provider"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
+	"github.com/sxwebdev/donejournal/internal/agent/provider/openrouter"
 	"github.com/sxwebdev/donejournal/internal/api"
 	"github.com/sxwebdev/donejournal/internal/bot"
 	"github.com/sxwebdev/donejournal/internal/config"
@@ -187,8 +189,11 @@ func startCMD() *cli.Command {
 			// Initialize token manager with BadgerDB as token store
 			tokenMgr := tokenmanager.New[api.TokenData](badgerDB, authConfig.AccessTokenSecretKey, 30*24*time.Hour)
 
-			// Initialize agent with Groq provider
-			llmProvider := groq.NewClient(l, conf.Agent.Groq.APIKey, conf.Agent.Groq.Model)
+			// Initialize agent LLM provider based on config (groq has priority if both enabled).
+			llmProvider, err := selectLLMProvider(l, conf.Agent)
+			if err != nil {
+				return fmt.Errorf("failed to init agent provider: %w", err)
+			}
 			agentService := agent.New(l, llmProvider, baseService, badgerDB)
 
 			// init bot service
@@ -234,5 +239,27 @@ func startCMD() *cli.Command {
 
 			return ln.Run()
 		},
+	}
+}
+
+// selectLLMProvider picks the agent LLM provider according to the config.
+// Groq has priority if both providers are enabled. Returns an error if none
+// is enabled or the enabled provider is misconfigured.
+func selectLLMProvider(log logger.Logger, cfg config.AgentConfig) (provider.Provider, error) {
+	switch {
+	case cfg.Groq.Enabled:
+		if cfg.Groq.APIKey == "" {
+			return nil, fmt.Errorf("groq is enabled but api_key is empty")
+		}
+		log.Infof("using LLM provider: groq (model=%s)", cfg.Groq.Model)
+		return groq.NewClient(log, cfg.Groq.APIKey, cfg.Groq.Model), nil
+	case cfg.OpenRouter.Enabled:
+		if cfg.OpenRouter.APIKey == "" {
+			return nil, fmt.Errorf("openrouter is enabled but api_key is empty")
+		}
+		log.Infof("using LLM provider: openrouter (model=%s)", cfg.OpenRouter.Model)
+		return openrouter.NewClient(log, cfg.OpenRouter.APIKey, cfg.OpenRouter.Model), nil
+	default:
+		return nil, fmt.Errorf("no LLM provider enabled: set agent.groq.enabled or agent.openrouter.enabled to true")
 	}
 }
