@@ -43,9 +43,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Task priority level. Default: none.",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Optional tag names to attach. Tags are auto-created if they don't exist.",
+							"description": "Optional tag names to attach. Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted. Tags are auto-created if they don't exist.",
 						},
 					},
 					"required": []string{"title"},
@@ -87,9 +87,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Task priority level. Default: none.",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Optional tag names to attach.",
+							"description": "Optional tag names to attach. Prefer a JSON array; a single string is also accepted.",
 						},
 					},
 					"required": []string{"title", "recurrence_rule"},
@@ -117,9 +117,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Optional workspace/project name",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Optional tag names to attach. Tags are auto-created if they don't exist.",
+							"description": "Optional tag names to attach. Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted. Tags are auto-created if they don't exist.",
 						},
 					},
 					"required": []string{"title"},
@@ -135,9 +135,9 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"status": map[string]any{
-							"type":        []string{"array", "null"},
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string", "enum": []string{"pending", "inprogress", "completed", "cancelled"}},
-							"description": "Filter by status. Pass as a JSON array, e.g. [\"completed\"]. If not specified, returns pending and inprogress.",
+							"description": "Filter by status. Prefer a JSON array, e.g. [\"completed\"]; a single string like \"completed\" is also accepted. If not specified, returns pending and inprogress.",
 						},
 						"date_from": map[string]any{
 							"type":        []string{"string", "null"},
@@ -289,9 +289,9 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"status": map[string]any{
-							"type":        []string{"array", "null"},
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string", "enum": []string{"pending", "inprogress", "completed", "cancelled"}},
-							"description": "Filter by status. Pass as a JSON array, e.g. [\"completed\"]. When status=[\"completed\"], date_from/date_to filter by completed_at; otherwise by planned_date.",
+							"description": "Filter by status. Prefer a JSON array, e.g. [\"completed\"]; a single string is also accepted. When status=[\"completed\"], date_from/date_to filter by completed_at; otherwise by planned_date.",
 						},
 						"date_from": map[string]any{
 							"type":        []string{"string", "null"},
@@ -306,9 +306,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Filter by workspace name",
 						},
 						"tags": map[string]any{
-							"type":        []string{"array", "null"},
+							"type":        []string{"array", "string", "null"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Filter by tag names (matches todos that have ANY of these tags). Pass as a JSON array, e.g. [\"work\"].",
+							"description": "Filter by tag names (matches todos that have ANY of these tags). Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted.",
 						},
 						"confirmed": map[string]any{
 							"type":        "boolean",
@@ -482,9 +482,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "ID of the todo or note",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "string"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Tag names to add",
+							"description": "Tag names to add. Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted.",
 						},
 					},
 					"required": []string{"entity_type", "entity_id", "tags"},
@@ -505,9 +505,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Type of entity to search",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "string"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Tag names to filter by",
+							"description": "Tag names to filter by. Prefer a JSON array, e.g. [\"work\"]; a single string is also accepted.",
 						},
 					},
 					"required": []string{"entity_type", "tags"},
