@@ -13,6 +13,7 @@ import (
 	"github.com/riverqueue/river/rivermigrate"
 	"github.com/sxwebdev/donejournal/internal/agent"
 	"github.com/sxwebdev/donejournal/internal/agent/provider"
+	"github.com/sxwebdev/donejournal/internal/agent/provider/aimlapi"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/baseten"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/groq"
 	"github.com/sxwebdev/donejournal/internal/agent/provider/openrouter"
@@ -269,7 +270,16 @@ func selectLLMProvider(log logger.Logger, cfg config.AgentConfig) (provider.Prov
 		}
 		log.Infof("using LLM provider: baseten (model=%s)", cfg.Baseten.Model)
 		return baseten.NewProvider(log, cfg.Baseten.APIKey, cfg.Baseten.Model), nil
+	case cfg.AIMLAPI.Enabled:
+		if cfg.AIMLAPI.APIKey == "" {
+			return nil, fmt.Errorf("aimlapi is enabled but api_key is empty")
+		}
+		if cfg.AIMLAPI.Model == "" {
+			return nil, fmt.Errorf("aimlapi is enabled but model is empty")
+		}
+		log.Infof("using LLM provider: aimlapi (model=%s)", cfg.AIMLAPI.Model)
+		return aimlapi.NewProvider(log, cfg.AIMLAPI.APIKey, cfg.AIMLAPI.Model), nil
 	default:
-		return nil, fmt.Errorf("no LLM provider enabled: set agent.groq.enabled, agent.openrouter.enabled or agent.baseten.enabled to true")
+		return nil, fmt.Errorf("no LLM provider enabled: set agent.groq.enabled, agent.openrouter.enabled, agent.baseten.enabled or agent.aimlapi.enabled to true")
 	}
 }

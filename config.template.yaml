@@ -51,6 +51,10 @@ agent:
     enabled: false
     model: ""
     api_key: ""
+  aimlapi:
+    enabled: false
+    model: ""
+    api_key: ""
 stt:
   enabled: false
   model_path: ""
