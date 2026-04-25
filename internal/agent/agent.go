@@ -81,13 +81,19 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 		}
 	}
 
-	// Build messages: system prompt + history + new user message
-	messages := make([]provider.ChatMessage, 0, len(history)+2)
+	// Build messages: system prompt + history + ephemeral date reminder + new user message.
+	// The ephemeral date reminder is placed adjacent to the user message to keep the current
+	// date salient — without it, dates in stale tool calls from history bias the model.
+	messages := make([]provider.ChatMessage, 0, len(history)+3)
 	messages = append(messages, provider.ChatMessage{
 		Role:    "system",
 		Content: buildSystemPrompt(workspaceNames, tagNames),
 	})
 	messages = append(messages, history...)
+	messages = append(messages, provider.ChatMessage{
+		Role:    "system",
+		Content: fmt.Sprintf("Current date: %s. Use this date for any 'today' / relative date references in this turn. Ignore any dates from previous tool calls in history — those were created on different days.", carbon.Now().ToDateString()),
+	})
 	messages = append(messages, provider.ChatMessage{
 		Role:    "user",
 		Content: text,
@@ -150,8 +156,20 @@ func (a *Agent) Process(ctx context.Context, userID int64, text string) (string,
 		finalContent = "Не удалось обработать запрос. Попробуйте ещё раз."
 	}
 
-	// Save conversation history (exclude system prompt)
-	historyToSave := messages[1:] // skip system prompt
+	// Save conversation history: only user messages and final assistant text.
+	// Tool calls / tool results are intra-turn mechanics — persisting them pollutes
+	// future contexts (especially with stale dates in arguments) without adding value,
+	// since tool_call_ids are one-shot and the user-visible answer captures the outcome.
+	historyToSave := make([]provider.ChatMessage, 0, len(messages))
+	for _, m := range messages {
+		if m.Role == "system" || m.Role == "tool" {
+			continue
+		}
+		if m.Role == "assistant" && len(m.ToolCalls) > 0 {
+			continue
+		}
+		historyToSave = append(historyToSave, m)
+	}
 	if err := a.conversation.Save(ctx, userID, historyToSave); err != nil {
 		a.log.Warnw("failed to save conversation history", "error", err)
 	}
@@ -200,6 +218,8 @@ Rules:
 - "сделал"/"done"/"completed" → create_todo with status="completed"
 - "нужно"/"надо"/"добавь"/"todo" → create_todo with status="pending"
 - "заметка"/"note"/"запомни" → create_note
+- ALWAYS use the "Today" value above to resolve relative dates ("сегодня", "завтра", "вчера", "на этой неделе"). Never assume "today" is a date you saw earlier in the conversation.
+- DO NOT copy planned_date values from previous tool calls in conversation history — those tasks were created on different days and have no bearing on the current date.
 - Handle relative dates: "вчера"/"yesterday", "завтра"/"tomorrow", "послезавтра", etc.
 - Handle weekday references: "в понедельник"/"on Monday", "в прошлую среду"/"last Wednesday", etc.
 - If workspace/project is mentioned ("для проекта X", "project X"), pass it to the workspace parameter

@@ -9,7 +9,7 @@ import (
 	"github.com/sxwebdev/donejournal/internal/store/storecmn"
 )
 
-const maxConversationMessages = 50
+const maxConversationMessages = 20
 
 // ConversationStore manages per-user conversation history in BadgerDB.
 type ConversationStore struct {
