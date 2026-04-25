@@ -135,9 +135,9 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"status": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "null"},
 							"items":       map[string]any{"type": "string", "enum": []string{"pending", "inprogress", "completed", "cancelled"}},
-							"description": "Filter by status. If not specified, returns pending and inprogress.",
+							"description": "Filter by status. Pass as a JSON array, e.g. [\"completed\"]. If not specified, returns pending and inprogress.",
 						},
 						"date_from": map[string]any{
 							"type":        []string{"string", "null"},
@@ -289,9 +289,9 @@ func toolDefinitions() []provider.ToolDefinition {
 					"type": "object",
 					"properties": map[string]any{
 						"status": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "null"},
 							"items":       map[string]any{"type": "string", "enum": []string{"pending", "inprogress", "completed", "cancelled"}},
-							"description": "Filter by status. When status=[\"completed\"], date_from/date_to filter by completed_at; otherwise by planned_date.",
+							"description": "Filter by status. Pass as a JSON array, e.g. [\"completed\"]. When status=[\"completed\"], date_from/date_to filter by completed_at; otherwise by planned_date.",
 						},
 						"date_from": map[string]any{
 							"type":        []string{"string", "null"},
@@ -306,9 +306,9 @@ func toolDefinitions() []provider.ToolDefinition {
 							"description": "Filter by workspace name",
 						},
 						"tags": map[string]any{
-							"type":        "array",
+							"type":        []string{"array", "null"},
 							"items":       map[string]any{"type": "string"},
-							"description": "Filter by tag names (matches todos that have ANY of these tags)",
+							"description": "Filter by tag names (matches todos that have ANY of these tags). Pass as a JSON array, e.g. [\"work\"].",
 						},
 						"confirmed": map[string]any{
 							"type":        "boolean",

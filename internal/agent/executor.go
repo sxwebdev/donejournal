@@ -1,10 +1,12 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dromara/carbon/v2"
@@ -20,6 +22,51 @@ import (
 	"github.com/sxwebdev/donejournal/internal/store/repos/repo_workspaces"
 )
 
+// stringSlice tolerates malformed LLM tool arguments. Some Groq models stringify
+// arrays (e.g. `"status": "[\"completed\"]"` instead of `["completed"]`) or send
+// a single bare value. Accepted shapes: JSON array of strings, JSON-encoded array
+// inside a string, single string, comma-separated string, null/empty.
+type stringSlice []string
+
+func (s *stringSlice) UnmarshalJSON(data []byte) error {
+	if len(data) == 0 || bytes.Equal(data, []byte("null")) {
+		return nil
+	}
+	if data[0] == '[' {
+		var arr []string
+		if err := json.Unmarshal(data, &arr); err != nil {
+			return err
+		}
+		*s = arr
+		return nil
+	}
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+	str = strings.TrimSpace(str)
+	if str == "" || str == "null" {
+		return nil
+	}
+	if strings.HasPrefix(str, "[") {
+		var arr []string
+		if err := json.Unmarshal([]byte(str), &arr); err == nil {
+			*s = arr
+			return nil
+		}
+	}
+	if strings.Contains(str, ",") {
+		for _, p := range strings.Split(str, ",") {
+			if p = strings.TrimSpace(p); p != "" {
+				*s = append(*s, p)
+			}
+		}
+		return nil
+	}
+	*s = []string{str}
+	return nil
+}
+
 // Executor dispatches tool calls to the appropriate service methods.
 type Executor struct {
 	services *baseservices.BaseServices
@@ -32,60 +79,95 @@ func NewExecutor(services *baseservices.BaseServices) *Executor {
 
 // Execute runs a tool call and returns the JSON result string.
 func (e *Executor) Execute(ctx context.Context, userID int64, call provider.ToolCall) (string, error) {
+	// Some Groq models emit string "null" for omitted optional fields, leaking literal
+	// "null" values downstream (e.g. workspace="null"). Replace top-level "null" string
+	// values with actual JSON null so the per-method unmarshal sees them as empty.
+	argsJSON := sanitizeNullStrings(call.Function.Arguments)
+
 	switch call.Function.Name {
 	case "create_todo":
-		return e.createTodo(ctx, userID, call.Function.Arguments)
+		return e.createTodo(ctx, userID, argsJSON)
 	case "create_recurring_todo":
-		return e.createRecurringTodo(ctx, userID, call.Function.Arguments)
+		return e.createRecurringTodo(ctx, userID, argsJSON)
 	case "create_note":
-		return e.createNote(ctx, userID, call.Function.Arguments)
+		return e.createNote(ctx, userID, argsJSON)
 	case "find_todos":
-		return e.findTodos(ctx, userID, call.Function.Arguments)
+		return e.findTodos(ctx, userID, argsJSON)
 	case "find_notes":
-		return e.findNotes(ctx, userID, call.Function.Arguments)
+		return e.findNotes(ctx, userID, argsJSON)
 	case "complete_todo":
-		return e.completeTodo(ctx, userID, call.Function.Arguments)
+		return e.completeTodo(ctx, userID, argsJSON)
 	case "update_todo":
-		return e.updateTodo(ctx, userID, call.Function.Arguments)
+		return e.updateTodo(ctx, userID, argsJSON)
 	case "list_workspaces":
 		return e.listWorkspaces(ctx, userID)
 	case "save_to_inbox":
-		return e.saveToInbox(ctx, userID, call.Function.Arguments)
+		return e.saveToInbox(ctx, userID, argsJSON)
 	case "delete_todo":
-		return e.deleteTodo(ctx, userID, call.Function.Arguments)
+		return e.deleteTodo(ctx, userID, argsJSON)
 	case "bulk_delete_todos":
-		return e.bulkDeleteTodos(ctx, userID, call.Function.Arguments)
+		return e.bulkDeleteTodos(ctx, userID, argsJSON)
 	case "delete_note":
-		return e.deleteNote(ctx, userID, call.Function.Arguments)
+		return e.deleteNote(ctx, userID, argsJSON)
 	case "update_note":
-		return e.updateNote(ctx, userID, call.Function.Arguments)
+		return e.updateNote(ctx, userID, argsJSON)
 	case "get_todo_stats":
-		return e.getTodoStats(ctx, userID, call.Function.Arguments)
+		return e.getTodoStats(ctx, userID, argsJSON)
 	case "list_inbox":
 		return e.listInbox(ctx, userID)
 	case "convert_inbox":
-		return e.convertInbox(ctx, userID, call.Function.Arguments)
+		return e.convertInbox(ctx, userID, argsJSON)
 	case "manage_tags":
-		return e.manageTags(ctx, userID, call.Function.Arguments)
+		return e.manageTags(ctx, userID, argsJSON)
 	case "tag_entity":
-		return e.tagEntity(ctx, userID, call.Function.Arguments)
+		return e.tagEntity(ctx, userID, argsJSON)
 	case "find_by_tag":
-		return e.findByTag(ctx, userID, call.Function.Arguments)
+		return e.findByTag(ctx, userID, argsJSON)
 	default:
 		return "", fmt.Errorf("unknown tool: %s", call.Function.Name)
 	}
 }
 
+// sanitizeNullStrings replaces top-level fields whose value is the literal JSON
+// string "null" with actual JSON null. Some Groq tool-use models emit
+// `"workspace": "null"` instead of `"workspace": null` for omitted optional
+// fields. Returns the original input unchanged on any parse error.
+func sanitizeNullStrings(s string) string {
+	if s == "" {
+		return s
+	}
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal([]byte(s), &raw); err != nil {
+		return s
+	}
+	changed := false
+	for k, v := range raw {
+		trimmed := bytes.TrimSpace(v)
+		if bytes.Equal(trimmed, []byte(`"null"`)) {
+			raw[k] = json.RawMessage("null")
+			changed = true
+		}
+	}
+	if !changed {
+		return s
+	}
+	out, err := json.Marshal(raw)
+	if err != nil {
+		return s
+	}
+	return string(out)
+}
+
 // --- Tool implementations ---
 
 type createTodoArgs struct {
-	Title       string   `json:"title"`
-	Description string   `json:"description"`
-	PlannedDate string   `json:"planned_date"`
-	Status      string   `json:"status"`
-	Workspace   string   `json:"workspace"`
-	Priority    string   `json:"priority"`
-	Tags        []string `json:"tags"`
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	PlannedDate string      `json:"planned_date"`
+	Status      string      `json:"status"`
+	Workspace   string      `json:"workspace"`
+	Priority    string      `json:"priority"`
+	Tags        stringSlice `json:"tags"`
 }
 
 func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -160,13 +242,13 @@ func (e *Executor) createTodo(ctx context.Context, userID int64, argsJSON string
 }
 
 type createRecurringTodoArgs struct {
-	Title          string   `json:"title"`
-	Description    string   `json:"description"`
-	PlannedDate    string   `json:"planned_date"`
-	RecurrenceRule string   `json:"recurrence_rule"`
-	Workspace      string   `json:"workspace"`
-	Priority       string   `json:"priority"`
-	Tags           []string `json:"tags"`
+	Title          string      `json:"title"`
+	Description    string      `json:"description"`
+	PlannedDate    string      `json:"planned_date"`
+	RecurrenceRule string      `json:"recurrence_rule"`
+	Workspace      string      `json:"workspace"`
+	Priority       string      `json:"priority"`
+	Tags           stringSlice `json:"tags"`
 }
 
 func (e *Executor) createRecurringTodo(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -234,10 +316,10 @@ func (e *Executor) createRecurringTodo(ctx context.Context, userID int64, argsJS
 }
 
 type createNoteArgs struct {
-	Title     string   `json:"title"`
-	Body      string   `json:"body"`
-	Workspace string   `json:"workspace"`
-	Tags      []string `json:"tags"`
+	Title     string      `json:"title"`
+	Body      string      `json:"body"`
+	Workspace string      `json:"workspace"`
+	Tags      stringSlice `json:"tags"`
 }
 
 func (e *Executor) createNote(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -288,10 +370,10 @@ func (e *Executor) createNote(ctx context.Context, userID int64, argsJSON string
 }
 
 type findTodosArgs struct {
-	Status    []string `json:"status"`
-	DateFrom  string   `json:"date_from"`
-	DateTo    string   `json:"date_to"`
-	Workspace string   `json:"workspace"`
+	Status    stringSlice `json:"status"`
+	DateFrom  string      `json:"date_from"`
+	DateTo    string      `json:"date_to"`
+	Workspace string      `json:"workspace"`
 }
 
 func (e *Executor) findTodos(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -580,12 +662,12 @@ func (e *Executor) deleteTodo(ctx context.Context, userID int64, argsJSON string
 }
 
 type bulkDeleteTodosArgs struct {
-	Status    []string `json:"status"`
-	DateFrom  string   `json:"date_from"`
-	DateTo    string   `json:"date_to"`
-	Workspace string   `json:"workspace"`
-	Tags      []string `json:"tags"`
-	Confirmed bool     `json:"confirmed"`
+	Status    stringSlice `json:"status"`
+	DateFrom  string      `json:"date_from"`
+	DateTo    string      `json:"date_to"`
+	Workspace string      `json:"workspace"`
+	Tags      stringSlice `json:"tags"`
+	Confirmed bool        `json:"confirmed"`
 }
 
 func (e *Executor) bulkDeleteTodos(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -652,11 +734,11 @@ func (e *Executor) bulkDeleteTodos(ctx context.Context, userID int64, argsJSON s
 	return toJSON(map[string]any{
 		"deleted_count": count,
 		"filters": map[string]any{
-			"status":     args.Status,
-			"date_from":  args.DateFrom,
-			"date_to":    args.DateTo,
-			"workspace":  args.Workspace,
-			"tags":       args.Tags,
+			"status":    args.Status,
+			"date_from": args.DateFrom,
+			"date_to":   args.DateTo,
+			"workspace": args.Workspace,
+			"tags":      args.Tags,
 		},
 	})
 }
@@ -936,9 +1018,9 @@ func (e *Executor) manageTags(ctx context.Context, userID int64, argsJSON string
 }
 
 type tagEntityArgs struct {
-	EntityType string   `json:"entity_type"`
-	EntityID   string   `json:"entity_id"`
-	Tags       []string `json:"tags"`
+	EntityType string      `json:"entity_type"`
+	EntityID   string      `json:"entity_id"`
+	Tags       stringSlice `json:"tags"`
 }
 
 func (e *Executor) tagEntity(ctx context.Context, userID int64, argsJSON string) (string, error) {
@@ -978,8 +1060,8 @@ func (e *Executor) tagEntity(ctx context.Context, userID int64, argsJSON string)
 }
 
 type findByTagArgs struct {
-	EntityType string   `json:"entity_type"`
-	Tags       []string `json:"tags"`
+	EntityType string      `json:"entity_type"`
+	Tags       stringSlice `json:"tags"`
 }
 
 func (e *Executor) findByTag(ctx context.Context, userID int64, argsJSON string) (string, error) {
